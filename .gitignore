@@ -1,0 +1,25 @@
+.gradle
+build/
+cscope.*
+.classpath
+.project
+.svn
+target/
+bin/
+*/bin/
+*.iml
+.settings/
+out/
+.DS_Store
+test-output
+*.log
+*.patch
+*.log.gz
+*.code-workspace
+.idea
+# Local config to handle using Java 8 vs java 11.
+.java-version
+*.tgz
+# helm
+charts/
+Chart.lock
