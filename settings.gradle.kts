@@ -11,5 +11,5 @@ plugins {
 }
 
 include(":metric-anomaly-detector")
-include(":alerting-rule-manager")
+include(":metric-anomaly-task-manager")
 include(":metric-anomaly-detector-api")
