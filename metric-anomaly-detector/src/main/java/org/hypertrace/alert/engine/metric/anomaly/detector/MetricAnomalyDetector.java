@@ -1,4 +1,4 @@
-package org.hypertrace.alerting.metric.anomaly.detector;
+package org.hypertrace.alert.engine.metric.anomaly.detector;
 
 import org.hypertrace.core.serviceframework.PlatformService;
 

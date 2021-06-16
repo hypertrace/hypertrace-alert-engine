@@ -1,8 +1,8 @@
-package org.hypertrace.alerting.rule.manager;
+package org.hypertrace.alert.engine.metric.anomaly.task.manager;
 
 import org.hypertrace.core.serviceframework.PlatformService;
 
-public class AlertingRuleManager extends PlatformService {
+public class MetricAnomalyTaskManager extends PlatformService {
 
   @Override
   protected void doInit() {}
