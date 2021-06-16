@@ -5,6 +5,7 @@ plugins {
     id("org.hypertrace.jacoco-report-plugin") version "0.2.0" apply false
     id("org.hypertrace.avro-plugin") version "0.3.1" apply false
     id("org.hypertrace.code-style-plugin") version "1.1.0" apply false
+    id("org.hypertrace.publish-plugin") version "1.0.2" apply false
 }
 
 subprojects {

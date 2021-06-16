@@ -1,6 +1,5 @@
 plugins {
     `java-library`
-    // id("org.hypertrace.avro-plugin")
 }
 
 dependencies {
