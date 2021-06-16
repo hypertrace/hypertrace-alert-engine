@@ -1,4 +1,6 @@
-@namespace("org.hypertrace.alerting.metric.anomaly.detection")
+@namespace("org.hypertrace.alerting.metric.anomaly.detection.api")
 protocol MetricAnomalyDetectionTaskProtocol {
-  bytes rule;
+  record MetricAnomalyDetectionTask {
+    bytes rule;
+  }
 }
