@@ -10,5 +10,6 @@ plugins {
     id("org.hypertrace.version-settings") version "0.2.0"
 }
 
-rootProject.name = "alerting"
-
+include(":metric-anomaly-detector")
+include(":metric-anomaly-task-manager")
+include(":metric-anomaly-detector-api")
