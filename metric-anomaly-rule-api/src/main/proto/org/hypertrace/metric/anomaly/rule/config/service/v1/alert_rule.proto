@@ -10,9 +10,9 @@ message MetricAnomalyAlertRule {
   string name = 1;
   repeated Label labels = 2;
   MetricSelection metric_selection = 3;
-  repeated BaselineCondition baseline = 4;
-  LongevityCondition longevity = 5;
-  EvaluationCondition evaluation = 6;
+  repeated BaselineCondition baseline_condition = 4;
+  LongevityCondition longevity_condition = 5;
+  EvaluationCondition evaluation_condition = 6;
 }
 
 message Label {
@@ -23,8 +23,8 @@ message Label {
 message MetricSelection {
   string key = 1;
   string scope = 2;
-  MetricAggregationFunctionType function_type = 3;
-  AggregationInterval aggregation_interval = 4;
+  MetricAggregationFunctionType agg_function_type = 3;
+  AggregationInterval agg_interval = 4;
   repeated Filter filters = 5;
 }
 
