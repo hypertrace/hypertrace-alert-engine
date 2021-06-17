@@ -12,4 +12,4 @@ plugins {
 
 include(":metric-anomaly-detector")
 include(":metric-anomaly-task-manager")
-include(":metric-anomaly-detector-api")
+include(":metric-anomaly-data-model")
