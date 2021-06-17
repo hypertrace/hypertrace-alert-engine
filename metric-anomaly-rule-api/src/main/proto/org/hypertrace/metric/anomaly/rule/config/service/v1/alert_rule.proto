@@ -6,11 +6,18 @@ package org.hypertrace.alert.engine.metric.anomlay.rule.config.service.v1;
 
 import "org/hypertrace/metric/anomaly/rule/config/service/v1/alert_rule_enum.proto";
 
-message MetricAnomalyEventCondition {
-  MetricSelection metric_selection = 1;
-  repeated BaselineCondition baseline = 2;
-  LongevityCondition longevity = 4;
-  EvaluationCondition evaluation = 5;
+message MetricAnomalyAlertRule {
+  string name = 1;
+  repeated Label labels = 2;
+  MetricSelection metric_selection = 3;
+  repeated BaselineCondition baseline = 4;
+  LongevityCondition longevity = 5;
+  EvaluationCondition evaluation = 6;
+}
+
+message Label {
+  string key = 1;
+  string value = 2;
 }
 
 message MetricSelection {
