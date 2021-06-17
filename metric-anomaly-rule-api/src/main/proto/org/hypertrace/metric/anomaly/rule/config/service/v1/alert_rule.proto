@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package org.hypertrace.alert.engine.metric.anomlay.rule.config.service.v1;
+
+import "org/hypertrace/metric/anomaly/rule/config/service/v1/alert_rule_enum.proto";
+
+message MetricAnomalyEventCondition {
+  MetricSelection metric_selection = 1;
+  repeated BaselineCondition baseline = 2;
+  LongevityCondition longevity = 4;
+  EvaluationCondition evaluation = 5;
+}
+
+message MetricSelection {
+  string key = 1;
+  string scope = 2;
+  MetricAggregationFunctionType function_type = 3;
+  AggregationInterval aggregation_interval = 4;
+  repeated Filter filters = 5;
+}
+
+message AggregationInterval {
+  Period period = 1;
+}
+
+message Period {
+  int32 value = 1;
+  string unit = 2;
+}
+
+message Filter {
+  Expression lhs = 1;
+  Operator operator = 2;
+  Expression rhs = 3;
+  repeated Filter childFilter = 4;
+}
+
+message Expression {
+  oneof value {
+    Attribute attribute = 1;
+    Literal literal = 2;
+  }
+}
+
+message Attribute {
+  string key = 1;
+}
+
+message Literal {
+  Value value = 1;
+}
+
+message Value {
+  ValueType valueType = 1;
+  string string = 2;
+}
+
+message BaselineCondition {
+  Severity severity = 1;
+  oneof value {
+    StaticThreshold static_threshold = 2;
+    DynamicThreshold dynamic_threshold = 3;
+  }
+}
+
+message StaticThreshold {
+  double value = 1;
+  StaticThresholdOperator operator = 3;
+}
+
+
+message DynamicThreshold {
+  BaselineFunctionType baseline_function_type = 1;
+  Period look_back_window = 2;
+  BoundingBoxFunctionType bounding_box_function_type = 3;
+  BoundingBox bounding_box = 4;
+}
+
+message BoundingBox {
+  int32 upper = 2;
+  int32 lower = 3;
+}
+
+message LongevityCondition {
+  Period duration = 1;
+}
+
+message EvaluationCondition {
+  oneof value {
+    Always always = 1;
+    DailyEvaluationWindow daily_evaluation_window = 2;
+  }
+}
+
+message Always {}
+
+message DailyEvaluationWindow {
+  sfixed64 start_time = 1;
+  sfixed64 end_time = 2;
+}
