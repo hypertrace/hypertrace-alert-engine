@@ -39,11 +39,6 @@ enum StaticThresholdOperator {
   STATIC_THRESHOLD_OPERATOR_LT = 2;
 }
 
-enum BoundingFunction {
-  BOUNDING_FUNCTION_UNSPECIFIED = 0;
-  BOUNDING_FUNCTION_STD = 1;
-}
-
 enum Severity {
   SEVERITY_UNSPECIFIED = 0;
   SEVERITY_CRITICAL = 1;
