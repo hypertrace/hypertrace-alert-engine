@@ -18,7 +18,7 @@ message MetricAnomalyEvalRule {
   MetricSelection metric_selection = 3;
   repeated BaselineCondition baseline_condition = 4;
   LongevityCondition longevity_condition = 5;
-  EvaluationCondition evaluation_condition = 6;
+  EvaluationWindowCondition evaluation_condition = 6;
 }
 
 message Label {
@@ -100,7 +100,7 @@ message LongevityCondition {
   Period duration = 1;
 }
 
-message EvaluationCondition {
+message EvaluationWindowCondition {
   oneof value {
     Always always = 1;
     DailyEvaluationWindow daily_evaluation_window = 2;
