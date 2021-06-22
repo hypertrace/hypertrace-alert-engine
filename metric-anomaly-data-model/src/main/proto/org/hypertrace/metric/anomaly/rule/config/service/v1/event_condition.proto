@@ -7,6 +7,7 @@ package org.hypertrace.alert.engine.metric.anomlay.rule.config.service.v1;
 import "org/hypertrace/metric/anomaly/rule/config/service/v1/eval_rule_enums.proto";
 import "org/hypertrace/metric/anomaly/rule/config/service/v1/eval_rule.proto";
 
+// NOTE : this will be used with config service for CRUD (EventConditionConfigService)
 message NewEventCondition {
   oneof condition {
     MetricAnomalyEventCondition metric_anomaly_event_condition = 1;
