@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option java_multiple_files = true;
 
-package org.hypertrace.alert.engine.metric.anomlay.rule.config.service.v1;
+package org.hypertrace.alert.engine.metric.anomaly.rule.config.service.v1;
 
 import "org/hypertrace/metric/anomaly/rule/config/service/v1/alert_rule_enum.proto";
 
@@ -25,7 +25,7 @@ message MetricSelection {
   string scope = 2;
   MetricAggregationFunctionType agg_function_type = 3;
   AggregationInterval agg_interval = 4;
-  repeated Filter filters = 5;
+  Filter filters = 5;
 }
 
 message AggregationInterval {

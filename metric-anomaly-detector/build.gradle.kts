@@ -11,8 +11,16 @@ application {
 }
 
 dependencies {
+    implementation(project(":metric-anomaly-data-model"))
+
     implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.23")
     implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
+    implementation("org.hypertrace.core.query.service:query-service-client:0.5.2")
+    implementation("org.hypertrace.core.attribute.service:attribute-service-client:0.9.3")
+    implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.3.4")
+    implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
+    implementation("com.typesafe:config:1.4.1")
+    implementation("org.hypertrace.gateway.service:gateway-service-api:0.1.59")
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")

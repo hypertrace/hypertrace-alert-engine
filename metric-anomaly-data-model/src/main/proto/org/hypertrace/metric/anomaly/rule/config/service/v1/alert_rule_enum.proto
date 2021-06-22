@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option java_multiple_files = true;
 
-package org.hypertrace.alert.engine.metric.anomlay.rule.config.service.v1;
+package org.hypertrace.alert.engine.metric.anomaly.rule.config.service.v1;
 
 enum MetricAggregationFunctionType {
   METRIC_AGGREGATION_FUNCTION_TYPE_UNSPECIFIED = 0;
