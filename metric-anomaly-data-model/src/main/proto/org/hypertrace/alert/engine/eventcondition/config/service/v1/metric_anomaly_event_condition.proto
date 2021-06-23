@@ -10,13 +10,16 @@ message MetricAnomalyEventCondition {
 }
 
 message MetricSelection {
-  string key = 1;
-  string scope = 2;
+  Attribute metric_attribute = 1;
   MetricAggregationFunction metric_aggregation_function = 3;
   string metric_aggregation_interval = 4; //iso duration string PT15S
   Filter filter = 5;
 }
 
+message Attribute {
+  string key = 1;
+  string scope = 2;
+}
 enum MetricAggregationFunction {
   METRIC_AGGREGATION_FUNCTION_TYPE_UNSPECIFIED = 0;
   METRIC_AGGREGATION_FUNCTION_TYPE_SUM = 1;
@@ -56,7 +59,7 @@ message CompositeFilter {
 
 message LhsExpression {
   oneof value {
-    ColumnIdentifier column_identifier = 1;
+    Attribute attribute = 1;
   }
 }
 
@@ -64,10 +67,6 @@ message RhsExpression {
   oneof value {
     Literal literal = 1;
   }
-}
-
-message ColumnIdentifier {
-  string id = 1;
 }
 
 message Literal {
@@ -88,7 +87,7 @@ enum Severity {
 
 message ViolationCondition {
   oneof condition {
-    StaticThreshold static_threshold = 2;
+    StaticThresholdCondition static_threshold_condition = 2;
   }
 }
 
