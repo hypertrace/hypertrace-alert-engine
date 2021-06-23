@@ -6,7 +6,6 @@ package org.hypertrace.alert.engine.eventcondition.config.service.v1;
 
 message MetricAnomalyEventCondition {
   MetricAnomalyEvaluationRule evaluation_rule = 1;
-  NotificationCondition notification_condition = 2;
 }
 
 message MetricAnomalyEvaluationRule {
@@ -104,8 +103,4 @@ enum StaticThresholdOperator {
   STATIC_THRESHOLD_OPERATOR_LT = 2;
   STATIC_THRESHOLD_OPERATOR_GTE = 3;
   STATIC_THRESHOLD_OPERATOR_LTE = 4;
-}
-
-message NotificationCondition {
-  // todo : yet to define.
 }
