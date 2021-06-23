@@ -39,6 +39,8 @@ message LeafFilter {
 enum Operator {
   OPERATOR_UNSPECIFIED = 0;
   OPERATOR_EQ = 1;
+  OPERATOR_AND = 2;
+  OPERATOR_OR = 3;
 }
 
 message CompositeFilter {
