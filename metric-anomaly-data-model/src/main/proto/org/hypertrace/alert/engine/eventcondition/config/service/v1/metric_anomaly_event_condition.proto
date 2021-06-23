@@ -64,17 +64,7 @@ message LhsExpression {
 
 message RhsExpression {
   oneof value {
-    Literal literal = 1;
-  }
-}
-
-message Literal {
-  Value value = 1;
-}
-
-message Value {
-  oneof value {
-    string string = 1;
+    string string_value = 1;
   }
 }
 
