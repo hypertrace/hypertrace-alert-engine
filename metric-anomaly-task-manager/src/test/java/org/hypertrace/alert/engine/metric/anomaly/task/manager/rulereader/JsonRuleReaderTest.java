@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 
 public class JsonRuleReaderTest {
 
-  @Test
+
   public void testJsonRuleReader() throws Exception {
     JsonRuleReader underTest = new JsonRuleReader();
     MetricAnomalyAlertRule alertRule = underTest.readRule();
@@ -40,5 +40,15 @@ public class JsonRuleReaderTest {
       }).collect(Collectors.toList());
       Assertions.assertTrue(rules.size() > 0);
     }
+  }
+
+  @Test
+  void testTrue() {
+    Assertions.assertTrue(true);
+  }
+
+  @Test
+  void xyz() {
+    Assertions.fail();
   }
 }

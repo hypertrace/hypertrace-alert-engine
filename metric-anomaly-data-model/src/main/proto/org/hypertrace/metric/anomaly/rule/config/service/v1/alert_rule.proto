@@ -111,20 +111,20 @@ message DailyEvaluationWindow {
 //  - fetch metrics
 //    - baseline fun
 
-Evalutor {
- MetricFetcher fetcher; -> fetchMetric(starTime, endTime)
- BaselineCalc baseline; -> giveBaseline()
- LogetitiEvalutor ->
-}
-
-Alog {
-  alertTaks = ReadTask()
-  Metric[] metric = fetcher.fetchMetric(aletTask.startTime, alertTask.endtime)
-  baseline = GetBaselineCalcuatre(alertTask.type)
-}
-// for give metric anomaly -> StaticEvaluater
-    - MetricFetcher metricFetcher(org.hypertrace)
-    - metric_selection (org.hy)
-    - calcluate baseline (ai.trace) -> dy - gateway serice
-    - log (org.hy)
-    - sending event (org.hyper)
+//Evalutor {
+// MetricFetcher fetcher; -> fetchMetric(starTime, endTime)
+// BaselineCalc baseline; -> giveBaseline()
+// LogetitiEvalutor ->
+//}
+//
+//Alog {
+//  alertTaks = ReadTask()
+//  Metric[] metric = fetcher.fetchMetric(aletTask.startTime, alertTask.endtime)
+//  baseline = GetBaselineCalcuatre(alertTask.type)
+//}
+//// for give metric anomaly -> StaticEvaluater
+//    - MetricFetcher metricFetcher(org.hypertrace)
+//    - metric_selection (org.hy)
+//    - calcluate baseline (ai.trace) -> dy - gateway serice
+//    - log (org.hy)
+//    - sending event (org.hyper)
