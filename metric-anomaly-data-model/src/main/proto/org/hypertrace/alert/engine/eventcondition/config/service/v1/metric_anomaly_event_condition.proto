@@ -94,7 +94,7 @@ message ViolationCondition {
 message StaticThresholdCondition {
   StaticThresholdOperator operator = 1;
   double value = 2;
-  string duration = 3; // iso duration string e.g PT1M
+  optional string minimum_violation_duration = 3; // iso duration string e.g PT1M
   Severity severity = 4;
 }
 
