@@ -32,19 +32,23 @@ message Filter {
 
 message LeafFilter {
   LhsExpression lhs_expression = 1;
-  Operator operator = 2;
+  ValueOperator value_operator = 2;
   RhsExpression rhs_expression = 3;
 }
 
-enum Operator {
-  OPERATOR_UNSPECIFIED = 0;
-  OPERATOR_EQ = 1;
-  OPERATOR_AND = 2;
-  OPERATOR_OR = 3;
+enum ValueOperator {
+  VALUE_OPERATOR_UNSPECIFIED = 0;
+  VALUE_OPERATOR_EQ = 1;
+}
+
+enum LogicalOperator {
+  LOGICAL_OPERATOR_UNSPECIFIED = 0;
+  LOGICAL_OPERATOR_AND = 1;
+  LOGICAL_OPERATOR_OR = 2;
 }
 
 message CompositeFilter {
-  Operator operator = 1;
+  LogicalOperator logical_operator = 1;
   Filter lhs_filter = 2;
   Filter rhs_filter = 3;
 }
