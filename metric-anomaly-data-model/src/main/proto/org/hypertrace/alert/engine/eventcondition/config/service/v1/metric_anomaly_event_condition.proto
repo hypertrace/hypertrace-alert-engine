@@ -52,8 +52,7 @@ enum LogicalOperator {
 
 message CompositeFilter {
   LogicalOperator logical_operator = 1;
-  Filter lhs_filter = 2;
-  Filter rhs_filter = 3;
+  repeated Filter child_filters = 2;
 }
 
 
