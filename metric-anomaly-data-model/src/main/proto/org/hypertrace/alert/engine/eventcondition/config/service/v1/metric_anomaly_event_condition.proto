@@ -14,7 +14,7 @@ message MetricSelection {
   string scope = 2;
   MetricAggregationFunction metric_aggregation_function = 3;
   string metric_aggregation_interval = 4; //iso duration string PT15S
-  repeated Filter filters = 5;
+  Filter filter = 5;
 }
 
 enum MetricAggregationFunction {
