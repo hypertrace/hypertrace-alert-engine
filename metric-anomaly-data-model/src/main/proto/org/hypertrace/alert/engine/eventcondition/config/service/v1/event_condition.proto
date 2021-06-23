@@ -4,8 +4,7 @@ option java_multiple_files = true;
 
 package org.hypertrace.alert.engine.eventcondition.config.service.v1;
 
-import "org/hypertrace/alert/engine/eventcondition/config/service/v1/eval_rule_enums.proto";
-import "org/hypertrace/alert/engine/eventcondition/config/service/v1/eval_rule.proto";
+import "org/hypertrace/alert/engine/eventcondition/config/service/v1/metric_anomaly_event_condition.proto";
 
 // NOTE : this will be used with config service for CRUD (EventConditionConfigService)
 message NewEventCondition {

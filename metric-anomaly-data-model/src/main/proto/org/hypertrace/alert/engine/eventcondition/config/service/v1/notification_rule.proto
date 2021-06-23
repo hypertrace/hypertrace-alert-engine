@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package org.hypertrace.alert.engine.eventcondition.config.service.v1;
+
+// NOTE : this will be used with config service for CRUD (NotificationRuleConfigService)
+// For now, this is for completeness.
+
+message NewNotificationRule {
+  string rule_name = 1;
+  string description = 2;
+  map<string, string> labels = 3;
+
+  string event_condition_id = 4;
+  string event_condition_type = 5;
+
+  // TODO : add channel related proto
+  // e.g string channel_id = 6;
+}
+
+message NotificationRule {
+  string id = 1;
+  string rule_name = 2;
+  string description = 3;
+  map<string, string> labels = 4;
+
+  string event_condition_id = 5;
+  string event_condition_type = 6;
+
+  // TODO : add channel related proto
+  // e.g string channel_id = 6;
+}
