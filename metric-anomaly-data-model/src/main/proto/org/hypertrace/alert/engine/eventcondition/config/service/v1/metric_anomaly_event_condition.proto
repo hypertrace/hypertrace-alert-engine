@@ -10,13 +10,16 @@ message MetricAnomalyEventCondition {
 }
 
 message MetricSelection {
-  string key = 1;
-  string scope = 2;
+  Attribute metric_attribute = 1;
   MetricAggregationFunction metric_aggregation_function = 3;
   string metric_aggregation_interval = 4; //iso duration string PT15S
-  repeated Filter filters = 5;
+  Filter filter = 5;
 }
 
+message Attribute {
+  string key = 1;
+  string scope = 2;
+}
 enum MetricAggregationFunction {
   METRIC_AGGREGATION_FUNCTION_TYPE_UNSPECIFIED = 0;
   METRIC_AGGREGATION_FUNCTION_TYPE_SUM = 1;
@@ -32,47 +35,36 @@ message Filter {
 
 message LeafFilter {
   LhsExpression lhs_expression = 1;
-  Operator operator = 2;
+  ValueOperator value_operator = 2;
   RhsExpression rhs_expression = 3;
 }
 
-enum Operator {
-  OPERATOR_UNSPECIFIED = 0;
-  OPERATOR_EQ = 1;
-  OPERATOR_AND = 2;
-  OPERATOR_OR = 3;
+enum ValueOperator {
+  VALUE_OPERATOR_UNSPECIFIED = 0;
+  VALUE_OPERATOR_EQ = 1;
+}
+
+enum LogicalOperator {
+  LOGICAL_OPERATOR_UNSPECIFIED = 0;
+  LOGICAL_OPERATOR_AND = 1;
+  LOGICAL_OPERATOR_OR = 2;
 }
 
 message CompositeFilter {
-  Operator operator = 1;
-  Filter lhs_filter = 2;
-  Filter rhs_filter = 3;
+  LogicalOperator logical_operator = 1;
+  repeated Filter child_filters = 2;
 }
 
 
 message LhsExpression {
   oneof value {
-    ColumnIdentifier column_identifier = 1;
+    Attribute attribute = 1;
   }
 }
 
 message RhsExpression {
   oneof value {
-    Literal literal = 1;
-  }
-}
-
-message ColumnIdentifier {
-  string id = 1;
-}
-
-message Literal {
-  Value value = 1;
-}
-
-message Value {
-  oneof value {
-    string string = 1;
+    string string_value = 1;
   }
 }
 
@@ -84,14 +76,14 @@ enum Severity {
 
 message ViolationCondition {
   oneof condition {
-    StaticThreshold static_threshold = 2;
+    StaticThresholdCondition static_threshold_condition = 2;
   }
 }
 
-message StaticThreshold {
+message StaticThresholdCondition {
   StaticThresholdOperator operator = 1;
   double value = 2;
-  string duration = 3; // iso duration string e.g PT1M
+  optional string minimum_violation_duration = 3; // iso duration string e.g PT1M
   Severity severity = 4;
 }
 
