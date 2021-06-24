@@ -1,0 +1,54 @@
+{
+  "name": "high_avg_latency",
+  "labels": [{
+    "key": "environment",
+    "value": "dev"
+  }],
+  "metricSelection": {
+    "key": "duration",
+    "scope": "SERVICE",
+    "aggFunctionType": "METRIC_AGGREGATION_FUNCTION_TYPE_AVG",
+    "aggInterval": {
+      "period": {
+        "value": 15,
+        "unit": "seconds"
+      }
+    },
+    "filters": [{
+      "lhs": {
+        "literal": {
+          "value": {
+            "valueType": "VALUE_TYPE_STRING",
+            "string": "1234"
+          }
+        }
+      },
+      "operator": "OPERATOR_EQ"
+    }]
+  },
+  "baselineCondition": [{
+    "severity": "SEVERITY_CRITICAL",
+    "dynamicThreshold": {
+      "baselineFunctionType": "BASELINE_FUNCTION_TYPE_AVG",
+      "lookBackWindow": {
+        "value": 1,
+        "unit": "days"
+      },
+      "boundingBoxFunctionType": "BOUNDING_BOX_FUNCTION_TYPE_STANDARD_DEVIATION",
+      "boundingBox": {
+        "upper": 2,
+        "lower": 2
+      }
+    }
+  }],
+  "longevityCondition": {
+    "duration": {
+      "value": 5,
+      "unit": "minute"
+    }
+  },
+  "evaluationCondition": {
+    "always": {
+    }
+  }
+}

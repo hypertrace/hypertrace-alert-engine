@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package org.hypertrace.alert.engine.metric.anomlay.rule.config.service.v1;
+
+import "org/hypertrace/metric/anomaly/rule/config/service/v1/alert_rule_enum.proto";
+import "org/hypertrace/metric/anomaly/rule/config/service/v1/alert_rule.proto";
+
+message EventCondition {
+  oneof condition {
+    MetricAnomalyEventCondition metric = 6;
+    //MetricAnomalyDynamicThresholdCondition dynamic = 4;
+    //MetricAnomalyStaticThresholdCondition static = 5;
+  }
+}
+
+message NewEventCondition {
+  string id = 1;
+  oneof condition {
+    MetricAnomalyEventCondition metric = 6;
+    // MetricAnomalyDynamicThresholdCondition dynamic = 4;
+    // MetricAnomalyStaticThresholdCondition static = 5;
+  }
+}
+
+message MetricAnomalyEventCondition {
+  string event_name = 1;
+  repeated Label labels = 2;
+  MetricAnomalyAlertRule alert_rule = 3;
+  NotificationCondition notification_condition = 4;
+}
+
+//message MetricAnomalyStaticThresholdCondition {}
+//message MetricAnomalyDynamicThresholdCondition {
+//  string event_name = 1;
+//  repeated Label labels = 2;
+//  MetricAnomalyAlertRule alert_rule = 3; // evaluation data (evaluator)
+//  NotificationCondition notification_condition = 4; // discreate event notification data (notification sender)
+//}
+
+enum MetricAnomalyState {
+  METRIC_ANOMALY_STATE_UNSPECIFIED = 0;
+  METRIC_ANOMALY_STATE_CRITICAL = 1;
+  METRIC_ANOMALY_STATE_WARNING = 2;
+  METRIC_ANOMALY_STATE_NORMAL = 3;
+}
+
+message NotificationCondition {
+  MetricAnomalyState state = 1;
+}
+
+message Label {
+  string key = 1;
+  string value = 2;
+}
+
