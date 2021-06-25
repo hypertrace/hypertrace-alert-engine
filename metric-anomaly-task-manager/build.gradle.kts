@@ -11,9 +11,12 @@ application {
 }
 
 dependencies {
+    // framework + data models
     implementation(project(":metric-anomaly-data-model"))
     implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.23")
     implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
+    implementation("org.hypertrace.config.service:config-proto-converter:0.1.3")
+    implementation("org.apache.kafka:kafka-clients:2.6.0")
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")

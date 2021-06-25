@@ -1,54 +1,63 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager.rulereader;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
-import java.io.File;
-import java.util.Arrays;
+import com.typesafe.config.ConfigFactory;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-import org.hypertrace.alert.engine.metric.anomlay.rule.config.service.v1.MetricAnomalyAlertRule;
+import java.util.Optional;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.AlertTask;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.NotificationRule;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.common.AlertTaskProvider;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.common.DataSource;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.common.FileSystemDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class JsonRuleReaderTest {
 
-
+  @Test
   public void testJsonRuleReader() throws Exception {
     JsonRuleReader underTest = new JsonRuleReader();
-    MetricAnomalyAlertRule alertRule = underTest.readRule();
+    NotificationRule alertRule = (NotificationRule) underTest.readRule();
     String alertRuleJson = JsonFormat.printer().print(alertRule);
     Assertions.assertNotNull(alertRuleJson);
-
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonFormat.Parser parser = JsonFormat.parser().ignoringUnknownFields();
-    JsonNode jsonNode = objectMapper.readTree(Thread.currentThread().getContextClassLoader().getResource("alert_rule_test.json"));
-    if (jsonNode.isArray()) {
-      ArrayNode arrayNode = (ArrayNode) jsonNode;
-      List<MetricAnomalyAlertRule> rules = StreamSupport.stream(arrayNode.spliterator(), false).map(node -> {
-        MetricAnomalyAlertRule.Builder builder = MetricAnomalyAlertRule.newBuilder();
-        try {
-          parser.merge(objectMapper.writeValueAsString(node), builder);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-        return builder.build();
-      }).collect(Collectors.toList());
-      Assertions.assertTrue(rules.size() > 0);
-    }
   }
 
   @Test
-  void testTrue() {
+  void testDataSource() throws Exception {
+    DataSource dataSource = new FileSystemDataSource();
+    dataSource.init(
+        ConfigFactory.parseURL(
+                Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResource("application.conf")
+                    .toURI()
+                    .toURL())
+            .getConfig("fs"));
+    List<JsonNode> jsonNodes = dataSource.getAllNotificationRules();
+    jsonNodes.forEach(jsonNode -> System.out.println(jsonNode.toPrettyString()));
     Assertions.assertTrue(true);
   }
 
   @Test
-  void xyz() {
-    Assertions.fail();
+  void testAlertTasks() throws Exception {
+    DataSource dataSource = new FileSystemDataSource();
+    dataSource.init(
+        ConfigFactory.parseURL(
+                Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResource("application.conf")
+                    .toURI()
+                    .toURL())
+            .getConfig("fs"));
+    List<JsonNode> jsonNodes = dataSource.getAllNotificationRules();
+    List<Optional<AlertTask>> optionals = AlertTaskProvider.prepareTasks(jsonNodes);
+    optionals.forEach(
+        alertTask -> {
+          if (alertTask.isPresent()) {
+            System.out.println(alertTask.get());
+          }
+        });
+    Assertions.assertTrue(true);
   }
 }

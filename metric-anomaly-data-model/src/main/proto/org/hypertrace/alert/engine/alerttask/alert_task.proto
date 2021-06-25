@@ -12,5 +12,6 @@ message AlertTask {
 
   string event_condition_id = 4;
   string event_condition_type = 5;
-  google.protobuf.Value event_condition_object = 6;
+  google.protobuf.Value event_condition_value = 6;
+
 }

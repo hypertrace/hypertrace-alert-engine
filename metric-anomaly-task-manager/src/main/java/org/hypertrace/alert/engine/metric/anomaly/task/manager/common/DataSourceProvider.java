@@ -10,11 +10,11 @@ public class DataSourceProvider {
 
   public static DataSource getDataSource(Config dataSourceConfig) {
     String dataSourceType = dataSourceConfig.getString("type").toLowerCase();
-    Class clazz = (Class)registry.get(dataSourceType);
+    Class clazz = (Class) registry.get(dataSourceType);
 
     try {
       Constructor<? extends DataSource> constructor = clazz.getConstructor();
-      DataSource instance = (DataSource)constructor.newInstance();
+      DataSource instance = (DataSource) constructor.newInstance();
       instance.init(dataSourceConfig.getConfig(dataSourceType));
       return instance;
     } catch (Exception var5) {
@@ -27,6 +27,6 @@ public class DataSourceProvider {
   }
 
   static {
-    register("file", FileDataSource.class);
+    register("file", FileSystemDataSource.class);
   }
 }
