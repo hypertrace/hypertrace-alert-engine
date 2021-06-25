@@ -1,31 +1,38 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager.common;
 
 import com.typesafe.config.Config;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Properties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.AlertTask;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AlertTaskProducer {
-  private static final Logger LOGGER = LoggerFactory.getLogger(AlertTaskProducer.class);
+public class AvdlAlertTaskProducer {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AvdlAlertTaskProducer.class);
 
   private Config config;
-  Producer<String, byte[]> producer;
+  Producer<String, ByteBuffer> producer;
   String topicName;
 
-  public AlertTaskProducer(Config config) {
+  public AvdlAlertTaskProducer(Config config) {
     this.config = config;
     topicName = config.getString("output.topic");
     Properties props = createBaseProperties();
-    producer = new KafkaProducer<String, byte[]>(props);
+    producer = new KafkaProducer<String, ByteBuffer>(props);
   }
 
   public void produceTask(AlertTask alertTask) {
-    producer.send(new ProducerRecord<String, byte[]>(topicName, null, alertTask.toByteArray()));
-    LOGGER.info("task produced");
+    try {
+      producer.send(
+          new ProducerRecord<String, ByteBuffer>(topicName, null, alertTask.toByteBuffer()));
+      LOGGER.info("task produced");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public void close() {
@@ -57,7 +64,7 @@ public class AlertTaskProducer {
 
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
-    props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+    props.put("value.serializer", "org.apache.kafka.common.serialization.ByteBufferSerializer");
 
     return props;
   }

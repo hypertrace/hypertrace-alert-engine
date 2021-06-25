@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import java.util.List;
 import java.util.Optional;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.AlertTask;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -12,8 +12,8 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AlertTaskJob implements Job {
-  private static final Logger LOGGER = LoggerFactory.getLogger(AlertTaskConsumer.class);
+public class AvdlAlertTaskJob implements Job {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AvdlAlertTaskJob.class);
   private static final String DATA_SOURCE_CONFIG = "dataSource";
 
   public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -27,20 +27,20 @@ public class AlertTaskJob implements Job {
     List<JsonNode> objectList = dataSource.getAllNotificationRules();
 
     // prepare tasks
-    List<Optional<AlertTask>> alertTasks = AlertTaskProvider.prepareTasks(objectList);
+    List<Optional<AlertTask>> alertTasks = AvdlAlertTaskProvider.prepareTasks(objectList);
 
     // print as logs.
-    AlertTaskProducer alertTaskProducer =
-        new AlertTaskProducer(appConfig.getConfig("queue.config.kafka"));
+    AvdlAlertTaskProducer avdlAlertTaskProducer =
+        new AvdlAlertTaskProducer(appConfig.getConfig("queue.config.kafka"));
 
     alertTasks.forEach(
         alertTask -> {
           if (alertTask.isPresent()) {
-            alertTaskProducer.produceTask(alertTask.get());
+            avdlAlertTaskProducer.produceTask(alertTask.get());
           }
         });
 
-    alertTaskProducer.close();
+    avdlAlertTaskProducer.close();
     LOGGER.info("job finished");
   }
 }
