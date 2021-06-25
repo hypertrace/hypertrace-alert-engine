@@ -14,7 +14,7 @@ public class AlertTaskProducer {
 
   public AlertTaskProducer(Config config) {
     this.config = config;
-    topicName = config.getString("kafka.output.topic");
+    topicName = config.getString("output.topic");
     Properties props = createBaseProperties();
     producer = new KafkaProducer<String, byte[]>(props);
   }
@@ -32,7 +32,7 @@ public class AlertTaskProducer {
     Properties props = new Properties();
 
     // Assign localhost id
-    props.put("bootstrap.servers", config.getString("kafka.bootstrap.servers"));
+    props.put("bootstrap.servers", config.getString("bootstrap.servers"));
 
     // Set acknowledgements for producer requests.
     props.put("acks", "all");

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Properties;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -27,7 +28,7 @@ public class AlertTaskConsumer {
 
   public AlertTaskConsumer(Config config) {
     this.config = config;
-    topicName = config.getString("kafka.output.topic");
+    topicName = config.getString("output.topic");
     Properties props = createBaseProperties();
     consumer = new KafkaConsumer<String, byte[]>(props);
     consumer.subscribe(Arrays.asList(topicName));
@@ -64,13 +65,18 @@ public class AlertTaskConsumer {
 
   private Properties createBaseProperties() {
     Properties props = new Properties();
-    props.put("bootstrap.servers", config.getString("kafka.bootstrap.servers"));
+    props.put("bootstrap.servers", config.getString("bootstrap.servers"));
     props.put("group.id", "alert-task-consumer");
-    props.put("enable.auto.commit", "true");
+    props.put("enable.auto.commit", "false");
     props.put("auto.commit.interval.ms", "1000");
     props.put("session.timeout.ms", "30000");
-    props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    props.put(
+        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+        "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put(
+        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+        "org.apache.kafka.common.serialization.ByteArrayDeserializer");
     return props;
   }
 }

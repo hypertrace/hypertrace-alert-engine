@@ -1,23 +1,32 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.typesafe.config.Config;
-import java.util.List;
 import java.util.Optional;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.AlertTask;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.common.AlertTaskProducer;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.common.AlertTaskProvider;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.common.DataSource;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.common.DataSourceProvider;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.common.AlertTaskConsumer;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.common.AlertTaskJob;
 import org.hypertrace.core.serviceframework.PlatformService;
 import org.hypertrace.core.serviceframework.config.ConfigClient;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetricAnomalyTaskManager extends PlatformService {
-  private static final String SERVICE_NAME_CONFIG = "service.name";
-  private static final String SERVICE_PORT_CONFIG = "service.port";
-  private static final String DATA_SOURCE_CONFIG = "dataSource";
+  private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyTaskManager.class);
 
-  private DataSource dataSource;
+  //  private static final String SERVICE_NAME_CONFIG = "service.name";
+  //  private static final String SERVICE_PORT_CONFIG = "service.port";
+
+  private Scheduler scheduler;
+  AlertTaskConsumer alertTaskConsumer;
 
   public MetricAnomalyTaskManager(ConfigClient configClient) {
     super(configClient);
@@ -25,34 +34,65 @@ public class MetricAnomalyTaskManager extends PlatformService {
 
   @Override
   protected void doInit() {
-    Config dataSourceConfig = getAppConfig().getConfig(DATA_SOURCE_CONFIG);
-    this.dataSource = DataSourceProvider.getDataSource(dataSourceConfig);
+    try {
+      SchedulerFactory schedulerFactory = new StdSchedulerFactory();
+      scheduler = schedulerFactory.getScheduler();
+      JobDataMap jobDataMap = new JobDataMap();
+      jobDataMap.put("config", getAppConfig());
+      JobDetail jobDetail =
+          JobBuilder.newJob(AlertTaskJob.class)
+              .withIdentity("alert-task", "alerting")
+              .usingJobData(jobDataMap)
+              .build();
+
+      CronTrigger trigger =
+          TriggerBuilder.newTrigger()
+              .withIdentity("trigger3", "group1")
+              .withSchedule(CronScheduleBuilder.cronSchedule("0 * * * * ?"))
+              .build();
+      scheduler.scheduleJob(jobDetail, trigger);
+
+    } catch (SchedulerException e) {
+      throw new RuntimeException(e);
+    }
+    alertTaskConsumer = new AlertTaskConsumer(getAppConfig().getConfig("queue.config.kafka"));
   }
 
   @Override
   protected void doStart() {
-    // read rules
-    List<JsonNode> objectList = dataSource.getAllNotificationRules();
-    // prepare tasks
-    List<Optional<AlertTask>> alertTasks = AlertTaskProvider.prepareTasks(objectList);
-    // print as logs.
-    AlertTaskProducer alertTaskProducer =
-        new AlertTaskProducer(getAppConfig().getConfig("queue.config.kafka"));
+    try {
+      scheduler.start();
+    } catch (SchedulerException e) {
+      throw new RuntimeException(e);
+    }
 
-    alertTasks.forEach(
-        alertTask -> {
-          if (alertTask.isPresent()) {
-            alertTaskProducer.produceTask(alertTask.get());
-          }
-        });
-    alertTaskProducer.close();
+    // consume task
+    // AlertTaskProducer Job
+    while (true) {
+      Optional<AlertTask> optionalAlertTask = alertTaskConsumer.consumeTask();
+      if (optionalAlertTask.isPresent()) {
+        LOGGER.info("AlertTask:{}", optionalAlertTask.get().toString());
+      }
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
-  protected void doStop() {}
+  protected void doStop() {
+    try {
+      alertTaskConsumer.close();
+      scheduler.shutdown();
+    } catch (SchedulerException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   @Override
   public boolean healthCheck() {
-    return false;
+    return true;
   }
 }

@@ -27,6 +27,6 @@ public class DataSourceProvider {
   }
 
   static {
-    register("file", FileSystemDataSource.class);
+    register("fs", FileSystemDataSource.class);
   }
 }
