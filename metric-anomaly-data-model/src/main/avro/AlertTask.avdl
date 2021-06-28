@@ -1,0 +1,10 @@
+@namespace("org.hypertrace.alert.engine.metric.anomaly.datamodel")
+protocol AlertTaskProtocol {
+  record AlertTask {
+    long current_execution_time;
+    long last_execution_time;
+    string event_condition_id;
+    string event_condition_type;
+    bytes event_condition_value;
+  }
+}
