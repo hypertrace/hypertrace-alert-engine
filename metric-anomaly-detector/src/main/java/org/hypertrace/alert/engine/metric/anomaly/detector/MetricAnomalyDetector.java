@@ -1,20 +1,17 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
-import org.hypertrace.core.serviceframework.PlatformService;
 
-public class MetricAnomalyDetector extends PlatformService {
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.AlertTask;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 
-  @Override
-  protected void doInit() {}
+class MetricAnomalyDetector {
 
-  @Override
-  protected void doStart() {}
+  private MetricQueryBuilder metricQueryBuilder;
 
-  @Override
-  protected void doStop() {}
+  public MetricAnomalyDetector() {
+  }
 
-  @Override
-  public boolean healthCheck() {
-    return false;
+  void process(AlertTask alertTask) {
+    metricQueryBuilder.buildMetricQueryRequest(alertTask.g, )
   }
 }
