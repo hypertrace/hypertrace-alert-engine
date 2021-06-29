@@ -40,4 +40,4 @@ jobs:
       - name: Build with Gradle
         uses: hypertrace/github-actions/gradle@main
         with: 
-          args: build dockerBuildImages
+          args: build -x avroCompatibilityCheck dockerBuildImages

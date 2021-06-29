@@ -1,33 +1,20 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager;
 
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobManager;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
 import org.hypertrace.core.serviceframework.PlatformService;
 import org.hypertrace.core.serviceframework.config.ConfigClient;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MetricAnomalyTaskManager extends PlatformService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyTaskManager.class);
-
-  //  private static final String SERVICE_NAME_CONFIG = "service.name";
-  //  private static final String SERVICE_PORT_CONFIG = "service.port";
-
   private Scheduler scheduler;
-  TaskManager taskManager;
+  private JobManager jobManager;
 
   public MetricAnomalyTaskManager(ConfigClient configClient) {
     super(configClient);
-  }
-
-  private TaskManager getTaskManager(String type) {
-    if (type.equals("avdl")) {
-      return new AvdlBasedTaskManager();
-    } else {
-      return new ProtoBasedTaskManager();
-    }
   }
 
   @Override
@@ -35,8 +22,8 @@ public class MetricAnomalyTaskManager extends PlatformService {
     try {
       SchedulerFactory schedulerFactory = new StdSchedulerFactory();
       scheduler = schedulerFactory.getScheduler();
-      taskManager = getTaskManager(getAppConfig().getString("jobType"));
-      taskManager.init(scheduler, getAppConfig());
+      jobManager = new AlertTaskJobManager();
+      jobManager.initJob(getAppConfig());
     } catch (SchedulerException e) {
       throw new RuntimeException(e);
     }
@@ -45,19 +32,19 @@ public class MetricAnomalyTaskManager extends PlatformService {
   @Override
   protected void doStart() {
     try {
+      jobManager.startJob(scheduler);
       scheduler.start();
-    } catch (SchedulerException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    taskManager.runConsumerLoop();
   }
 
   @Override
   protected void doStop() {
     try {
-      taskManager.stop(scheduler);
+      jobManager.stopJob(scheduler);
       scheduler.shutdown();
-    } catch (SchedulerException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }

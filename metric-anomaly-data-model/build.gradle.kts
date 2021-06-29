@@ -36,6 +36,8 @@ dependencies {
     api("io.grpc:grpc-stub:1.37.0")
     api("javax.annotation:javax.annotation-api:1.3.2")
     api("org.apache.avro:avro:1.10.2")
+    implementation("com.typesafe:config:1.4.1")
+    implementation("org.apache.kafka:kafka-clients:2.6.0")
 }
 
 sourceSets {
