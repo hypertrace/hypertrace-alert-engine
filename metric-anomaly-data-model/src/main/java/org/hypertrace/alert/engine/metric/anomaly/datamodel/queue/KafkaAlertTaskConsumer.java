@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-import jdk.jshell.spi.ExecutionControl.NotImplementedException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -18,24 +17,20 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KafkaQueueAlertTaskConsumer implements Queue<AlertTask> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(KafkaQueueAlertTaskConsumer.class);
+public class KafkaAlertTaskConsumer {
+  private static final Logger LOGGER = LoggerFactory.getLogger(KafkaAlertTaskConsumer.class);
   private static final int CONSUMER_POLL_TIMEOUT_MS = 100;
 
-  private KafkaQueueConfigReader kafkaQueueConfigReader;
+  private KafkaConfigReader kafkaConfigReader;
   private KafkaConsumer<String, ByteBuffer> consumer;
   private LinkedList<ConsumerRecord<String, ByteBuffer>> linkedList = new LinkedList<>();
 
-  public void init(Config kafkaQueueConfig) {
-    this.kafkaQueueConfigReader = new KafkaQueueConfigReader(kafkaQueueConfig);
+  public KafkaAlertTaskConsumer(Config kafkaQueueConfig) {
+    this.kafkaConfigReader = new KafkaConfigReader(kafkaQueueConfig);
     Properties props = new Properties();
-    props.putAll(kafkaQueueConfigReader.getConsumerConfig(createBaseProperties()));
+    props.putAll(kafkaConfigReader.getConsumerConfig(createBaseProperties()));
     consumer = new KafkaConsumer<String, ByteBuffer>(props);
-    consumer.subscribe(Collections.singletonList(kafkaQueueConfigReader.getTopicName()));
-  }
-
-  public void enqueue(AlertTask alertTask) throws NotImplementedException {
-    throw new NotImplementedException("For kafka based queue, user Producer");
+    consumer.subscribe(Collections.singletonList(kafkaConfigReader.getTopicName()));
   }
 
   public AlertTask dequeue() throws IOException {
@@ -61,7 +56,7 @@ public class KafkaQueueAlertTaskConsumer implements Queue<AlertTask> {
   private Map<String, Object> createBaseProperties() {
     Map<String, Object> baseProperties = new HashMap<>();
     baseProperties.put(
-        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaQueueConfigReader.getBootstrapServer());
+        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigReader.getBootstrapServer());
     baseProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "alert-task-consumer");
     baseProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
     baseProperties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");

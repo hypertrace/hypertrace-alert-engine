@@ -24,6 +24,7 @@ public class AlertTaskConverter {
   static final String EVENT_CONDITION_ID = "eventConditionId";
   static final String EVENT_CONDITION_TYPE = "eventConditionType";
   static final String EVENT_CONDITION = "eventCondition";
+  static final String DEFAULT_TENANT_ID = "__default";
 
   public static AlertTask toAlertTask(Document document, int delayInMinutes) throws IOException {
     JsonNode rule = OBJECT_MAPPER.readTree(document.toJson());
@@ -32,6 +33,7 @@ public class AlertTaskConverter {
     String eventConditionType = rule.get(EVENT_CONDITION_TYPE).textValue();
     if (eventConditionType.equals(METRIC_ANOMALY_EVENT_CONDITION)) {
       Instant current = roundHalfDown(Instant.now(), ChronoUnit.MINUTES);
+      builder.setTenantId(DEFAULT_TENANT_ID);
       builder.setCurrentExecutionTime(current.toEpochMilli());
       builder.setLastExecutionTime(
           current.minus(Duration.of(delayInMinutes, ChronoUnit.MINUTES)).toEpochMilli());

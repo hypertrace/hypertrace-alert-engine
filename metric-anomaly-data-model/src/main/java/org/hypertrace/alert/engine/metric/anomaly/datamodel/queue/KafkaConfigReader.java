@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-class KafkaQueueConfigReader {
+class KafkaConfigReader {
   static final String TOPIC_NAME_CONFIG = "topic";
   static final String BOOTSTRAP_SERVERS_CONFIG = "bootstrap.servers";
   static final String PRODUCER_CONFIG = "producer";
@@ -13,7 +13,7 @@ class KafkaQueueConfigReader {
 
   private Config kafkaQueueConfig;
 
-  KafkaQueueConfigReader(Config kafkaQueueConfig) {
+  KafkaConfigReader(Config kafkaQueueConfig) {
     this.kafkaQueueConfig = kafkaQueueConfig;
   }
 

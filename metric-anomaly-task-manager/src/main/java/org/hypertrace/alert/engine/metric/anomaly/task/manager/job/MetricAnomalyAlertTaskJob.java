@@ -10,7 +10,7 @@ import com.typesafe.config.Config;
 import java.io.IOException;
 import java.util.List;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaQueueAlertTaskProducer;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.rulesource.RuleSource;
 import org.hypertrace.core.documentstore.Document;
 import org.quartz.Job;
@@ -32,8 +32,8 @@ public class MetricAnomalyAlertTaskJob implements Job {
     JobDataMap jobDataMap = jobDetail.getJobDataMap();
     Config jobConfig = (Config) jobDataMap.get(JOB_DATA_MAP_JOB_CONFIG);
     RuleSource ruleSource = (RuleSource) jobDataMap.get(JOB_DATA_MAP_RULE_SOURCE);
-    KafkaQueueAlertTaskProducer kafkaQueueAlertTaskProducer =
-        (KafkaQueueAlertTaskProducer) jobDataMap.get(JOB_DATA_MAP_PRODUCER_QUEUE);
+    KafkaAlertTaskProducer kafkaAlertTaskProducer =
+        (KafkaAlertTaskProducer) jobDataMap.get(JOB_DATA_MAP_PRODUCER_QUEUE);
 
     int delayInMinutes =
         jobConfig.hasPath(DELAY_IN_MINUTES_CONFIG)
@@ -46,7 +46,7 @@ public class MetricAnomalyAlertTaskJob implements Job {
           document -> {
             try {
               AlertTask task = AlertTaskConverter.toAlertTask(document, delayInMinutes);
-              kafkaQueueAlertTaskProducer.enqueue(task);
+              kafkaAlertTaskProducer.enqueue(task);
             } catch (IOException e) {
               LOGGER.debug(
                   "Failed to enqueue alert task for document:{} with exception:{}",

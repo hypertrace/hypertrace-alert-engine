@@ -11,9 +11,7 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.Map;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.AlertTaskQueueProvider;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.Queue;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.rulesource.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.rulesource.RuleSourceProvider;
 import org.quartz.CronScheduleBuilder;
@@ -31,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class AlertTaskJobManager implements JobManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(AlertTaskJobManager.class);
   private static final String RULE_SOURCE_CONFIG = "ruleSource";
-  private static final String QUEUE_CONFIG = "queue.config";
+  private static final String KAFKA_QUEUE_CONFIG = "queue.config.kafka";
   private static final String JOB_CONFIG = "job.config";
   private static final String JOB_CONFIG_CRON_EXPRESSION = "cronExpression";
 
@@ -39,11 +37,11 @@ public class AlertTaskJobManager implements JobManager {
   private JobDetail jobDetail;
   private Trigger jobTrigger;
   private RuleSource ruleSource;
-  private Queue<AlertTask> alertTaskQueue;
+  private KafkaAlertTaskProducer kafkaAlertTaskProducer;
 
   public void initJob(Config appConfig) {
     ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(RULE_SOURCE_CONFIG));
-    alertTaskQueue = AlertTaskQueueProvider.getProducerQueue(appConfig.getConfig(QUEUE_CONFIG));
+    kafkaAlertTaskProducer = new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
     Config jobConfig =
         appConfig.hasPath(JOB_CONFIG)
             ? appConfig.getConfig(JOB_CONFIG)
@@ -54,7 +52,7 @@ public class AlertTaskJobManager implements JobManager {
     JobDataMap jobDataMap = new JobDataMap();
     jobDataMap.put(JOB_DATA_MAP_JOB_CONFIG, jobConfig);
     jobDataMap.put(JOB_DATA_MAP_RULE_SOURCE, ruleSource);
-    jobDataMap.put(JOB_DATA_MAP_PRODUCER_QUEUE, alertTaskQueue);
+    jobDataMap.put(JOB_DATA_MAP_PRODUCER_QUEUE, kafkaAlertTaskProducer);
 
     jobDetail =
         JobBuilder.newJob(MetricAnomalyAlertTaskJob.class)

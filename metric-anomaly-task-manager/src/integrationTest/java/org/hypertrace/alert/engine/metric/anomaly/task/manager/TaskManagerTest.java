@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaQueueAlertTaskConsumer;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskConsumer;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobManager;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
 import org.junit.jupiter.api.AfterAll;
@@ -83,11 +83,10 @@ public class TaskManagerTest {
     jobManager.startJob(scheduler);
     scheduler.start();
 
-    // start the consumer that will wait max 2 mins
+    // start the consumer that will wait max 30 seconds
     Config kafkaQueueConfig = appConfig.getConfig("queue.config.kafka");
-    KafkaQueueAlertTaskConsumer kafkaQueueAlertTaskConsumer = new KafkaQueueAlertTaskConsumer();
-    kafkaQueueAlertTaskConsumer.init(kafkaQueueConfig);
-    boolean result = startConsumerLoop(kafkaQueueAlertTaskConsumer);
+    KafkaAlertTaskConsumer kafkaAlertTaskConsumer = new KafkaAlertTaskConsumer(kafkaQueueConfig);
+    boolean result = startConsumerLoop(kafkaAlertTaskConsumer);
 
     jobManager.stopJob(scheduler);
     scheduler.shutdown();
@@ -96,13 +95,13 @@ public class TaskManagerTest {
     Assertions.assertTrue(result);
   }
 
-  private boolean startConsumerLoop(KafkaQueueAlertTaskConsumer kafkaQueueAlertTaskConsumer) {
+  private boolean startConsumerLoop(KafkaAlertTaskConsumer kafkaAlertTaskConsumer) {
     int sleepTimeMs = 1000; // 1 seconds
-    int maxWaitTimeMs = 120 * sleepTimeMs; // wait for max 2 mins
+    int maxWaitTimeMs = 30 * sleepTimeMs; // wait for max 30 seconds
     int elapsedWaitTime = 0;
     while (true) {
       try {
-        AlertTask alertTask = kafkaQueueAlertTaskConsumer.dequeue();
+        AlertTask alertTask = kafkaAlertTaskConsumer.dequeue();
         if (alertTask != null && alertTask.getEventConditionType().equals(EVENT_CONDITION_TYPE)) {
           MetricAnomalyEventCondition.parseFrom(alertTask.getEventConditionValue());
           return true;
