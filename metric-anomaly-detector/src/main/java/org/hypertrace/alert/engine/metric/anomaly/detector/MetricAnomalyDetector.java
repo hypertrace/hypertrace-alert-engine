@@ -26,6 +26,7 @@ class MetricAnomalyDetector {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyDetector.class);
 
+  static final String TENANT_ID_KEY = "x-tenant-id";
   private static final String QUERY_SERVICE_CONFIG_KEY = "query.service.config";
   private static final String REQUEST_TIMEOUT_CONFIG_KEY = "request.timeout";
   private static final int DEFAULT_REQUEST_TIMEOUT_MILLIS = 10000;
@@ -70,13 +71,15 @@ class MetricAnomalyDetector {
         metricQueryBuilder.buildMetricQueryRequest(
             metricAnomalyEventCondition.getMetricSelection(),
             alertTask.getLastExecutionTime(),
-            alertTask.getCurrentExecutionTime());
+            alertTask.getCurrentExecutionTime(),
+            alertTask.getTenantId());
 
     ViolationCondition violationCondition =
         metricAnomalyEventCondition.getViolationConditionList().get(0);
 
     boolean isViolation = true;
-    Iterator<ResultSetChunk> iterator = executeQuery(Map.of("x-tenant-id", "default"), queryRequest);
+    Iterator<ResultSetChunk> iterator =
+        executeQuery(Map.of(alertTask.getTenantId(), "default"), queryRequest);
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
       for (Row row : resultSetChunk.getRowList()) {

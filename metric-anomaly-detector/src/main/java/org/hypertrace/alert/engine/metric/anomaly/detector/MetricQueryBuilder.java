@@ -40,10 +40,13 @@ public class MetricQueryBuilder {
   }
 
   QueryRequest buildMetricQueryRequest(
-      MetricSelection metricSelection, long startTime, long endTime) {
+      MetricSelection metricSelection,
+      long startTime, long endTime,
+      String tenantId) {
     QueryRequest.Builder builder = QueryRequest.newBuilder();
-    String timeColumn =
-        getTimestampAttributeId(metricSelection.getMetricAttribute().getScope());
+    String timeColumn = getTimestampAttributeId(
+        metricSelection.getMetricAttribute().getScope(),
+        tenantId);
     if (null == timeColumn) {
       throw new IllegalArgumentException("Error time column is null");
     }
@@ -58,8 +61,7 @@ public class MetricQueryBuilder {
 
     builder.addGroupBy(
         createTimeColumnGroupByExpression(
-            timeColumn,
-            isoDurationToSeconds(metricSelection.getMetricAggregationInterval())));
+            timeColumn, isoDurationToSeconds(metricSelection.getMetricAggregationInterval())));
     builder.setLimit(QueryServiceClient.DEFAULT_QUERY_SERVICE_GROUP_BY_LIMIT);
 
     return builder.build();
@@ -112,7 +114,10 @@ public class MetricQueryBuilder {
       case ATTRIBUTE:
         return builder.setColumnIdentifier(
             ColumnIdentifier.newBuilder()
-                .setColumnName(lhsExpression.getAttribute().getScope() + "." + lhsExpression.getAttribute().getKey())
+                .setColumnName(
+                    lhsExpression.getAttribute().getScope()
+                        + "."
+                        + lhsExpression.getAttribute().getKey())
                 .build());
       default:
         throw new IllegalArgumentException("error");
@@ -247,10 +252,10 @@ public class MetricQueryBuilder {
         .build();
   }
 
-  String getTimestampAttributeId(String attributeScope) {
+  String getTimestampAttributeId(String tenantId, String attributeScope) {
     Iterator<AttributeMetadata> attributeMetadataIterator =
         attributesServiceClient.findAttributes(
-            Map.of("x-tenant-id", "__default"),
+            Map.of(MetricAnomalyDetector.TENANT_ID_KEY, tenantId),
             AttributeMetadataFilter.newBuilder().addScopeString(attributeScope).build());
 
     while (attributeMetadataIterator.hasNext()) {
