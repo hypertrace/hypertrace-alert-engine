@@ -20,6 +20,7 @@ message Attribute {
   string key = 1;
   string scope = 2;
 }
+
 enum MetricAggregationFunction {
   METRIC_AGGREGATION_FUNCTION_TYPE_UNSPECIFIED = 0;
   METRIC_AGGREGATION_FUNCTION_TYPE_SUM = 1;

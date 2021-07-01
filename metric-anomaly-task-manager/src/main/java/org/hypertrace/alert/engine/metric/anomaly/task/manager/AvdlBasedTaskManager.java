@@ -49,7 +49,7 @@ public class AvdlBasedTaskManager implements TaskManager {
 
   public void runConsumerLoop() {
     while (true) {
-      Optional<AlertTask> optionalAlertTask = avdlAlertTaskConsumer.consumeTask();
+      Optional<org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask> optionalAlertTask = avdlAlertTaskConsumer.consumeTask();
       if (optionalAlertTask.isPresent()) {
         AlertTask alertTask = optionalAlertTask.get();
         LOGGER.info("AlertTask:{}", alertTask);

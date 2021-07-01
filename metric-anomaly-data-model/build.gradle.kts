@@ -9,29 +9,48 @@ plugins {
     `java-library`
     id("com.google.protobuf") version "0.8.15"
     id("org.hypertrace.publish-plugin")
-    id("org.hypertrace.avro-plugin")
+    id("com.commercehub.gradle.plugin.avro")
+    // id("org.hypertrace.avro-plugin")  version "0.3.1"
 }
+
+val generateLocalGoGrpcFiles = false
 
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:3.15.7"
     }
     plugins {
-        id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.37.0"
+        id("grpc_java") {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.36.1"
+        }
+
+        if (generateLocalGoGrpcFiles) {
+            id("grpc_go") {
+                path = "<go-path>/bin/protoc-gen-go"
+            }
         }
     }
     generateProtoTasks {
-        ofSourceSet("main").forEach { task ->
-            task.plugins {
-                id("grpc")
+        ofSourceSet("main").forEach {
+            it.plugins {
+                // Apply the "grpc" plugin whose spec is defined above, without options.
+                id("grpc_java")
+
+                if (generateLocalGoGrpcFiles) {
+                    id("grpc_go")
+                }
+            }
+            it.builtins {
+                java
+                if (generateLocalGoGrpcFiles) {
+                    id("go")
+                }
             }
         }
     }
 }
 
 dependencies {
-    api("org.apache.avro:avro:1.10.2")
     api("io.grpc:grpc-protobuf:1.37.0")
     api("io.grpc:grpc-stub:1.37.0")
     api("javax.annotation:javax.annotation-api:1.3.2")
@@ -41,7 +60,7 @@ dependencies {
 sourceSets {
     main {
         java {
-            srcDirs("build/generated/source/proto/main/java", "build/generated/source/proto/main/grpc")
+            srcDirs("src/main/java", "build/generated/source/proto/main/java", "build/generated/source/proto/main/grpc_java", "build/generated-main-avro-java")
         }
     }
 }
