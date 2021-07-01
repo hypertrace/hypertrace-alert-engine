@@ -4,6 +4,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.typesafe.config.Config;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
@@ -67,6 +68,7 @@ class MetricAnomalyDetector {
       LOGGER.info("EventConditionType:{}", alertTask.getEventConditionType());
       return;
     }
+    LOGGER.info(alertTask.toString());
     QueryRequest queryRequest =
         metricQueryBuilder.buildMetricQueryRequest(
             metricAnomalyEventCondition.getMetricSelection(),
@@ -77,25 +79,34 @@ class MetricAnomalyDetector {
     ViolationCondition violationCondition =
         metricAnomalyEventCondition.getViolationConditionList().get(0);
 
-    boolean isViolation = true;
+    LOGGER.info("Starting rule evaluation for start {} & end time {}",
+        Instant.ofEpochMilli(alertTask.getLastExecutionTime()),
+        Instant.ofEpochMilli(alertTask.getCurrentExecutionTime()));
+
     Iterator<ResultSetChunk> iterator =
-        executeQuery(Map.of(alertTask.getTenantId(), "default"), queryRequest);
+        executeQuery(Map.of(TENANT_ID_KEY, alertTask.getTenantId()), queryRequest);
+
+
+    int dataCount = 0, violationCount = 0;
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
       for (Row row : resultSetChunk.getRowList()) {
+        dataCount++;
         Value value = row.getColumn(1);
         if (value.getValueType() != ValueType.STRING) {
-          throw new IllegalArgumentException("");
+          throw new IllegalArgumentException("error");
         }
-        if (!compareThreshold(value, violationCondition)) {
-          isViolation = false;
-          break;
+        LOGGER.info("Metric data {}", value.getString());
+        if (compareThreshold(value, violationCondition)) {
+          violationCount++;
         }
       }
     }
 
-    if (isViolation) {
-      LOGGER.info("Rule violation");
+    if (dataCount > 0 && violationCount == dataCount) {
+      LOGGER.info("Rule with id {} violated", alertTask.getEventConditionId());
+    } else {
+      LOGGER.info("Rule with id {} is normal", alertTask.getCurrentExecutionTime());
     }
   }
 

@@ -45,8 +45,7 @@ public class MetricQueryBuilder {
       String tenantId) {
     QueryRequest.Builder builder = QueryRequest.newBuilder();
     String timeColumn = getTimestampAttributeId(
-        metricSelection.getMetricAttribute().getScope(),
-        tenantId);
+        tenantId, metricSelection.getMetricAttribute().getScope());
     if (null == timeColumn) {
       throw new IllegalArgumentException("Error time column is null");
     }

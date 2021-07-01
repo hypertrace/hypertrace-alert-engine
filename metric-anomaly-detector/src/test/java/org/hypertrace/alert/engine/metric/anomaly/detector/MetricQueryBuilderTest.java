@@ -105,6 +105,7 @@ public class MetricQueryBuilderTest {
             .build();
     AttributeServiceClient asClient = new AttributeServiceClient(attributeServiceChannel);
 
+
     Config qsConfig = config.getConfig("query.service.config");
     QueryServiceClient queryServiceClient =
         new QueryServiceClient(new QueryServiceConfig(qsConfig));
@@ -113,10 +114,10 @@ public class MetricQueryBuilderTest {
 
     LhsExpression lhsExpression =
         LhsExpression.newBuilder()
-            .setAttribute(Attribute.newBuilder().setKey("id").setScope("SERVICE").build())
+            .setAttribute(Attribute.newBuilder().setKey("name").setScope("SERVICE").build())
             .build();
     RhsExpression rhsExpression =
-        RhsExpression.newBuilder().setStringValue("5efcdda0-2a81-3c19-bf66-2187891bdba1").build();
+        RhsExpression.newBuilder().setStringValue("customer").build();
     LeafFilter leafFilter =
         LeafFilter.newBuilder()
             .setValueOperator(ValueOperator.VALUE_OPERATOR_EQ)
@@ -131,7 +132,7 @@ public class MetricQueryBuilderTest {
                 MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM)
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
-                Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
+                Attribute.newBuilder().setKey("numCalls").setScope("SERVICE").build())
             .build();
 
     QueryRequest queryRequest =
@@ -170,5 +171,119 @@ public class MetricQueryBuilderTest {
      * dateTimeConvert(start_time_millis,'1:MILLISECONDS:EPOCH','1:MILLISECONDS:EPOCH','15:SECONDS')
      * limit 10000
      */
+
+    /**
+
+
+    {
+      entities(
+          scope: "SERVICE"
+      limit: 1
+      between: {startTime: "2021-07-01T08:16:09.601Z", endTime: "2021-07-01T09:16:09.601Z"}
+      filterBy: [{operator: EQUALS, value: "8738f0b8-7878-3e4d-adaa-a75ff8211c7c", type: ID, idType: SERVICE}]
+      includeInactive: true
+  ) {
+      results {
+        id
+        duration: metric(key: "duration") {
+          p50_series_15s: series(size: 15, units: SECONDS) {
+            startTime
+            percentile(size: 50) {
+              value
+                  __typename
+            }
+            __typename
+          }
+          p50: percentile(size: 50) {
+            value
+                __typename
+          }
+          p95_series_15s: series(size: 15, units: SECONDS) {
+            startTime
+            percentile(size: 95) {
+              value
+                  __typename
+            }
+            __typename
+          }
+          p95: percentile(size: 95) {
+            value
+                __typename
+          }
+          p99_series_15s: series(size: 15, units: SECONDS) {
+            startTime
+            percentile(size: 99) {
+              value
+                  __typename
+            }
+            __typename
+          }
+          p99: percentile(size: 99) {
+            value
+                __typename
+          }
+          avg_series_15s: series(size: 15, units: SECONDS) {
+            startTime
+            avg {
+              value
+                  __typename
+            }
+            __typename
+          }
+          avg {
+            value
+                __typename
+          }
+          __typename
+        }
+        errorCount: metric(key: "errorCount") {
+          sum_series_15s: series(size: 15, units: SECONDS) {
+            startTime
+            sum {
+              value
+                  __typename
+            }
+            __typename
+          }
+          sum {
+            value
+                __typename
+          }
+          avgrate_sec_series_15s: series(size: 15, units: SECONDS) {
+            startTime
+            avgrate(units: SECONDS, size: 1) {
+              value
+                  __typename
+            }
+            __typename
+          }
+          avgrate_sec: avgrate(units: SECONDS, size: 1) {
+            value
+                __typename
+          }
+          __typename
+        }
+        numCalls: metric(key: "numCalls") {
+          sum_series_15s: series(size: 15, units: SECONDS) {
+            startTime
+            sum {
+              value
+                  __typename
+            }
+            __typename
+          }
+          sum {
+            value
+                __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    }
+**/
   }
+
 }
