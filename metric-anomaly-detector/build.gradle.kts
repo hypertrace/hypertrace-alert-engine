@@ -7,7 +7,7 @@ plugins {
 }
 
 application {
-    mainClass.set("org.hypertrace.alerting.metric.anomaly.detector.MetricAnomalyDetector")
+    mainClass.set("org.hypertrace.core.serviceframework.PlatformServiceLauncher")
 }
 
 tasks.test {
@@ -36,4 +36,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
     testImplementation("org.mockito:mockito-core:3.9.0")
     testImplementation("org.mockito:mockito-inline:3.9.0")
+}
+
+tasks.run<JavaExec> {
+    jvmArgs = listOf("-Dservice.name=${project.name}")
 }

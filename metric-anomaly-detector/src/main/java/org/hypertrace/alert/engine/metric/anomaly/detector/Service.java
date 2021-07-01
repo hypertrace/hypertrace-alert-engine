@@ -3,11 +3,16 @@ package org.hypertrace.alert.engine.metric.anomaly.detector;
 import java.util.Optional;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.core.serviceframework.PlatformService;
+import org.hypertrace.core.serviceframework.config.ConfigClient;
 
 public class Service extends PlatformService {
 
   AlertTaskConsumer alertTaskConsumer;
   MetricAnomalyDetector metricAnomalyDetector;
+
+  public Service(ConfigClient configClient) {
+    super(configClient);
+  }
 
   @Override
   protected void doInit() {
