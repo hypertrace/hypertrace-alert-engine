@@ -32,8 +32,7 @@ class MetricAnomalyDetectorTest {
         LhsExpression.newBuilder()
             .setAttribute(Attribute.newBuilder().setKey("name").setScope("SERVICE").build())
             .build();
-    RhsExpression rhsExpression =
-        RhsExpression.newBuilder().setStringValue("customer").build();
+    RhsExpression rhsExpression = RhsExpression.newBuilder().setStringValue("customer").build();
     LeafFilter leafFilter =
         LeafFilter.newBuilder()
             .setValueOperator(ValueOperator.VALUE_OPERATOR_EQ)
@@ -51,7 +50,8 @@ class MetricAnomalyDetectorTest {
                 Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
             .build();
 
-    MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder = MetricAnomalyEventCondition.newBuilder();
+    MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
+        MetricAnomalyEventCondition.newBuilder();
 
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
 
@@ -69,12 +69,13 @@ class MetricAnomalyDetectorTest {
     AlertTask.Builder alertTaskBuilder = AlertTask.newBuilder();
 
     alertTaskBuilder.setCurrentExecutionTime(System.currentTimeMillis());
-    alertTaskBuilder.setLastExecutionTime(System.currentTimeMillis() - Duration.ofMinutes(1).toMillis());
+    alertTaskBuilder.setLastExecutionTime(
+        System.currentTimeMillis() - Duration.ofMinutes(1).toMillis());
     alertTaskBuilder.setEventConditionId("event-condition-1");
     alertTaskBuilder.setEventConditionType("MetricAnomalyEventCondition");
     alertTaskBuilder.setTenantId("__default");
-    alertTaskBuilder.setEventConditionValue(metricAnomalyEventConditionBuilder.build().toByteString()
-        .asReadOnlyByteBuffer());
+    alertTaskBuilder.setEventConditionValue(
+        metricAnomalyEventConditionBuilder.build().toByteString().asReadOnlyByteBuffer());
 
     Config config =
         ConfigFactory.parseURL(
@@ -88,11 +89,11 @@ class MetricAnomalyDetectorTest {
 
     /**
      * Query that's hitting pinot
+     *
      * <p>Select
      * dateTimeConvert(start_time_millis,'1:MILLISECONDS:EPOCH','1:MILLISECONDS:EPOCH','15:SECONDS'),
      * SUM(duration_millis) FROM rawServiceView WHERE tenant_id = 'default' AND ( (
-     * start_time_millis >= ? AND start_time_millis < ? ) AND service_name =
-     * 'customer' ) GROUP BY
+     * start_time_millis >= ? AND start_time_millis < ? ) AND service_name = 'customer' ) GROUP BY
      * dateTimeConvert(start_time_millis,'1:MILLISECONDS:EPOCH','1:MILLISECONDS:EPOCH','15:SECONDS')
      * limit 10000
      */

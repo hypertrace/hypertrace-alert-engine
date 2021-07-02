@@ -96,8 +96,7 @@ class MetricAnomalyDetector {
   }
 
   void evaluateForStaticThreshold(
-      Iterator<ResultSetChunk> iterator,
-      ViolationCondition violationCondition) {
+      Iterator<ResultSetChunk> iterator, ViolationCondition violationCondition) {
     int dataCount = 0, violationCount = 0;
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
@@ -115,15 +114,9 @@ class MetricAnomalyDetector {
     }
 
     if (dataCount > 0 && violationCount == dataCount) {
-      LOGGER.debug(
-          "Rule violated. dataCount {}, violationCount {}",
-          dataCount,
-          violationCount);
+      LOGGER.debug("Rule violated. dataCount {}, violationCount {}", dataCount, violationCount);
     } else {
-      LOGGER.debug(
-          "Rule normal. dataCount {} violationCount {}",
-          dataCount,
-          violationCount);
+      LOGGER.debug("Rule normal. dataCount {} violationCount {}", dataCount, violationCount);
     }
   }
 

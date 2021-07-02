@@ -64,11 +64,11 @@ class MetricQueryBuilderTest {
                 .setId("Service.startTime")
                 .build());
     when(attributesServiceClient.findAttributes(
-        eq(Map.of("x-tenant-id", "__default")),
-        eq(
-            AttributeMetadataFilter.newBuilder()
-                .addScopeString(AttributeScope.SERVICE.name())
-                .build())))
+            eq(Map.of("x-tenant-id", "__default")),
+            eq(
+                AttributeMetadataFilter.newBuilder()
+                    .addScopeString(AttributeScope.SERVICE.name())
+                    .build())))
         .thenAnswer((Answer<Iterator<AttributeMetadata>>) invocation -> attributesList1.iterator());
 
     MetricQueryBuilder mqb = new MetricQueryBuilder(attributesServiceClient);
