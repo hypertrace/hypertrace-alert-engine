@@ -68,7 +68,7 @@ class MetricAnomalyDetector {
       LOGGER.info("EventConditionType:{}", alertTask.getEventConditionType());
       return;
     }
-    LOGGER.info(alertTask.toString());
+    //LOGGER.info(alertTask.toString());
     QueryRequest queryRequest =
         metricQueryBuilder.buildMetricQueryRequest(
             metricAnomalyEventCondition.getMetricSelection(),
@@ -79,14 +79,14 @@ class MetricAnomalyDetector {
     ViolationCondition violationCondition =
         metricAnomalyEventCondition.getViolationConditionList().get(0);
 
-    LOGGER.info("Starting rule evaluation for start {} & end time {}",
-        Instant.ofEpochMilli(alertTask.getLastExecutionTime()),
-        Instant.ofEpochMilli(alertTask.getCurrentExecutionTime()));
-
     Iterator<ResultSetChunk> iterator =
         executeQuery(Map.of(TENANT_ID_KEY, alertTask.getTenantId()), queryRequest);
 
 
+    LOGGER.info("Starting rule evaluation for rule Id {} start {} & end time {}",
+        alertTask.getEventConditionId(),
+        Instant.ofEpochMilli(alertTask.getLastExecutionTime()),
+        Instant.ofEpochMilli(alertTask.getCurrentExecutionTime()));
     int dataCount = 0, violationCount = 0;
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
@@ -104,9 +104,9 @@ class MetricAnomalyDetector {
     }
 
     if (dataCount > 0 && violationCount == dataCount) {
-      LOGGER.info("Rule with id {} violated", alertTask.getEventConditionId());
+      LOGGER.info("Rule with id {} violated. dataCount {}, violationCount {}", alertTask.getEventConditionId(), dataCount, violationCount);
     } else {
-      LOGGER.info("Rule with id {} is normal", alertTask.getCurrentExecutionTime());
+      LOGGER.info("Rule with id {} is normal. dataCount {} violationCount {}", alertTask.getEventConditionId(), dataCount, violationCount);
     }
   }
 
