@@ -43,7 +43,13 @@ public class AlertTaskTest {
     List<Document> documents = ruleSource.getAllEventConditions("MetricAnomalyEventCondition");
     Assertions.assertTrue(documents.size() > 0);
 
-    AlertTask alertTask = AlertTaskConverter.toAlertTask(documents.get(0), 1);
+    Config jobConfig =
+        ConfigFactory.parseMap(
+            Map.of(
+                "delayInMinutes", "1",
+                "executionWindowInMinutes", 1,
+                "tenant_id", "__default"));
+    AlertTask alertTask = new AlertTaskConverter(jobConfig).toAlertTask(documents.get(0));
     Assertions.assertEquals("MetricAnomalyEventCondition", alertTask.getEventConditionType());
 
     MetricAnomalyEventCondition actual =

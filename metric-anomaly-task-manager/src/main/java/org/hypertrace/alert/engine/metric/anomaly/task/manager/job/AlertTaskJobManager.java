@@ -1,9 +1,9 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager.job;
 
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.CRON_EXPRESSION;
-import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_PRODUCER_QUEUE;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_TASK_CONVERTER;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_GROUP;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_NAME;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_TRIGGER_NAME;
@@ -38,21 +38,24 @@ public class AlertTaskJobManager implements JobManager {
   private Trigger jobTrigger;
   private RuleSource ruleSource;
   private KafkaAlertTaskProducer kafkaAlertTaskProducer;
+  private AlertTaskConverter alertTaskConverter;
 
   public void initJob(Config appConfig) {
-    ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(RULE_SOURCE_CONFIG));
-    kafkaAlertTaskProducer = new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
     Config jobConfig =
         appConfig.hasPath(JOB_CONFIG)
             ? appConfig.getConfig(JOB_CONFIG)
             : ConfigFactory.parseMap(Map.of());
 
+    ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(RULE_SOURCE_CONFIG));
+    kafkaAlertTaskProducer = new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
+    alertTaskConverter = new AlertTaskConverter(jobConfig);
+
     jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP);
 
     JobDataMap jobDataMap = new JobDataMap();
-    jobDataMap.put(JOB_DATA_MAP_JOB_CONFIG, jobConfig);
     jobDataMap.put(JOB_DATA_MAP_RULE_SOURCE, ruleSource);
     jobDataMap.put(JOB_DATA_MAP_PRODUCER_QUEUE, kafkaAlertTaskProducer);
+    jobDataMap.put(JOB_DATA_MAP_TASK_CONVERTER, alertTaskConverter);
 
     jobDetail =
         JobBuilder.newJob(MetricAnomalyAlertTaskJob.class)

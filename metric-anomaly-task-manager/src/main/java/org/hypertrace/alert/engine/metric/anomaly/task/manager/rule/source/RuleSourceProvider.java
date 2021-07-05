@@ -8,15 +8,14 @@ public class RuleSourceProvider {
 
   public static RuleSource getProvider(Config ruleSourceConfig) {
     RuleSource ruleSource;
-    String dataSourceType = ruleSourceConfig.getString(RULE_SOURCE_TYPE);
-    switch (dataSourceType) {
+    String ruleSourceType = ruleSourceConfig.getString(RULE_SOURCE_TYPE);
+    switch (ruleSourceType) {
       case RULE_SOURCE_TYPE_FS:
-        Config fileSystemConfig = ruleSourceConfig.getConfig(RULE_SOURCE_TYPE_FS);
-        ruleSource = new FSRuleSource(fileSystemConfig);
+        Config ruleSourceFsConfig = ruleSourceConfig.getConfig(RULE_SOURCE_TYPE_FS);
+        ruleSource = new FSRuleSource(ruleSourceFsConfig);
         break;
       default:
-        throw new RuntimeException(
-            String.format("Invalid datasource configuration: %s", dataSourceType));
+        throw new RuntimeException(String.format("Invalid rule source type:%s", ruleSourceType));
     }
     return ruleSource;
   }
