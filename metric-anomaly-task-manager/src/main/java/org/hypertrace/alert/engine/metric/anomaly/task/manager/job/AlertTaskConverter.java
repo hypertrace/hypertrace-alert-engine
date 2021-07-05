@@ -25,6 +25,7 @@ public class AlertTaskConverter {
   static final String EVENT_CONDITION_TYPE = "eventConditionType";
   static final String EVENT_CONDITION = "eventCondition";
   static final String DEFAULT_TENANT_ID = "__default";
+  static final int EXECUTION_WINDOW_IN_MINUTES = 1;
 
   public static AlertTask toAlertTask(Document document, int delayInMinutes) throws IOException {
     JsonNode rule = OBJECT_MAPPER.readTree(document.toJson());
@@ -32,11 +33,12 @@ public class AlertTaskConverter {
     AlertTask.Builder builder = AlertTask.newBuilder();
     String eventConditionType = rule.get(EVENT_CONDITION_TYPE).textValue();
     if (eventConditionType.equals(METRIC_ANOMALY_EVENT_CONDITION)) {
-      Instant current = roundHalfDown(Instant.now(), ChronoUnit.MINUTES);
+      Instant current =
+          adjustDelay(roundHalfDown(Instant.now(), ChronoUnit.MINUTES), delayInMinutes);
       builder.setTenantId(DEFAULT_TENANT_ID);
       builder.setCurrentExecutionTime(current.toEpochMilli());
       builder.setLastExecutionTime(
-          current.minus(Duration.of(delayInMinutes, ChronoUnit.MINUTES)).toEpochMilli());
+          adjustDelay(current, EXECUTION_WINDOW_IN_MINUTES).toEpochMilli());
       builder.setEventConditionId(rule.get(EVENT_CONDITION_ID).textValue());
       String conditionType = rule.get(EVENT_CONDITION_TYPE).textValue();
       Optional<ByteBuffer> eventConditionValueAsBytes =
@@ -72,5 +74,9 @@ public class AlertTaskConverter {
 
   private static Instant roundHalfDown(Instant instant, TemporalUnit unit) {
     return instant.minus(unit.getDuration().dividedBy(2)).truncatedTo(unit);
+  }
+
+  private static Instant adjustDelay(Instant instant, int delayInMinutes) {
+    return instant.minus(Duration.of(delayInMinutes, ChronoUnit.MINUTES));
   }
 }

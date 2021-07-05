@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.metric.anomaly.task.manager.rulesource;
+package org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source;
 
 import com.typesafe.config.Config;
 

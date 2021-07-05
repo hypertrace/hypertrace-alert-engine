@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.metric.anomaly.task.manager.rulesource;
+package org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +13,7 @@ import org.hypertrace.core.documentstore.JSONDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FSRuleSource implements RuleSource {
+class FSRuleSource implements RuleSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(FSRuleSource.class);
   private static final String PATH_CONFIG = "path";
 
@@ -27,7 +27,7 @@ public class FSRuleSource implements RuleSource {
 
   public List<Document> getAllEventConditions(String type) throws IOException {
     String fsPath = fsConfig.getString(PATH_CONFIG);
-    LOGGER.info("Reading rules rules from file path:{}", fsPath);
+    LOGGER.debug("Reading rules rules from file path:{}", fsPath);
 
     JsonNode jsonNode = OBJECT_MAPPER.readTree(new File(fsPath));
     if (!jsonNode.isArray()) {

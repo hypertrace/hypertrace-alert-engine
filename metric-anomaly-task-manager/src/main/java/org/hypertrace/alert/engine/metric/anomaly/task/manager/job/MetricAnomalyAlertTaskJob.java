@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rulesource.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSource;
 import org.hypertrace.core.documentstore.Document;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -27,7 +27,7 @@ public class MetricAnomalyAlertTaskJob implements Job {
 
   public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
     JobDetail jobDetail = jobExecutionContext.getJobDetail();
-    LOGGER.info("Starting Alert task Job:", jobDetail.getKey());
+    LOGGER.debug("Starting Alert task Job:", jobDetail.getKey());
 
     JobDataMap jobDataMap = jobDetail.getJobDataMap();
     Config jobConfig = (Config) jobDataMap.get(JOB_DATA_MAP_JOB_CONFIG);
@@ -54,7 +54,7 @@ public class MetricAnomalyAlertTaskJob implements Job {
                   e);
             }
           });
-      LOGGER.info("job finished");
+      LOGGER.debug("job finished");
     } catch (IOException e) {
       LOGGER.error("Job failed with exception:{}", e);
     }

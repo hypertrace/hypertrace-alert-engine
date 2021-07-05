@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.metric.anomaly.task.manager.rulereader;
+package org.hypertrace.alert.engine.metric.anomaly.task.manager;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -23,8 +23,8 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperato
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rulesource.FSRuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rulesource.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSourceProvider;
 import org.hypertrace.core.documentstore.Document;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -38,8 +38,8 @@ public class AlertTaskTest {
     File file = Paths.get(url.toURI()).toFile();
     String absolutePath = file.getAbsolutePath();
 
-    Config fsConfig = ConfigFactory.parseMap(Map.of("path", absolutePath));
-    RuleSource ruleSource = new FSRuleSource(fsConfig);
+    Config ruleSourceConfig = ConfigFactory.parseMap(Map.of("type", "fs", "fs.path", absolutePath));
+    RuleSource ruleSource = RuleSourceProvider.getProvider(ruleSourceConfig);
     List<Document> documents = ruleSource.getAllEventConditions("MetricAnomalyEventCondition");
     Assertions.assertTrue(documents.size() > 0);
 
