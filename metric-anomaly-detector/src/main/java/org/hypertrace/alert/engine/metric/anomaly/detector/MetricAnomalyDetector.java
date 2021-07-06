@@ -73,6 +73,14 @@ class MetricAnomalyDetector {
       return;
     }
 
+    if (metricAnomalyEventCondition.getViolationConditionList().isEmpty()) {
+      LOGGER.info(
+          "Received rule with empty violation conditions. tenantId: {}, eventConditionId: {}",
+          alertTask.getTenantId(),
+          alertTask.getEventConditionId());
+      return;
+    }
+
     QueryRequest queryRequest =
         metricQueryBuilder.buildMetricQueryRequest(
             metricAnomalyEventCondition.getMetricSelection(),

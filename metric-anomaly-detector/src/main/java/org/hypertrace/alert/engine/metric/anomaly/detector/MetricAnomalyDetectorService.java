@@ -1,7 +1,6 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
 import java.io.IOException;
-import java.time.Duration;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskConsumer;
 import org.hypertrace.core.serviceframework.PlatformService;
@@ -31,15 +30,11 @@ public class MetricAnomalyDetectorService extends PlatformService {
     while (true) {
       try {
         AlertTask alertTask = alertTaskConsumer.dequeue();
-        if (alertTask != null) metricAnomalyDetector.process(alertTask);
+        if (alertTask != null) {
+          metricAnomalyDetector.process(alertTask);
+        }
       } catch (IOException e) {
         LOGGER.error("Exception processing record", e);
-      }
-
-      try {
-        Thread.sleep(Duration.ofSeconds(1).toMillis());
-      } catch (InterruptedException e) {
-        // ignore
       }
     }
   }
