@@ -68,7 +68,7 @@ class MetricAnomalyDetector {
         return;
       }
     } else {
-      LOGGER.debug("EventConditionType:{}", alertTask.getEventConditionType());
+      LOGGER.debug("Not alert taks of type EventConditionType: {}", alertTask.getEventConditionType());
       return;
     }
 
@@ -109,7 +109,6 @@ class MetricAnomalyDetector {
       ResultSetChunk resultSetChunk = iterator.next();
       int metricDataColumnIndex = -1;
       for (Row row : resultSetChunk.getRowList()) {
-        dataCount++;
 
         if (metricDataColumnIndex == -1 && resultSetChunk.hasResultSetMetadata()) {
           for (int i = 0; i < resultSetChunk.getResultSetMetadata().getColumnMetadataCount(); i++) {
@@ -128,11 +127,13 @@ class MetricAnomalyDetector {
           LOGGER.warn("Couldn't find the requested metric data column in result");
           continue;
         }
+
         Value value = row.getColumn(metricDataColumnIndex);
         if (value.getValueType() != ValueType.STRING) {
           throw new IllegalArgumentException(
               "Expecting value of type string, received valueType: " + value.getValueType());
         }
+        dataCount++;
         LOGGER.debug("Metric data {}", value.getString());
         if (compareThreshold(value, violationCondition)) {
           violationCount++;

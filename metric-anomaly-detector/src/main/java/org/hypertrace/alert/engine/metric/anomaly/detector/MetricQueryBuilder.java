@@ -72,7 +72,7 @@ class MetricQueryBuilder {
   }
 
   static org.hypertrace.core.query.service.api.Filter convertFilter(Filter filter) {
-    if (filter.equals(Filter.getDefaultInstance())) {
+    if (Filter.getDefaultInstance().equals(filter)) {
       return org.hypertrace.core.query.service.api.Filter.getDefaultInstance();
     }
     switch (filter.getFilterCase()) {
