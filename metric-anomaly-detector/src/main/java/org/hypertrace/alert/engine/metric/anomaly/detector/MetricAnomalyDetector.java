@@ -7,6 +7,7 @@ import io.grpc.ManagedChannelBuilder;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
@@ -92,20 +93,45 @@ class MetricAnomalyDetector {
         Instant.ofEpochMilli(alertTask.getCurrentExecutionTime()));
 
     if (violationCondition.hasStaticThresholdCondition()) {
-      evaluateForStaticThreshold(iterator, violationCondition);
+      evaluateForStaticThreshold(
+          iterator,
+          violationCondition,
+          metricAnomalyEventCondition.getMetricSelection().getMetricAttribute());
     }
   }
 
   void evaluateForStaticThreshold(
-      Iterator<ResultSetChunk> iterator, ViolationCondition violationCondition) {
+      Iterator<ResultSetChunk> iterator,
+      ViolationCondition violationCondition,
+      Attribute attribute) {
     int dataCount = 0, violationCount = 0;
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
+      int metricDataColumnIndex = -1;
       for (Row row : resultSetChunk.getRowList()) {
         dataCount++;
-        Value value = row.getColumn(1);
+
+        if (metricDataColumnIndex == -1 && resultSetChunk.hasResultSetMetadata()) {
+          for (int i = 0; i < resultSetChunk.getResultSetMetadata().getColumnMetadataCount(); i++) {
+            if (resultSetChunk
+                .getResultSetMetadata()
+                .getColumnMetadata(i)
+                .getColumnName()
+                .equals(String.join(".", attribute.getScope(), attribute.getKey()))) {
+              metricDataColumnIndex = i;
+              break;
+            }
+          }
+        }
+
+        if (metricDataColumnIndex == -1) {
+          LOGGER.warn("Couldn't find the requested metric data column in result");
+          continue;
+        }
+        Value value = row.getColumn(metricDataColumnIndex);
         if (value.getValueType() != ValueType.STRING) {
-          throw new IllegalArgumentException("error");
+          throw new IllegalArgumentException(
+              "Expecting value of type string, received valueType: " + value.getValueType());
         }
         LOGGER.debug("Metric data {}", value.getString());
         if (compareThreshold(value, violationCondition)) {
