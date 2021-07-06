@@ -68,7 +68,7 @@ class MetricAnomalyDetector {
         return;
       }
     } else {
-      LOGGER.debug("Not alert taks of type EventConditionType: {}", alertTask.getEventConditionType());
+      LOGGER.debug("Not processing alert task of EventConditionType: {}", alertTask.getEventConditionType());
       return;
     }
 
