@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringJoiner;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.CompositeFilter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
@@ -32,6 +33,7 @@ class MetricQueryBuilder {
 
   private static final String START_TIME_ATTRIBUTE_KEY = "startTime";
   private static final String DATE_TIME_CONVERTER = "dateTimeConvert";
+  private static final StringJoiner dotJoiner = new StringJoiner(".");
 
   private final AttributeServiceClient attributesServiceClient;
 
@@ -112,12 +114,14 @@ class MetricQueryBuilder {
         return builder.setColumnIdentifier(
             ColumnIdentifier.newBuilder()
                 .setColumnName(
-                    lhsExpression.getAttribute().getScope()
-                        + "."
-                        + lhsExpression.getAttribute().getKey())
+                    dotJoiner
+                        .add(lhsExpression.getAttribute().getScope())
+                        .add(lhsExpression.getAttribute().getKey())
+                        .toString())
                 .build());
       default:
-        throw new IllegalArgumentException("error");
+        throw new IllegalArgumentException(
+            "Exception converting filter lhs expression: " + lhsExpression.getValueCase());
     }
   }
 
@@ -130,7 +134,8 @@ class MetricQueryBuilder {
                 .setValue(Value.newBuilder().setString(rhsExpression.getStringValue()))
                 .build());
       default:
-        throw new IllegalArgumentException("error");
+        throw new IllegalArgumentException(
+            "Exception converting filter rhs expression: " + rhsExpression.getValueCase());
     }
   }
 
@@ -139,7 +144,8 @@ class MetricQueryBuilder {
       case VALUE_OPERATOR_EQ:
         return Operator.EQ;
       default:
-        throw new IllegalArgumentException("error");
+        throw new IllegalArgumentException(
+            "Exception converting filter value operator: " + valueOperator);
     }
   }
 
@@ -150,7 +156,8 @@ class MetricQueryBuilder {
       case LOGICAL_OPERATOR_AND:
         return Operator.AND;
       default:
-        throw new IllegalArgumentException("error");
+        throw new IllegalArgumentException(
+            "Exception converting filter logical operator: " + logicalOperator);
     }
   }
 
@@ -205,7 +212,10 @@ class MetricQueryBuilder {
                     .setColumnIdentifier(
                         ColumnIdentifier.newBuilder()
                             .setColumnName(
-                                metricAttribute.getScope() + "." + metricAttribute.getKey())
+                                dotJoiner
+                                    .add(metricAttribute.getScope())
+                                    .add(metricAttribute.getKey())
+                                    .toString())
                             .build()))
             .build();
     queryBuilder.addSelection(Expression.newBuilder().setFunction(function));
@@ -219,7 +229,8 @@ class MetricQueryBuilder {
       case METRIC_AGGREGATION_FUNCTION_TYPE_AVG:
         return FunctionType.AVG.name();
       default:
-        throw new IllegalStateException();
+        throw new IllegalStateException(
+            "Exception converting metricAggregationFunction: " + metricAggregationFunction);
     }
   }
 

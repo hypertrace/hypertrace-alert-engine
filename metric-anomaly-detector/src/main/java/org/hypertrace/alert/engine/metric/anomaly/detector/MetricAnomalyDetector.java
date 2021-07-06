@@ -78,6 +78,7 @@ class MetricAnomalyDetector {
             alertTask.getCurrentExecutionTime(),
             alertTask.getTenantId());
 
+    // todo handle multiple violation conditions
     ViolationCondition violationCondition =
         metricAnomalyEventCondition.getViolationConditionList().get(0);
 
@@ -135,7 +136,8 @@ class MetricAnomalyDetector {
       case STATIC_THRESHOLD_OPERATOR_LTE:
         return lhs <= rhs;
       default:
-        return false;
+        throw new UnsupportedOperationException(
+            "Unsupported threshold condition operator: " + thresholdCondition.getOperator());
     }
   }
 

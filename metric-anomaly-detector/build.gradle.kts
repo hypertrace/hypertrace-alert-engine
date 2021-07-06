@@ -28,6 +28,8 @@ dependencies {
     implementation("org.hypertrace.gateway.service:gateway-service-api:0.1.59")
     implementation("org.apache.kafka:kafka-clients:2.6.0")
     implementation("com.google.protobuf:protobuf-java-util:4.0.0-rc-2")
+    implementation("com.google.guava:guava:30.1.1-jre")
+
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")
     runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.14.1")

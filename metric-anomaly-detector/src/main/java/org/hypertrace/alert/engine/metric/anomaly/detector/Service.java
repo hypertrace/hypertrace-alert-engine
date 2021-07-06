@@ -31,7 +31,7 @@ public class Service extends PlatformService {
     while (true) {
       try {
         AlertTask alertTask = alertTaskConsumer.dequeue();
-        metricAnomalyDetector.process(alertTask);
+        if (alertTask != null) metricAnomalyDetector.process(alertTask);
       } catch (IOException e) {
         LOGGER.error("Exception processing record", e);
       }
