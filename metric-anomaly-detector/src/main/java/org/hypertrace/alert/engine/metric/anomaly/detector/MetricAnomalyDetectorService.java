@@ -9,14 +9,14 @@ import org.hypertrace.core.serviceframework.config.ConfigClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Service extends PlatformService {
+public class MetricAnomalyDetectorService extends PlatformService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyDetectorService.class);
 
   KafkaAlertTaskConsumer alertTaskConsumer;
   MetricAnomalyDetector metricAnomalyDetector;
 
-  public Service(ConfigClient configClient) {
+  public MetricAnomalyDetectorService(ConfigClient configClient) {
     super(configClient);
   }
 
