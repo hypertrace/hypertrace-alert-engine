@@ -24,7 +24,8 @@ public class MetricAnomalyDetectorService extends PlatformService {
 
   @Override
   protected void doInit() {
-    alertTaskConsumer = new KafkaAlertTaskConsumer(getAppConfig().getConfig(KAFKA_QUEUE_CONFIG_KEY));
+    alertTaskConsumer =
+        new KafkaAlertTaskConsumer(getAppConfig().getConfig(KAFKA_QUEUE_CONFIG_KEY));
     actionEventProducer = new ActionEventProducer(getAppConfig().getConfig(KAFKA_QUEUE_CONFIG_KEY));
     metricAnomalyDetector = new MetricAnomalyDetector(getAppConfig(), actionEventProducer);
   }

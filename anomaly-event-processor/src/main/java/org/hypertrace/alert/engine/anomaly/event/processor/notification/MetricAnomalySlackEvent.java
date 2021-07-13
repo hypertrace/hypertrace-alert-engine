@@ -22,8 +22,7 @@ class MetricAnomalySlackEvent implements SlackMessage {
     this.attachments = attachments;
   }
 
-  static MetricAnomalySlackEvent getMessage(
-      MetricAnomalyWebhookEvent metricAnomalyWebhookEvent) {
+  static MetricAnomalySlackEvent getMessage(MetricAnomalyWebhookEvent metricAnomalyWebhookEvent) {
     String titleMessage = "Alert for Metric Anomaly Event";
     SectionBlock titleBlock = getTitleBlock(titleMessage);
 

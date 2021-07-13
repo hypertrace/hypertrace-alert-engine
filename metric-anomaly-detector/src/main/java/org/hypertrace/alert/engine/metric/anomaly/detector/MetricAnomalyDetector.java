@@ -1,7 +1,5 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
-import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorService.KAFKA_QUEUE_CONFIG_KEY;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.typesafe.config.Config;
 import io.grpc.ManagedChannel;
