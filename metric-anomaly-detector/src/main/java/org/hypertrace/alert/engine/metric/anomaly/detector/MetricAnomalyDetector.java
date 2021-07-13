@@ -4,14 +4,20 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.typesafe.config.Config;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.ActionEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyViolation;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.client.config.AttributeServiceClientConfig;
 import org.hypertrace.core.query.service.api.QueryRequest;
@@ -38,6 +44,7 @@ class MetricAnomalyDetector {
   private final MetricQueryBuilder metricQueryBuilder;
   private final QueryServiceClient queryServiceClient;
   private final int qsRequestTimeout;
+  private final ActionEventProducer eventProducer;
 
   MetricAnomalyDetector(Config appConfig) {
     AttributeServiceClientConfig asConfig = AttributeServiceClientConfig.from(appConfig);
@@ -55,9 +62,10 @@ class MetricAnomalyDetector {
             : DEFAULT_REQUEST_TIMEOUT_MILLIS;
 
     metricQueryBuilder = new MetricQueryBuilder(asClient);
+    eventProducer = new ActionEventProducer(appConfig);
   }
 
-  void process(AlertTask alertTask) {
+  void process(AlertTask alertTask) throws IOException {
     MetricAnomalyEventCondition metricAnomalyEventCondition;
     if (alertTask.getEventConditionType().equals(METRIC_ANOMALY_EVENT_CONDITION)) {
       try {
@@ -102,14 +110,35 @@ class MetricAnomalyDetector {
         Instant.ofEpochMilli(alertTask.getCurrentExecutionTime()));
 
     if (violationCondition.hasStaticThresholdCondition()) {
-      evaluateForStaticThreshold(
+      EvaluationResult evaluationResult = evaluateForStaticThreshold(
           iterator,
           violationCondition,
           metricAnomalyEventCondition.getMetricSelection().getMetricAttribute());
+      if (evaluationResult.isViolation()) {
+
+        MetricAnomalyViolation metricAnomalyViolation = MetricAnomalyViolation.newBuilder()
+            .setViolationTimestamp(alertTask.getCurrentExecutionTime())
+            .setChannelId(metricAnomalyEventCondition.getChannelId())
+            .setEventConditionId(alertTask.getEventConditionId())
+            .setEventConditionType(alertTask.getEventConditionType())
+            .build();
+        EventRecord eventRecord = EventRecord.newBuilder()
+            .setEventType("MetricAnomalyViolation")
+            .setEventRecordMetadata(Map.of())
+            .setEventValue(metricAnomalyViolation.toByteBuffer())
+            .build();
+        ActionEvent actionEvent = ActionEvent.newBuilder()
+            .setTenantId(alertTask.getTenantId())
+            .setActionEventMetadata(Map.of())
+            .setEventTimeMillis(alertTask.getCurrentExecutionTime())
+            .setEventRecord(eventRecord)
+            .build();
+        eventProducer.publish(actionEvent);
+      }
     }
   }
 
-  void evaluateForStaticThreshold(
+  EvaluationResult evaluateForStaticThreshold(
       Iterator<ResultSetChunk> iterator,
       ViolationCondition violationCondition,
       Attribute attribute) {
@@ -155,6 +184,20 @@ class MetricAnomalyDetector {
     } else {
       LOGGER.debug("Rule normal. dataCount {} violationCount {}", dataCount, violationCount);
     }
+
+    return EvaluationResult.builder()
+        .dataCount(dataCount)
+        .violationCount(violationCount)
+        .isViolation(dataCount == violationCount)
+        .build();
+  }
+
+  @SuperBuilder
+  @Getter
+  private static class EvaluationResult {
+    private final int violationCount;
+    private final int dataCount;
+    private final boolean isViolation;
   }
 
   boolean compareThreshold(Value value, ViolationCondition violationCondition) {

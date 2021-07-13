@@ -99,4 +99,7 @@ class MetricAnomalyDetectorTest {
      */
     metricAnomalyDetector.process(alertTaskBuilder.build());
   }
+
+  // test
+
 }

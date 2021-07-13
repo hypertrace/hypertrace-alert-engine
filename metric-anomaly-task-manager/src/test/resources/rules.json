@@ -35,7 +35,8 @@
           "minimumViolationDuration": "PT5M",
           "severity": "SEVERITY_CRITICAL"
         }
-      }]
+      }],
+      "channelId": "channel-1"
     }
   }
 ]

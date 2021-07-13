@@ -7,13 +7,14 @@ package org.hypertrace.alert.engine.eventcondition.config.service.v1;
 message MetricAnomalyEventCondition {
   MetricSelection metric_selection = 1;
   repeated ViolationCondition violation_condition = 2;
+  string channel_id = 3;
 }
 
 message MetricSelection {
   Attribute metric_attribute = 1;
-  MetricAggregationFunction metric_aggregation_function = 3;
-  string metric_aggregation_interval = 4; //iso duration string PT15S
-  Filter filter = 5;
+  MetricAggregationFunction metric_aggregation_function = 2;
+  string metric_aggregation_interval = 3; //iso duration string PT15S
+  Filter filter = 4;
 }
 
 message Attribute {

@@ -4,6 +4,7 @@ plugins {
     jacoco
     id("org.hypertrace.jacoco-report-plugin")
     id("org.hypertrace.docker-java-application-plugin")
+    id("org.hypertrace.integration-test-plugin")
 }
 
 application {
@@ -17,9 +18,12 @@ tasks.test {
 dependencies {
     implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.23")
     implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
+    implementation("org.hypertrace.core.documentstore:document-store:0.5.7")
 
     implementation(project(":metric-anomaly-data-model"))
+    implementation(project(":notification-transport"))
 
+    implementation("com.sendgrid:sendgrid-java:4.7.1")
     implementation("org.hypertrace.core.query.service:query-service-client:0.5.2")
     implementation("org.hypertrace.core.attribute.service:attribute-service-client:0.9.3")
     implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.3.4")
@@ -41,6 +45,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
     testImplementation("org.mockito:mockito-core:3.9.0")
     testImplementation("org.mockito:mockito-inline:3.9.0")
+    testImplementation("org.junit-pioneer:junit-pioneer:1.3.8")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 tasks.run<JavaExec> {

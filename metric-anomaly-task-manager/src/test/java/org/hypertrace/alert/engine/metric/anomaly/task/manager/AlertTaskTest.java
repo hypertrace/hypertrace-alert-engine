@@ -57,16 +57,6 @@ public class AlertTaskTest {
     Assertions.assertEquals(prepareMetricAnomalyEventCondition(), actual);
   }
 
-  private NotificationRule prepareNotificationRule() {
-    NotificationRule.Builder nBuilder = NotificationRule.newBuilder();
-    nBuilder.setId("notification_rule_1");
-    nBuilder.setRuleName("high_avg_latency");
-    nBuilder.setDescription("Alert for high avg latency of payment service");
-    nBuilder.setEventConditionId("event_condition_1");
-    nBuilder.setEventConditionType("MetricAnomalyEventCondition");
-    return nBuilder.build();
-  }
-
   private MetricAnomalyEventCondition prepareMetricAnomalyEventCondition() {
     MetricAnomalyEventCondition.Builder builder = MetricAnomalyEventCondition.newBuilder();
     builder.setMetricSelection(
@@ -106,6 +96,7 @@ public class AlertTaskTest {
                     .build())
             .build());
 
+    builder.setChannelId("channel-1");
     return builder.build();
   }
 }

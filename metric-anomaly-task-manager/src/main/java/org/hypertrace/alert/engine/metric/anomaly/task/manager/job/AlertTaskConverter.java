@@ -29,6 +29,7 @@ public class AlertTaskConverter {
   static final String DELAY_IN_MINUTES_CONFIG = "delayInMinutes";
   static final String EXECUTION_WINDOW_IN_MINUTES_CONFIG = "executionWindowInMinutes";
   static final String TENANT_ID_CONFIG = "tenant_id";
+  static final String EVENT_CHANNEL_ID = "channelId";
 
   static final String DEFAULT_TENANT_ID = "__default";
   static final int DEFAULT_DELAY_IN_MINUTES = 1;
