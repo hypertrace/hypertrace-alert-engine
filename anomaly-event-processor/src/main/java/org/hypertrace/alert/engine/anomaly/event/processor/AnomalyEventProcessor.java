@@ -31,7 +31,8 @@ class AnomalyEventProcessor {
     if (!eventRecord.getEventType().equals("MetricAnomalyViolation")) {
       return;
     }
-    MetricAnomalyViolation metricAnomalyViolation = MetricAnomalyViolation.fromByteBuffer(eventRecord.getEventValue());
+    MetricAnomalyViolation metricAnomalyViolation =
+        MetricAnomalyViolation.fromByteBuffer(eventRecord.getEventValue());
     if (notificationChannelMap.containsKey(metricAnomalyViolation.getChannelId())) {
       webhookNotifier.notify(
           metricAnomalyViolation,

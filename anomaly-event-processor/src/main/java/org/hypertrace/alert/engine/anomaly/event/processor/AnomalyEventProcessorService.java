@@ -21,7 +21,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.NotificationChannelConfig;
 import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ActionEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyViolation;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaConfigReader;
 import org.hypertrace.core.serviceframework.PlatformService;
 import org.hypertrace.core.serviceframework.config.ConfigClient;

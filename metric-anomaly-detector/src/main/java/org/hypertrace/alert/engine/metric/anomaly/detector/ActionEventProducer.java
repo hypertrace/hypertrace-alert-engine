@@ -11,7 +11,6 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ActionEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyViolation;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaConfigReader;
 
 class ActionEventProducer {

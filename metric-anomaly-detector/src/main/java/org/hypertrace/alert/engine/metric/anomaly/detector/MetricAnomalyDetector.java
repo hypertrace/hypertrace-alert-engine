@@ -110,29 +110,33 @@ class MetricAnomalyDetector {
         Instant.ofEpochMilli(alertTask.getCurrentExecutionTime()));
 
     if (violationCondition.hasStaticThresholdCondition()) {
-      EvaluationResult evaluationResult = evaluateForStaticThreshold(
-          iterator,
-          violationCondition,
-          metricAnomalyEventCondition.getMetricSelection().getMetricAttribute());
+      EvaluationResult evaluationResult =
+          evaluateForStaticThreshold(
+              iterator,
+              violationCondition,
+              metricAnomalyEventCondition.getMetricSelection().getMetricAttribute());
       if (evaluationResult.isViolation()) {
 
-        MetricAnomalyViolation metricAnomalyViolation = MetricAnomalyViolation.newBuilder()
-            .setViolationTimestamp(alertTask.getCurrentExecutionTime())
-            .setChannelId(metricAnomalyEventCondition.getChannelId())
-            .setEventConditionId(alertTask.getEventConditionId())
-            .setEventConditionType(alertTask.getEventConditionType())
-            .build();
-        EventRecord eventRecord = EventRecord.newBuilder()
-            .setEventType("MetricAnomalyViolation")
-            .setEventRecordMetadata(Map.of())
-            .setEventValue(metricAnomalyViolation.toByteBuffer())
-            .build();
-        ActionEvent actionEvent = ActionEvent.newBuilder()
-            .setTenantId(alertTask.getTenantId())
-            .setActionEventMetadata(Map.of())
-            .setEventTimeMillis(alertTask.getCurrentExecutionTime())
-            .setEventRecord(eventRecord)
-            .build();
+        MetricAnomalyViolation metricAnomalyViolation =
+            MetricAnomalyViolation.newBuilder()
+                .setViolationTimestamp(alertTask.getCurrentExecutionTime())
+                .setChannelId(metricAnomalyEventCondition.getChannelId())
+                .setEventConditionId(alertTask.getEventConditionId())
+                .setEventConditionType(alertTask.getEventConditionType())
+                .build();
+        EventRecord eventRecord =
+            EventRecord.newBuilder()
+                .setEventType("MetricAnomalyViolation")
+                .setEventRecordMetadata(Map.of())
+                .setEventValue(metricAnomalyViolation.toByteBuffer())
+                .build();
+        ActionEvent actionEvent =
+            ActionEvent.newBuilder()
+                .setTenantId(alertTask.getTenantId())
+                .setActionEventMetadata(Map.of())
+                .setEventTimeMillis(alertTask.getCurrentExecutionTime())
+                .setEventRecord(eventRecord)
+                .build();
         eventProducer.publish(actionEvent);
       }
     }

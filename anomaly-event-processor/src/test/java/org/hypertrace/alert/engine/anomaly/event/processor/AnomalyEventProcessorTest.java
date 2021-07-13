@@ -35,18 +35,20 @@ class AnomalyEventProcessorTest {
             .setEventConditionType("grth")
             .build();
 
-    EventRecord eventRecord = EventRecord.newBuilder()
-        .setEventValue(metricAnomalyViolation.toByteBuffer())
-        .setEventType("MetricAnomalyViolation")
-        .setEventRecordMetadata(Map.of())
-        .build();
+    EventRecord eventRecord =
+        EventRecord.newBuilder()
+            .setEventValue(metricAnomalyViolation.toByteBuffer())
+            .setEventType("MetricAnomalyViolation")
+            .setEventRecordMetadata(Map.of())
+            .build();
 
-    ActionEvent actionEvent = ActionEvent.newBuilder()
-        .setEventRecord(eventRecord)
-        .setActionEventMetadata(Map.of())
-        .setTenantId("tenant-1")
-        .setEventTimeMillis(System.currentTimeMillis())
-        .build();
+    ActionEvent actionEvent =
+        ActionEvent.newBuilder()
+            .setEventRecord(eventRecord)
+            .setActionEventMetadata(Map.of())
+            .setTenantId("tenant-1")
+            .setEventTimeMillis(System.currentTimeMillis())
+            .build();
 
     new AnomalyEventProcessor(List.of(notificationChannel)).process(actionEvent);
   }

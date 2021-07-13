@@ -14,7 +14,6 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.LhsExpressio
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.NotificationRule;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.RhsExpression;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Severity;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
