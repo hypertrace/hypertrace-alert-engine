@@ -18,13 +18,13 @@ class MetricAnomalySlackEvent implements SlackMessage {
   public static final String METRIC_ANOMALY_EVENT_TYPE = "Metric Anomaly Event Type";
   private final List<Attachment> attachments;
 
-  public MetricAnomalySlackEvent(List<Attachment> attachments) {
+  MetricAnomalySlackEvent(List<Attachment> attachments) {
     this.attachments = attachments;
   }
 
-  public static MetricAnomalySlackEvent getMessage(
+  static MetricAnomalySlackEvent getMessage(
       MetricAnomalyWebhookEvent metricAnomalyWebhookEvent) {
-    String titleMessage = "An event was blocked with the following details";
+    String titleMessage = "Alert for Metric Anomaly Event";
     SectionBlock titleBlock = getTitleBlock(titleMessage);
 
     // create Metadata block
@@ -53,7 +53,7 @@ class MetricAnomalySlackEvent implements SlackMessage {
     return new MetricAnomalySlackEvent(List.of(attachments));
   }
 
-  public List<Attachment> getAttachments() {
+  List<Attachment> getAttachments() {
     return attachments;
   }
 }

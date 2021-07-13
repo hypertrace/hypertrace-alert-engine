@@ -6,7 +6,7 @@ import java.util.List;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.SectionBlock;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Text;
 
-public interface SlackMessage {
+interface SlackMessage {
 
   static SectionBlock getTitleBlock(String titleMessage) {
     Text titleText = new Text(Text.MARKDOWN_TYPE, titleMessage);
