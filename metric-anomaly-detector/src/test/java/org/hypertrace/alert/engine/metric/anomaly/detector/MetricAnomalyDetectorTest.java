@@ -2,7 +2,7 @@ package org.hypertrace.alert.engine.metric.anomaly.detector;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
@@ -26,7 +26,7 @@ class MetricAnomalyDetectorTest {
 
   @Test
   @Disabled
-  void testRuleEvaluation() throws URISyntaxException, MalformedURLException {
+  void testRuleEvaluation() throws URISyntaxException, IOException {
 
     LhsExpression lhsExpression =
         LhsExpression.newBuilder()
