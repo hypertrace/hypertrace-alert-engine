@@ -8,10 +8,6 @@ import lombok.experimental.SuperBuilder;
 @Getter
 public class NotificationChannel {
 
-  public static final String WEBHOOK_CHANNEL_CONFIG_TYPE = "WEBHOOK";
-  public static final String WEBHOOK_FORMAT_SLACK = "WEBHOOK_FORMAT_SLACK";
-  public static final String WEBHOOK_FORMAT_JSON = "WEBHOOK_FORMAT_JSON";
-
   private final String channelName;
   private final String channelId;
   private final List<NotificationChannelConfig> notificationChannelConfig;

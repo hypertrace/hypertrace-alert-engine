@@ -4,15 +4,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.WebFormatNotificationChannelConfig;
+import org.hypertrace.alert.engine.anomaly.event.processor.notification.WebhookNotifier;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ActionEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyViolation;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class AnomalyEventProcessorTest {
 
   @Test
-  public void test1() throws IOException {
+  void testProcess() throws IOException {
     NotificationChannel notificationChannel =
         NotificationChannel.builder()
             .channelName("1")
@@ -21,8 +23,7 @@ class AnomalyEventProcessorTest {
                 List.of(
                     WebFormatNotificationChannelConfig.builder()
                         .channelConfigType(NotificationChannel.WEBHOOK_CHANNEL_CONFIG_TYPE)
-                        .url(
-                            "https://hooks.slack.com/services/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")
+                        .url("https://hooks.slack.com/services/abcd")
                         .webhookFormat(NotificationChannel.WEBHOOK_FORMAT_SLACK)
                         .build()))
             .build();
@@ -38,7 +39,7 @@ class AnomalyEventProcessorTest {
     EventRecord eventRecord =
         EventRecord.newBuilder()
             .setEventValue(metricAnomalyViolation.toByteBuffer())
-            .setEventType("MetricAnomalyViolation")
+            .setEventType(AnomalyEventProcessor.METRIC_ANOMALY_ACTION_EVENT_TYPE)
             .setEventRecordMetadata(Map.of())
             .build();
 
@@ -50,6 +51,9 @@ class AnomalyEventProcessorTest {
             .setEventTimeMillis(System.currentTimeMillis())
             .build();
 
-    new AnomalyEventProcessor(List.of(notificationChannel)).process(actionEvent);
+    WebhookNotifier webhookNotifier = Mockito.mock(WebhookNotifier.class);
+    new AnomalyEventProcessor(List.of(notificationChannel), webhookNotifier).process(actionEvent);
+
+    Mockito.verify(webhookNotifier).notify(Mockito.any(), Mockito.any());
   }
 }

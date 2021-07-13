@@ -4,6 +4,7 @@ import java.time.Instant;
 import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel;
 import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.NotificationChannelConfig;
 import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.WebFormatNotificationChannelConfig;
+import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannelsReader;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyViolation;
 import org.hypertrace.alert.engine.notification.transport.webhook.WebhookSender;
 
@@ -26,14 +27,14 @@ public class WebhookNotifier {
           notificationChannel.getNotificationChannelConfig()) {
         if (!channelConfig
             .getChannelConfigType()
-            .equals(NotificationChannel.WEBHOOK_CHANNEL_CONFIG_TYPE)) {
+            .equals(NotificationChannelsReader.CHANNEL_CONFIG_TYPE_WEBHOOK)) {
           continue;
         }
         WebFormatNotificationChannelConfig webFormatNotificationChannelConfig =
             (WebFormatNotificationChannelConfig) channelConfig;
         if (webFormatNotificationChannelConfig
             .getWebhookFormat()
-            .equals(NotificationChannel.WEBHOOK_FORMAT_SLACK)) {
+            .equals(NotificationChannelsReader.WEBHOOK_FORMAT_SLACK)) {
           webhookSender.send(webFormatNotificationChannelConfig.getUrl(), slackMessage);
         } else {
           webhookSender.send(webFormatNotificationChannelConfig.getUrl(), message);
