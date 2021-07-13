@@ -22,9 +22,9 @@ class AnomalyEventProcessorTest {
             .notificationChannelConfig(
                 List.of(
                     WebFormatNotificationChannelConfig.builder()
-                        .channelConfigType(NotificationChannel.WEBHOOK_CHANNEL_CONFIG_TYPE)
+                        .channelConfigType(NotificationChannelsReader.CHANNEL_CONFIG_TYPE_WEBHOOK)
                         .url("https://hooks.slack.com/services/abcd")
-                        .webhookFormat(NotificationChannel.WEBHOOK_FORMAT_SLACK)
+                        .webhookFormat(NotificationChannelsReader.WEBHOOK_FORMAT_SLACK)
                         .build()))
             .build();
 
