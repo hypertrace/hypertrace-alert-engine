@@ -21,9 +21,9 @@ public class KafkaAlertTaskConsumer {
   private static final Logger LOGGER = LoggerFactory.getLogger(KafkaAlertTaskConsumer.class);
   private static final int CONSUMER_POLL_TIMEOUT_MS = 100;
 
-  private KafkaConfigReader kafkaConfigReader;
-  private KafkaConsumer<String, ByteBuffer> consumer;
-  private LinkedList<ConsumerRecord<String, ByteBuffer>> linkedList = new LinkedList<>();
+  private final KafkaConfigReader kafkaConfigReader;
+  private final KafkaConsumer<String, ByteBuffer> consumer;
+  private final LinkedList<ConsumerRecord<String, ByteBuffer>> linkedList = new LinkedList<>();
 
   public KafkaAlertTaskConsumer(Config kafkaQueueConfig) {
     this.kafkaConfigReader = new KafkaConfigReader(kafkaQueueConfig);

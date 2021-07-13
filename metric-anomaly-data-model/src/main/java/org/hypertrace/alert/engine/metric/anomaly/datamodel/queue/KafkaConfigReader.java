@@ -11,7 +11,7 @@ public class KafkaConfigReader {
   static final String PRODUCER_CONFIG = "producer";
   static final String CONSUMER_CONFIG = "consumer";
 
-  private Config kafkaQueueConfig;
+  private final Config kafkaQueueConfig;
 
   public KafkaConfigReader(Config kafkaQueueConfig) {
     this.kafkaQueueConfig = kafkaQueueConfig;

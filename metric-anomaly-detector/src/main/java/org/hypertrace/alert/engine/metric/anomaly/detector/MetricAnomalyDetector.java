@@ -1,5 +1,7 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
+import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorService.KAFKA_QUEUE_CONFIG_KEY;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.typesafe.config.Config;
 import io.grpc.ManagedChannel;
@@ -38,7 +40,6 @@ class MetricAnomalyDetector {
   private static final String REQUEST_TIMEOUT_CONFIG_KEY = "request.timeout";
   private static final int DEFAULT_REQUEST_TIMEOUT_MILLIS = 10000;
   private static final String METRIC_ANOMALY_EVENT_CONDITION = "MetricAnomalyEventCondition";
-
   static final String TENANT_ID_KEY = "x-tenant-id";
 
   private final MetricQueryBuilder metricQueryBuilder;
@@ -46,7 +47,7 @@ class MetricAnomalyDetector {
   private final int qsRequestTimeout;
   private final ActionEventProducer eventProducer;
 
-  MetricAnomalyDetector(Config appConfig) {
+  MetricAnomalyDetector(Config appConfig, ActionEventProducer actionEventProducer) {
     AttributeServiceClientConfig asConfig = AttributeServiceClientConfig.from(appConfig);
     ManagedChannel attributeServiceChannel =
         ManagedChannelBuilder.forAddress(asConfig.getHost(), asConfig.getPort())
@@ -62,7 +63,8 @@ class MetricAnomalyDetector {
             : DEFAULT_REQUEST_TIMEOUT_MILLIS;
 
     metricQueryBuilder = new MetricQueryBuilder(asClient);
-    eventProducer = new ActionEventProducer(appConfig);
+
+    this.eventProducer = actionEventProducer;
   }
 
   void process(AlertTask alertTask) throws IOException {

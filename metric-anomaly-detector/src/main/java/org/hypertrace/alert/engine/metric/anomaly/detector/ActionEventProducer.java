@@ -17,18 +17,19 @@ class ActionEventProducer {
 
   private final Producer<String, ByteBuffer> producer;
   private final KafkaConfigReader kafkaConfigReader;
+  private final Properties properties;
 
   ActionEventProducer(Config kafkaQueueConfig) {
     this.kafkaConfigReader = new KafkaConfigReader(kafkaQueueConfig);
-    Properties props = new Properties();
-    props.putAll(kafkaConfigReader.getProducerConfig(createBaseProperties()));
-    producer = new KafkaProducer<String, ByteBuffer>(props);
+    this.properties = new Properties();
+    properties.putAll(kafkaConfigReader.getProducerConfig(createBaseProperties()));
+    producer = new KafkaProducer<String, ByteBuffer>(properties);
   }
 
   public void publish(ActionEvent actionEvent) throws IOException {
     producer.send(
         new ProducerRecord<String, ByteBuffer>(
-            kafkaConfigReader.getTopicName(), null, actionEvent.toByteBuffer()));
+            properties.getProperty("topic"), null, actionEvent.toByteBuffer()));
   }
 
   public void close() {

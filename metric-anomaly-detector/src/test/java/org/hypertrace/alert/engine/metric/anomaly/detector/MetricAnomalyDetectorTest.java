@@ -3,6 +3,7 @@ package org.hypertrace.alert.engine.metric.anomaly.detector;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
@@ -85,7 +86,8 @@ class MetricAnomalyDetectorTest {
                 .toURI()
                 .toURL());
 
-    MetricAnomalyDetector metricAnomalyDetector = new MetricAnomalyDetector(config);
+    ActionEventProducer actionEventProducer = new ActionEventProducer(config.getConfig(MetricAnomalyDetectorService.KAFKA_QUEUE_CONFIG_KEY));
+    MetricAnomalyDetector metricAnomalyDetector = new MetricAnomalyDetector(config, actionEventProducer);
 
     /**
      * Query that's hitting pinot
@@ -101,5 +103,4 @@ class MetricAnomalyDetectorTest {
   }
 
   // test
-
 }
