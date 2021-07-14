@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.LeafFilter;
@@ -220,7 +221,7 @@ class MetricAnomalyDetectorTest {
     QueryRequest expectedQueryRequest =
         QueryRequest.newBuilder()
             .addSelection(
-                createColumnExpression(
+                MetricQueryBuilder.createColumnExpression(
                     "API.apiId")) // Added implicitly in the getEntitiesAndAggregatedMetrics() in
             // order to do GroupBy on the entity id
             .addSelection(createColumnExpression("API.apiName", "API Name"))
@@ -231,7 +232,7 @@ class MetricAnomalyDetectorTest {
             // an aggregation is needed.
             .addSelection(createQsAggregationExpression("COUNT", "API.apiId"))
             .setFilter(queryServiceFilter)
-            .addGroupBy(createColumnExpression("API.apiId"))
+            .addGroupBy(MetricQueryBuilder.createColumnExpression("API.apiId"))
             .addGroupBy(createColumnExpression("API.apiName", "API Name"))
             .setLimit(QueryServiceClient.DEFAULT_QUERY_SERVICE_GROUP_BY_LIMIT)
             .build();
@@ -285,12 +286,6 @@ class MetricAnomalyDetectorTest {
     return resultSetChunkBuilder.build();
   }
 
-  public static Expression createColumnExpression(String columnName) {
-    return Expression.newBuilder()
-        .setColumnIdentifier(ColumnIdentifier.newBuilder().setColumnName(columnName))
-        .build();
-  }
-
   public static Expression createColumnExpression(String columnName, String alias) {
     return Expression.newBuilder()
         .setColumnIdentifier(
@@ -303,7 +298,7 @@ class MetricAnomalyDetectorTest {
         .setFunction(
             Function.newBuilder()
                 .setFunctionName(functionName)
-                .addArguments(createColumnExpression(columnName)))
+                .addArguments(MetricQueryBuilder.createColumnExpression(columnName)))
         .build();
   }
 
@@ -313,7 +308,7 @@ class MetricAnomalyDetectorTest {
         .setOperator(Operator.AND)
         .addChildFilter(
             createFilter(
-                createColumnExpression(entityIdColumnName),
+                MetricQueryBuilder.createColumnExpression(entityIdColumnName),
                 Operator.NEQ,
                 createStringNullLiteralExpression()))
         .addAllChildFilter(
@@ -332,25 +327,9 @@ class MetricAnomalyDetectorTest {
   public static org.hypertrace.core.query.service.api.Filter createBetweenTimesFilter(String columnName, long lower, long higher) {
     return org.hypertrace.core.query.service.api.Filter.newBuilder()
         .setOperator(Operator.AND)
-        .addChildFilter(createLongFilter(columnName, Operator.GE, lower))
-        .addChildFilter(createLongFilter(columnName, Operator.LT, higher))
+        .addChildFilter(MetricQueryBuilder.createLongFilter(columnName, Operator.GE, lower))
+        .addChildFilter(MetricQueryBuilder.createLongFilter(columnName, Operator.LT, higher))
         .build();
-  }
-
-  public static org.hypertrace.core.query.service.api.Filter createLongFilter(String columnName, Operator op, long value) {
-    return createFilter(columnName, op, createLongLiteralExpression(value));
-  }
-
-  public static Expression createLongLiteralExpression(long value) {
-    return Expression.newBuilder()
-        .setLiteral(
-            LiteralConstant.newBuilder()
-                .setValue(Value.newBuilder().setValueType(ValueType.LONG).setLong(value)))
-        .build();
-  }
-
-  public static org.hypertrace.core.query.service.api.Filter createFilter(String columnName, Operator op, Expression value) {
-    return createFilter(createColumnExpression(columnName), op, value);
   }
 
   public static org.hypertrace.core.query.service.api.Filter createFilter(Expression columnExpression, Operator op, Expression value) {
