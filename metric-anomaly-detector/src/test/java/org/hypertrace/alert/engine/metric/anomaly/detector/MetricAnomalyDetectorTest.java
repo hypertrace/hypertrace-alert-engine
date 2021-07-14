@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.LeafFilter;
@@ -46,7 +45,6 @@ import org.hypertrace.core.query.service.api.Row;
 import org.hypertrace.core.query.service.api.Value;
 import org.hypertrace.core.query.service.api.ValueType;
 import org.hypertrace.core.query.service.client.QueryServiceClient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -131,9 +129,9 @@ class MetricAnomalyDetectorTest {
   }
 
   @Test
-  void testMetricAnomaly() throws URISyntaxException, MalformedURLException{
+  void testMetricAnomaly() throws URISyntaxException, MalformedURLException {
 
-    //create mock alertTask
+    // create mock alertTask
     LhsExpression lhsExpression =
         LhsExpression.newBuilder()
             .setAttribute(Attribute.newBuilder().setKey("name").setScope("SERVICE").build())
@@ -182,7 +180,7 @@ class MetricAnomalyDetectorTest {
     alertTaskBuilder.setEventConditionValue(
         metricAnomalyEventConditionBuilder.build().toByteString().asReadOnlyByteBuffer());
 
-    //create mock config
+    // create mock config
     Config config =
         ConfigFactory.parseURL(
             Thread.currentThread()
@@ -191,7 +189,7 @@ class MetricAnomalyDetectorTest {
                 .toURI()
                 .toURL());
 
-    //create mock attributeServiceClient
+    // create mock attributeServiceClient
     AttributeServiceClient attributesServiceClient = mock(AttributeServiceClient.class);
     List<AttributeMetadata> attributesList1 =
         List.of(
@@ -206,14 +204,14 @@ class MetricAnomalyDetectorTest {
                 .setId("Service.startTime")
                 .build());
     when(attributesServiceClient.findAttributes(
-        eq(Map.of("x-tenant-id", "__default")),
-        eq(
-            AttributeMetadataFilter.newBuilder()
-                .addScopeString(AttributeScope.SERVICE.name())
-                .build())))
+            eq(Map.of("x-tenant-id", "__default")),
+            eq(
+                AttributeMetadataFilter.newBuilder()
+                    .addScopeString(AttributeScope.SERVICE.name())
+                    .build())))
         .thenAnswer((Answer<Iterator<AttributeMetadata>>) invocation -> attributesList1.iterator());
 
-    //create mock queryRequest
+    // create mock queryRequest
     long endTime = System.currentTimeMillis();
     long startTime = endTime - 1000;
     org.hypertrace.core.query.service.api.Filter queryServiceFilter =
@@ -237,23 +235,24 @@ class MetricAnomalyDetectorTest {
             .setLimit(QueryServiceClient.DEFAULT_QUERY_SERVICE_GROUP_BY_LIMIT)
             .build();
 
-    //create mock queryServiceClient
+    // create mock queryServiceClient
     QueryServiceClient queryServiceClient = Mockito.mock(QueryServiceClient.class);
     when(queryServiceClient.executeQuery(eq(expectedQueryRequest), any(), Mockito.anyInt()))
         .thenReturn(
             List.of(
-                getResultSetChunk(
-                    List.of("API.apiId", "API.apiName"),
-                    new String[][] {
-                        {
+                    getResultSetChunk(
+                        List.of("API.apiId", "API.apiName"),
+                        new String[][] {
+                          {
                             "apiId1", "/login",
-                        },
-                        {"apiId2", "/checkout"}
-                    }))
+                          },
+                          {"apiId2", "/checkout"}
+                        }))
                 .iterator());
 
-    MetricAnomalyDetector metricAnomalyDetector = new MetricAnomalyDetector(config,attributesServiceClient,queryServiceClient);
-//    Assertions.assertTrue(metricAnomalyDetector.process(alertTaskBuilder.build()));
+    MetricAnomalyDetector metricAnomalyDetector =
+        new MetricAnomalyDetector(config, attributesServiceClient, queryServiceClient);
+    //    Assertions.assertTrue(metricAnomalyDetector.process(alertTaskBuilder.build()));
   }
 
   public static ResultSetChunk getResultSetChunk(
@@ -324,7 +323,8 @@ class MetricAnomalyDetectorTest {
         .build();
   }
 
-  public static org.hypertrace.core.query.service.api.Filter createBetweenTimesFilter(String columnName, long lower, long higher) {
+  public static org.hypertrace.core.query.service.api.Filter createBetweenTimesFilter(
+      String columnName, long lower, long higher) {
     return org.hypertrace.core.query.service.api.Filter.newBuilder()
         .setOperator(Operator.AND)
         .addChildFilter(MetricQueryBuilder.createLongFilter(columnName, Operator.GE, lower))
@@ -332,7 +332,12 @@ class MetricAnomalyDetectorTest {
         .build();
   }
 
-  public static org.hypertrace.core.query.service.api.Filter createFilter(Expression columnExpression, Operator op, Expression value) {
-    return org.hypertrace.core.query.service.api.Filter.newBuilder().setLhs(columnExpression).setOperator(op).setRhs(value).build();
+  public static org.hypertrace.core.query.service.api.Filter createFilter(
+      Expression columnExpression, Operator op, Expression value) {
+    return org.hypertrace.core.query.service.api.Filter.newBuilder()
+        .setLhs(columnExpression)
+        .setOperator(op)
+        .setRhs(value)
+        .build();
   }
 }
