@@ -7,7 +7,6 @@ package org.hypertrace.alert.engine.eventcondition.config.service.v1;
 message MetricAnomalyEventCondition {
   MetricSelection metric_selection = 1;
   repeated ViolationCondition violation_condition = 2;
-  string channel_id = 3;
 }
 
 message MetricSelection {

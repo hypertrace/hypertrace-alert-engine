@@ -29,7 +29,7 @@ public class AlertTaskConverter {
   static final String DELAY_IN_MINUTES_CONFIG = "delayInMinutes";
   static final String EXECUTION_WINDOW_IN_MINUTES_CONFIG = "executionWindowInMinutes";
   static final String TENANT_ID_CONFIG = "tenant_id";
-  static final String EVENT_CHANNEL_ID = "channelId";
+  static final String CHANNEL_ID = "channelId";
 
   static final String DEFAULT_TENANT_ID = "__default";
   static final int DEFAULT_DELAY_IN_MINUTES = 1;
@@ -64,7 +64,7 @@ public class AlertTaskConverter {
     builder.setEventConditionId(rule.get(EVENT_CONDITION_ID).textValue());
     builder.setEventConditionType(rule.get(EVENT_CONDITION_TYPE).textValue());
     builder.setEventConditionValue(eventConditionValueAsBytes);
-
+    builder.setChannelId(rule.get(CHANNEL_ID).asText());
     return builder.build();
   }
 

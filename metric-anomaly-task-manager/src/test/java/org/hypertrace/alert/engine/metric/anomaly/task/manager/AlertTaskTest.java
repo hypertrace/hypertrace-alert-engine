@@ -1,5 +1,7 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
@@ -28,7 +30,7 @@ import org.hypertrace.core.documentstore.Document;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class AlertTaskTest {
+class AlertTaskTest {
 
   @Test
   void testAlertTask() throws Exception {
@@ -49,11 +51,11 @@ public class AlertTaskTest {
                 "executionWindowInMinutes", 1,
                 "tenant_id", "__default"));
     AlertTask alertTask = new AlertTaskConverter(jobConfig).toAlertTask(documents.get(0));
-    Assertions.assertEquals("MetricAnomalyEventCondition", alertTask.getEventConditionType());
-
+    assertEquals("MetricAnomalyEventCondition", alertTask.getEventConditionType());
+    assertEquals("channel-1", alertTask.getChannelId());
     MetricAnomalyEventCondition actual =
         MetricAnomalyEventCondition.parseFrom(alertTask.getEventConditionValue());
-    Assertions.assertEquals(prepareMetricAnomalyEventCondition(), actual);
+    assertEquals(prepareMetricAnomalyEventCondition(), actual);
   }
 
   private MetricAnomalyEventCondition prepareMetricAnomalyEventCondition() {
@@ -94,8 +96,6 @@ public class AlertTaskTest {
                     .setSeverity(Severity.SEVERITY_CRITICAL)
                     .build())
             .build());
-
-    builder.setChannelId("channel-1");
     return builder.build();
   }
 }
