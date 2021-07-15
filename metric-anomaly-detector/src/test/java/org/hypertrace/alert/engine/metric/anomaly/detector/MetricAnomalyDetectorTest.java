@@ -1,6 +1,5 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -260,7 +259,8 @@ class MetricAnomalyDetectorTest {
 
     // create mock queryServiceClient
     QueryServiceClient queryServiceClient = Mockito.mock(QueryServiceClient.class);
-    when(queryServiceClient.executeQuery(eq(expectedQueryRequest), any(), Mockito.anyInt()))
+    when(queryServiceClient.executeQuery(
+            eq(expectedQueryRequest), Map.of("x-tenant-id", "__default"), Mockito.anyInt()))
         .thenReturn(
             List.of(
                     getResultSetChunk(
