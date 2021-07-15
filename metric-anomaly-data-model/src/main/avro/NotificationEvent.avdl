@@ -1,0 +1,15 @@
+@namespace("org.hypertrace.alert.engine.metric.anomaly.datamodel")
+protocol NotificationEventProtocol {
+  record NotificationEvent {
+    string tenant_id;
+    long event_time_millis;
+    map<string> action_event_metadata;
+    EventRecord event_record;
+  }
+
+  record EventRecord {
+    string event_type;
+    map<string> event_record_metadata;
+    bytes event_value;
+  }
+}

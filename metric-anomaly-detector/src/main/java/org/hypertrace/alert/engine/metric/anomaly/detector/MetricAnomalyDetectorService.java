@@ -16,7 +16,7 @@ public class MetricAnomalyDetectorService extends PlatformService {
 
   private KafkaAlertTaskConsumer alertTaskConsumer;
   private MetricAnomalyDetector metricAnomalyDetector;
-  private ActionEventProducer actionEventProducer;
+  private NotificationEventProducer notificationEventProducer;
 
   public MetricAnomalyDetectorService(ConfigClient configClient) {
     super(configClient);
@@ -26,8 +26,9 @@ public class MetricAnomalyDetectorService extends PlatformService {
   protected void doInit() {
     alertTaskConsumer =
         new KafkaAlertTaskConsumer(getAppConfig().getConfig(KAFKA_QUEUE_CONFIG_KEY));
-    actionEventProducer = new ActionEventProducer(getAppConfig().getConfig(KAFKA_QUEUE_CONFIG_KEY));
-    metricAnomalyDetector = new MetricAnomalyDetector(getAppConfig(), actionEventProducer);
+    notificationEventProducer =
+        new NotificationEventProducer(getAppConfig().getConfig(KAFKA_QUEUE_CONFIG_KEY));
+    metricAnomalyDetector = new MetricAnomalyDetector(getAppConfig(), notificationEventProducer);
   }
 
   @Override
@@ -47,7 +48,7 @@ public class MetricAnomalyDetectorService extends PlatformService {
   @Override
   protected void doStop() {
     alertTaskConsumer.close();
-    actionEventProducer.close();
+    notificationEventProducer.close();
   }
 
   @Override

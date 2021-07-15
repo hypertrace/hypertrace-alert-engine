@@ -14,10 +14,10 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.ActionEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyViolation;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.client.config.AttributeServiceClientConfig;
 import org.hypertrace.core.query.service.api.QueryRequest;
@@ -44,9 +44,9 @@ class MetricAnomalyDetector {
   private final MetricQueryBuilder metricQueryBuilder;
   private final QueryServiceClient queryServiceClient;
   private final int qsRequestTimeout;
-  private final ActionEventProducer eventProducer;
+  private final NotificationEventProducer eventProducer;
 
-  MetricAnomalyDetector(Config appConfig, ActionEventProducer actionEventProducer) {
+  MetricAnomalyDetector(Config appConfig, NotificationEventProducer notificationEventProducer) {
     AttributeServiceClientConfig asConfig = AttributeServiceClientConfig.from(appConfig);
     ManagedChannel attributeServiceChannel =
         ManagedChannelBuilder.forAddress(asConfig.getHost(), asConfig.getPort())
@@ -63,7 +63,7 @@ class MetricAnomalyDetector {
 
     metricQueryBuilder = new MetricQueryBuilder(asClient);
 
-    this.eventProducer = actionEventProducer;
+    this.eventProducer = notificationEventProducer;
   }
 
   void process(AlertTask alertTask) throws IOException {
@@ -118,8 +118,8 @@ class MetricAnomalyDetector {
               metricAnomalyEventCondition.getMetricSelection().getMetricAttribute());
       if (evaluationResult.isViolation()) {
 
-        MetricAnomalyViolation metricAnomalyViolation =
-            MetricAnomalyViolation.newBuilder()
+        MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
+            MetricAnomalyNotificationEvent.newBuilder()
                 .setViolationTimestamp(alertTask.getCurrentExecutionTime())
                 .setChannelId(metricAnomalyEventCondition.getChannelId())
                 .setEventConditionId(alertTask.getEventConditionId())
@@ -129,16 +129,16 @@ class MetricAnomalyDetector {
             EventRecord.newBuilder()
                 .setEventType(METRIC_ANOMALY_ACTION_EVENT_TYPE)
                 .setEventRecordMetadata(Map.of())
-                .setEventValue(metricAnomalyViolation.toByteBuffer())
+                .setEventValue(metricAnomalyNotificationEvent.toByteBuffer())
                 .build();
-        ActionEvent actionEvent =
-            ActionEvent.newBuilder()
+        NotificationEvent notificationEvent =
+            NotificationEvent.newBuilder()
                 .setTenantId(alertTask.getTenantId())
                 .setActionEventMetadata(Map.of())
                 .setEventTimeMillis(alertTask.getCurrentExecutionTime())
                 .setEventRecord(eventRecord)
                 .build();
-        eventProducer.publish(actionEvent);
+        eventProducer.publish(notificationEvent);
       }
     }
   }

@@ -1,0 +1,9 @@
+@namespace("org.hypertrace.alert.engine.metric.anomaly.datamodel")
+protocol MetricAnomalyNotificationEventProtocol {
+  record MetricAnomalyNotificationEvent {
+    string event_condition_id;
+    string event_condition_type;
+    long violation_timestamp;
+    string channel_id;
+  }
+}

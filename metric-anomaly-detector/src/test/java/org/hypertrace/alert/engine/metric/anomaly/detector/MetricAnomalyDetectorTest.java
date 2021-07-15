@@ -85,11 +85,11 @@ class MetricAnomalyDetectorTest {
                 .toURI()
                 .toURL());
 
-    ActionEventProducer actionEventProducer =
-        new ActionEventProducer(
+    NotificationEventProducer notificationEventProducer =
+        new NotificationEventProducer(
             config.getConfig(MetricAnomalyDetectorService.KAFKA_QUEUE_CONFIG_KEY));
     MetricAnomalyDetector metricAnomalyDetector =
-        new MetricAnomalyDetector(config, actionEventProducer);
+        new MetricAnomalyDetector(config, notificationEventProducer);
 
     /**
      * Query that's hitting pinot
