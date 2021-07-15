@@ -59,7 +59,7 @@ class MetricAnomalyDetector {
 
   MetricAnomalyDetector(
       Config appConfig, AttributeServiceClient asClient, QueryServiceClient queryServiceClient) {
-    queryServiceClient = queryServiceClient;
+    this.queryServiceClient = queryServiceClient;
     qsRequestTimeout =
         appConfig.hasPath(REQUEST_TIMEOUT_CONFIG_KEY)
             ? appConfig.getInt(REQUEST_TIMEOUT_CONFIG_KEY)
