@@ -121,7 +121,7 @@ class MetricAnomalyDetector {
         MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
             MetricAnomalyNotificationEvent.newBuilder()
                 .setViolationTimestamp(alertTask.getCurrentExecutionTime())
-                .setChannelId(metricAnomalyEventCondition.getChannelId())
+                .setChannelId(alertTask.getChannelId())
                 .setEventConditionId(alertTask.getEventConditionId())
                 .setEventConditionType(alertTask.getEventConditionType())
                 .build();
