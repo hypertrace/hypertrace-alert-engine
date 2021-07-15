@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
@@ -36,7 +37,6 @@ import org.hypertrace.core.query.service.api.ColumnIdentifier;
 import org.hypertrace.core.query.service.api.ColumnMetadata;
 import org.hypertrace.core.query.service.api.Expression;
 import org.hypertrace.core.query.service.api.Function;
-import org.hypertrace.core.query.service.api.LiteralConstant;
 import org.hypertrace.core.query.service.api.Operator;
 import org.hypertrace.core.query.service.api.QueryRequest;
 import org.hypertrace.core.query.service.api.ResultSetChunk;
@@ -45,12 +45,15 @@ import org.hypertrace.core.query.service.api.Row;
 import org.hypertrace.core.query.service.api.Value;
 import org.hypertrace.core.query.service.api.ValueType;
 import org.hypertrace.core.query.service.client.QueryServiceClient;
+import org.hypertrace.gateway.service.v1.common.FunctionType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 class MetricAnomalyDetectorTest {
+
+  private static final StringJoiner dotJoiner = new StringJoiner(".");
 
   @Test
   @Disabled
@@ -212,28 +215,46 @@ class MetricAnomalyDetectorTest {
                     .build())))
         .thenAnswer((Answer<Iterator<AttributeMetadata>>) invocation -> attributesList1.iterator());
 
-    // create mock queryRequest
-    long endTime = System.currentTimeMillis();
-    long startTime = endTime - 1000;
+    // create mock queryServiceFilter
     org.hypertrace.core.query.service.api.Filter queryServiceFilter =
-        createQsDefaultRequestFilter("API.startTime", "API.apiId", startTime, endTime);
+        org.hypertrace.core.query.service.api.Filter.newBuilder()
+            .setOperator(Operator.AND)
+            .addChildFilter(
+                org.hypertrace.core.query.service.api.Filter.newBuilder()
+                    .setOperator(Operator.AND)
+                    .addChildFilter(
+                        MetricQueryBuilder.createLongFilter(
+                            "Service.startTime",
+                            Operator.GE,
+                            alertTaskBuilder.getLastExecutionTime()))
+                    .addChildFilter(
+                        MetricQueryBuilder.createLongFilter(
+                            "Service.startTime",
+                            Operator.LT,
+                            alertTaskBuilder.getCurrentExecutionTime())))
+            .addChildFilter(MetricQueryBuilder.convertLeafFilter(leafFilter))
+            .build();
 
+    // create mock queryRequest
     QueryRequest expectedQueryRequest =
         QueryRequest.newBuilder()
             .addSelection(
-                MetricQueryBuilder.createColumnExpression(
-                    "API.apiId")) // Added implicitly in the getEntitiesAndAggregatedMetrics() in
-            // order to do GroupBy on the entity id
-            .addSelection(createColumnExpression("API.apiName", "API Name"))
-            // QueryServiceEntityFetcher adds Count(entityId) to the request for one that does not
-            // have an aggregation.
-            // This is because internally a GroupBy request is created out of the entities request
-            // and
-            // an aggregation is needed.
-            .addSelection(createQsAggregationExpression("COUNT", "API.apiId"))
+                Expression.newBuilder()
+                    .setFunction(
+                        Function.newBuilder()
+                            .setFunctionName(FunctionType.SUM.name())
+                            .addArguments(
+                                Expression.newBuilder()
+                                    .setColumnIdentifier(
+                                        ColumnIdentifier.newBuilder()
+                                            .setColumnName(
+                                                dotJoiner.add("SERVICE").add("duration").toString())
+                                            .build()))
+                            .build()))
             .setFilter(queryServiceFilter)
-            .addGroupBy(MetricQueryBuilder.createColumnExpression("API.apiId"))
-            .addGroupBy(createColumnExpression("API.apiName", "API Name"))
+            .addGroupBy(
+                MetricQueryBuilder.createTimeColumnGroupByExpression(
+                    "Service.startTime", MetricQueryBuilder.isoDurationToSeconds("PT15s")))
             .setLimit(QueryServiceClient.DEFAULT_QUERY_SERVICE_GROUP_BY_LIMIT)
             .build();
 
@@ -285,61 +306,5 @@ class MetricAnomalyDetectorTest {
     }
 
     return resultSetChunkBuilder.build();
-  }
-
-  public static Expression createColumnExpression(String columnName, String alias) {
-    return Expression.newBuilder()
-        .setColumnIdentifier(
-            ColumnIdentifier.newBuilder().setColumnName(columnName).setAlias(alias))
-        .build();
-  }
-
-  public static Expression createQsAggregationExpression(String functionName, String columnName) {
-    return Expression.newBuilder()
-        .setFunction(
-            Function.newBuilder()
-                .setFunctionName(functionName)
-                .addArguments(MetricQueryBuilder.createColumnExpression(columnName)))
-        .build();
-  }
-
-  public static org.hypertrace.core.query.service.api.Filter createQsDefaultRequestFilter(
-      String timestampColumnName, String entityIdColumnName, long startTime, long endTime) {
-    return org.hypertrace.core.query.service.api.Filter.newBuilder()
-        .setOperator(Operator.AND)
-        .addChildFilter(
-            createFilter(
-                MetricQueryBuilder.createColumnExpression(entityIdColumnName),
-                Operator.NEQ,
-                createStringNullLiteralExpression()))
-        .addAllChildFilter(
-            createBetweenTimesFilter(timestampColumnName, startTime, endTime).getChildFilterList())
-        .build();
-  }
-
-  public static Expression createStringNullLiteralExpression() {
-    return Expression.newBuilder()
-        .setLiteral(
-            LiteralConstant.newBuilder()
-                .setValue(Value.newBuilder().setValueType(ValueType.NULL_STRING)))
-        .build();
-  }
-
-  public static org.hypertrace.core.query.service.api.Filter createBetweenTimesFilter(
-      String columnName, long lower, long higher) {
-    return org.hypertrace.core.query.service.api.Filter.newBuilder()
-        .setOperator(Operator.AND)
-        .addChildFilter(MetricQueryBuilder.createLongFilter(columnName, Operator.GE, lower))
-        .addChildFilter(MetricQueryBuilder.createLongFilter(columnName, Operator.LT, higher))
-        .build();
-  }
-
-  public static org.hypertrace.core.query.service.api.Filter createFilter(
-      Expression columnExpression, Operator op, Expression value) {
-    return org.hypertrace.core.query.service.api.Filter.newBuilder()
-        .setLhs(columnExpression)
-        .setOperator(op)
-        .setRhs(value)
-        .build();
   }
 }
