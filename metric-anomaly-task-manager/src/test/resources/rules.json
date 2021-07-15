@@ -6,6 +6,7 @@
     "eventConditionId": "event_condition_1",
     "eventConditionType": "MetricAnomalyEventCondition",
     "eventCondition" :  {
+      "channelId": "channel-1",
       "metricSelection": {
         "metricAttribute": {
           "key": "duration",
@@ -35,8 +36,7 @@
           "minimumViolationDuration": "PT5M",
           "severity": "SEVERITY_CRITICAL"
         }
-      }],
-      "channelId": "channel-1"
+      }]
     }
   }
 ]
