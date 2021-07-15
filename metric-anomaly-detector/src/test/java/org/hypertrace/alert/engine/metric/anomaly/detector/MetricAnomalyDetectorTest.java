@@ -190,7 +190,6 @@ class MetricAnomalyDetectorTest {
                 .toURL());
 
     // create mock attributeServiceClient
-    AttributeServiceClient attributesServiceClient = mock(AttributeServiceClient.class);
     List<AttributeMetadata> attributesList1 =
         List.of(
             AttributeMetadata.newBuilder()
@@ -203,6 +202,8 @@ class MetricAnomalyDetectorTest {
                 .setKey("startTime")
                 .setId("Service.startTime")
                 .build());
+
+    AttributeServiceClient attributesServiceClient = mock(AttributeServiceClient.class);
     when(attributesServiceClient.findAttributes(
             eq(Map.of("x-tenant-id", "__default")),
             eq(
@@ -216,6 +217,7 @@ class MetricAnomalyDetectorTest {
     long startTime = endTime - 1000;
     org.hypertrace.core.query.service.api.Filter queryServiceFilter =
         createQsDefaultRequestFilter("API.startTime", "API.apiId", startTime, endTime);
+
     QueryRequest expectedQueryRequest =
         QueryRequest.newBuilder()
             .addSelection(
