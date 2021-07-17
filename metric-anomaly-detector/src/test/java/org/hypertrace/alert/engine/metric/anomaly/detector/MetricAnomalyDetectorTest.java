@@ -58,17 +58,10 @@ class MetricAnomalyDetectorTest {
   @Disabled
   void testRuleEvaluation() throws URISyntaxException, MalformedURLException {
 
-    LhsExpression lhsExpression =
-        LhsExpression.newBuilder()
-            .setAttribute(Attribute.newBuilder().setKey("name").setScope("SERVICE").build())
-            .build();
-    RhsExpression rhsExpression = RhsExpression.newBuilder().setStringValue("customer").build();
+    LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
+    RhsExpression rhsExpression = createRhsExpression("customer");
     LeafFilter leafFilter =
-        LeafFilter.newBuilder()
-            .setValueOperator(ValueOperator.VALUE_OPERATOR_EQ)
-            .setLhsExpression(lhsExpression)
-            .setRhsExpression(rhsExpression)
-            .build();
+        createLeafFilter(ValueOperator.VALUE_OPERATOR_EQ, lhsExpression, rhsExpression);
 
     MetricSelection metricSelection =
         MetricSelection.newBuilder()
@@ -134,19 +127,10 @@ class MetricAnomalyDetectorTest {
   void testMetricAnomaly() throws URISyntaxException, MalformedURLException {
 
     // create mock alertTask
-    LhsExpression lhsExpression =
-        LhsExpression.newBuilder()
-            .setAttribute(Attribute.newBuilder().setKey("name").setScope("SERVICE").build())
-            .build();
-
-    RhsExpression rhsExpression = RhsExpression.newBuilder().setStringValue("customer").build();
-
+    LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
+    RhsExpression rhsExpression = createRhsExpression("customer");
     LeafFilter leafFilter =
-        LeafFilter.newBuilder()
-            .setValueOperator(ValueOperator.VALUE_OPERATOR_EQ)
-            .setLhsExpression(lhsExpression)
-            .setRhsExpression(rhsExpression)
-            .build();
+        createLeafFilter(ValueOperator.VALUE_OPERATOR_EQ, lhsExpression, rhsExpression);
 
     MetricSelection metricSelection =
         MetricSelection.newBuilder()
@@ -260,7 +244,7 @@ class MetricAnomalyDetectorTest {
     // create mock queryServiceClient
     QueryServiceClient queryServiceClient = Mockito.mock(QueryServiceClient.class);
     when(queryServiceClient.executeQuery(
-            eq(expectedQueryRequest), Map.of("x-tenant-id", "__default"), Mockito.anyInt()))
+            eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), Mockito.anyInt()))
         .thenReturn(
             List.of(
                     getResultSetChunk(
@@ -306,5 +290,24 @@ class MetricAnomalyDetectorTest {
     }
 
     return resultSetChunkBuilder.build();
+  }
+
+  private LhsExpression createLhsExpression(String key, String scope) {
+    return LhsExpression.newBuilder()
+        .setAttribute(Attribute.newBuilder().setKey(key).setScope(scope).build())
+        .build();
+  }
+
+  private RhsExpression createRhsExpression(String stringValue) {
+    return RhsExpression.newBuilder().setStringValue(stringValue).build();
+  }
+
+  private LeafFilter createLeafFilter(
+      ValueOperator valueOperator, LhsExpression lhsExpression, RhsExpression rhsExpression) {
+    return LeafFilter.newBuilder()
+        .setValueOperator(valueOperator)
+        .setLhsExpression(lhsExpression)
+        .setRhsExpression(rhsExpression)
+        .build();
   }
 }
