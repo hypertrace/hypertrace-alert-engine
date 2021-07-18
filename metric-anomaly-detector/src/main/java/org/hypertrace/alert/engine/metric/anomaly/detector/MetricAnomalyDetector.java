@@ -57,6 +57,16 @@ class MetricAnomalyDetector {
     metricQueryBuilder = new MetricQueryBuilder(asClient);
   }
 
+  MetricAnomalyDetector(
+      Config appConfig, AttributeServiceClient asClient, QueryServiceClient queryServiceClient) {
+    this.queryServiceClient = queryServiceClient;
+    qsRequestTimeout =
+        appConfig.hasPath(REQUEST_TIMEOUT_CONFIG_KEY)
+            ? appConfig.getInt(REQUEST_TIMEOUT_CONFIG_KEY)
+            : DEFAULT_REQUEST_TIMEOUT_MILLIS;
+    metricQueryBuilder = new MetricQueryBuilder(asClient);
+  }
+
   void process(AlertTask alertTask) {
     MetricAnomalyEventCondition metricAnomalyEventCondition;
     if (alertTask.getEventConditionType().equals(METRIC_ANOMALY_EVENT_CONDITION)) {
