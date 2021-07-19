@@ -148,7 +148,7 @@ class MetricAnomalyDetector {
         NotificationEvent notificationEvent =
             NotificationEvent.newBuilder()
                 .setTenantId(alertTask.getTenantId())
-                .setActionEventMetadata(Map.of())
+                .setNotificationEventMetadata(Map.of())
                 .setEventTimeMillis(System.currentTimeMillis())
                 .setEventRecord(eventRecord)
                 .build();

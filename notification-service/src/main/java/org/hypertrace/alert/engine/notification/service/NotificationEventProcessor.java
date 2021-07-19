@@ -11,8 +11,12 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.hypertrace.alert.engine.notification.transport.webhook.WebhookSender;
 import org.hypertrace.alert.engine.notification.transport.webhook.http.HttpWithJsonSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class NotificationEventProcessor {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(NotificationEventProcessor.class);
 
   static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
 
@@ -41,6 +45,7 @@ class NotificationEventProcessor {
   void process(NotificationEvent notificationEvent) throws IOException {
     EventRecord eventRecord = notificationEvent.getEventRecord();
     if (!eventRecord.getEventType().equals(METRIC_ANOMALY_ACTION_EVENT_TYPE)) {
+      LOGGER.debug("Received unsupported event type {}", eventRecord.getEventType());
       return;
     }
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
