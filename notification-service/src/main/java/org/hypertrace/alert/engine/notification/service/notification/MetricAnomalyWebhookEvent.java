@@ -7,7 +7,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 class MetricAnomalyWebhookEvent {
-  Instant eventTimeStamp;
+  Instant eventTimestamp;
+  Instant violationTimestamp;
   String eventConditionId;
   String eventConditionType;
 }

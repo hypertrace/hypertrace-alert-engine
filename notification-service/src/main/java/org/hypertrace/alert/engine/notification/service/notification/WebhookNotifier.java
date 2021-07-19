@@ -49,7 +49,9 @@ public class WebhookNotifier {
     return MetricAnomalyWebhookEvent.builder()
         .eventConditionId(metricAnomalyNotificationEvent.getEventConditionId())
         .eventConditionType(metricAnomalyNotificationEvent.getEventConditionType())
-        .eventTimeStamp(Instant.now())
+        .violationTimestamp(
+            Instant.ofEpochMilli(metricAnomalyNotificationEvent.getViolationTimestamp()))
+        .eventTimestamp(Instant.now())
         .build();
   }
 
