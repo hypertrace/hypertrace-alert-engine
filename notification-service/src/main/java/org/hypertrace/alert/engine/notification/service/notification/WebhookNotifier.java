@@ -1,10 +1,10 @@
-package org.hypertrace.alert.engine.anomaly.event.processor.notification;
+package org.hypertrace.alert.engine.notification.service.notification;
 
 import java.time.Instant;
-import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel;
-import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.NotificationChannelConfig;
-import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.WebFormatNotificationChannelConfig;
-import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannelsReader;
+import org.hypertrace.alert.engine.notification.service.NotificationChannel;
+import org.hypertrace.alert.engine.notification.service.NotificationChannel.NotificationChannelConfig;
+import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
+import org.hypertrace.alert.engine.notification.service.NotificationChannelsReader;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.notification.transport.webhook.WebhookSender;
 

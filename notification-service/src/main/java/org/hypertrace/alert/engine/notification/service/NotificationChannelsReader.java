@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.anomaly.event.processor;
+package org.hypertrace.alert.engine.notification.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.NotificationChannelConfig;
-import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.WebFormatNotificationChannelConfig;
+import org.hypertrace.alert.engine.notification.service.NotificationChannel.NotificationChannelConfig;
+import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

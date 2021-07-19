@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.anomaly.event.processor;
+package org.hypertrace.alert.engine.notification.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

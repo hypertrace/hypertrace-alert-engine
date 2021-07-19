@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.anomaly.event.processor;
+package org.hypertrace.alert.engine.notification.service;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

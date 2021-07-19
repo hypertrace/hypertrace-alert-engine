@@ -1,8 +1,8 @@
-package org.hypertrace.alert.engine.anomaly.event.processor.notification;
+package org.hypertrace.alert.engine.notification.service.notification;
 
-import static org.hypertrace.alert.engine.anomaly.event.processor.notification.SlackMessage.addIfNotEmpty;
-import static org.hypertrace.alert.engine.anomaly.event.processor.notification.SlackMessage.addTimestamp;
-import static org.hypertrace.alert.engine.anomaly.event.processor.notification.SlackMessage.getTitleBlock;
+import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addIfNotEmpty;
+import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addTimestamp;
+import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.getTitleBlock;
 
 import java.util.ArrayList;
 import java.util.List;

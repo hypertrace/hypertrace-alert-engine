@@ -1,11 +1,11 @@
-package org.hypertrace.alert.engine.anomaly.event.processor;
+package org.hypertrace.alert.engine.notification.service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.hypertrace.alert.engine.anomaly.event.processor.notification.WebhookNotifier;
+import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
