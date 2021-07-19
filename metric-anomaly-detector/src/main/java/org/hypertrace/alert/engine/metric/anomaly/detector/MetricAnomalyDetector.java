@@ -66,6 +66,20 @@ class MetricAnomalyDetector {
     this.eventProducer = notificationEventProducer;
   }
 
+  MetricAnomalyDetector(
+      Config appConfig,
+      AttributeServiceClient asClient,
+      QueryServiceClient queryServiceClient,
+      NotificationEventProducer notificationEventProducer) {
+    this.queryServiceClient = queryServiceClient;
+    qsRequestTimeout =
+        appConfig.hasPath(REQUEST_TIMEOUT_CONFIG_KEY)
+            ? appConfig.getInt(REQUEST_TIMEOUT_CONFIG_KEY)
+            : DEFAULT_REQUEST_TIMEOUT_MILLIS;
+    metricQueryBuilder = new MetricQueryBuilder(asClient);
+    this.eventProducer = notificationEventProducer;
+  }
+
   void process(AlertTask alertTask) throws IOException {
     MetricAnomalyEventCondition metricAnomalyEventCondition;
     if (alertTask.getEventConditionType().equals(METRIC_ANOMALY_EVENT_CONDITION)) {
@@ -200,6 +214,7 @@ class MetricAnomalyDetector {
   @SuperBuilder
   @Getter
   private static class EvaluationResult {
+
     private final int violationCount;
     private final int dataCount;
     private final boolean isViolation;
