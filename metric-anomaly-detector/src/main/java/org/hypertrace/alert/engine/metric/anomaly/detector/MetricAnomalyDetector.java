@@ -34,7 +34,7 @@ class MetricAnomalyDetector {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyDetector.class);
 
-  private static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
+  private static final String METRIC_ANOMALY_NOTIFICATION_EVENT_TYPE = "MetricAnomalyViolation";
   private static final String QUERY_SERVICE_CONFIG_KEY = "query.service.config";
   private static final String REQUEST_TIMEOUT_CONFIG_KEY = "request.timeout";
   private static final int DEFAULT_REQUEST_TIMEOUT_MILLIS = 10000;
@@ -141,7 +141,7 @@ class MetricAnomalyDetector {
                 .build();
         EventRecord eventRecord =
             EventRecord.newBuilder()
-                .setEventType(METRIC_ANOMALY_ACTION_EVENT_TYPE)
+                .setEventType(METRIC_ANOMALY_NOTIFICATION_EVENT_TYPE)
                 .setEventRecordMetadata(Map.of())
                 .setEventValue(metricAnomalyNotificationEvent.toByteBuffer())
                 .build();
@@ -149,7 +149,7 @@ class MetricAnomalyDetector {
             NotificationEvent.newBuilder()
                 .setTenantId(alertTask.getTenantId())
                 .setActionEventMetadata(Map.of())
-                .setEventTimeMillis(alertTask.getCurrentExecutionTime())
+                .setEventTimeMillis(System.currentTimeMillis())
                 .setEventRecord(eventRecord)
                 .build();
         eventProducer.publish(notificationEvent);
