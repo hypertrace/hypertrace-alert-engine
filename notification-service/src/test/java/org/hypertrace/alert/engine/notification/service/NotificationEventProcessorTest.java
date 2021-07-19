@@ -3,14 +3,14 @@ package org.hypertrace.alert.engine.notification.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.notification.service.NotificationChannel;
 import org.hypertrace.alert.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.hypertrace.alert.notification.service.NotificationChannelsReader;
 import org.hypertrace.alert.notification.service.NotificationEventProcessor;
 import org.hypertrace.alert.notification.service.notification.WebhookNotifier;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

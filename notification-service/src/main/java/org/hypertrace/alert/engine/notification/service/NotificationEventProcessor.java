@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.hypertrace.alert.engine.notification.transport.webhook.WebhookSender;
 import org.hypertrace.alert.engine.notification.transport.webhook.http.HttpWithJsonSender;
 
