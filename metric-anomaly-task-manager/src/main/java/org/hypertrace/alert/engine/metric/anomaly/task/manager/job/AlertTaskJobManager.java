@@ -36,9 +36,6 @@ public class AlertTaskJobManager implements JobManager {
   private JobKey jobKey;
   private JobDetail jobDetail;
   private Trigger jobTrigger;
-  private RuleSource ruleSource;
-  private KafkaAlertTaskProducer kafkaAlertTaskProducer;
-  private AlertTaskConverter alertTaskConverter;
 
   public void initJob(Config appConfig) {
     Config jobConfig =
@@ -46,9 +43,10 @@ public class AlertTaskJobManager implements JobManager {
             ? appConfig.getConfig(JOB_CONFIG)
             : ConfigFactory.parseMap(Map.of());
 
-    ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(RULE_SOURCE_CONFIG));
-    kafkaAlertTaskProducer = new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
-    alertTaskConverter = new AlertTaskConverter(jobConfig);
+    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(RULE_SOURCE_CONFIG));
+    KafkaAlertTaskProducer kafkaAlertTaskProducer =
+        new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
+    AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
 
     jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP);
 

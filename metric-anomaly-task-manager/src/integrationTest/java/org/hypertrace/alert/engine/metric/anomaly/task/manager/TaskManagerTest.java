@@ -1,6 +1,5 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
@@ -55,7 +54,7 @@ public class TaskManagerTest {
   }
 
   @Test
-  public void testAlertTask() throws InterruptedException, SchedulerException, URISyntaxException {
+  public void testAlertTask() throws SchedulerException, URISyntaxException {
     Integer port = kafkaZk.getMappedPort(9093);
     URL resourceUrl =
         Thread.currentThread().getContextClassLoader().getResource("application.conf");
@@ -63,7 +62,7 @@ public class TaskManagerTest {
     File file = Paths.get(pathUrl.toURI()).toFile();
     String absolutePath = file.getAbsolutePath();
 
-    Map testConfigMap =
+    Map<String, String> testConfigMap =
         Map.of(
             "queue.config.kafka.bootstrap.servers",
             "localhost:" + port,
@@ -113,11 +112,7 @@ public class TaskManagerTest {
         if (elapsedWaitTime > maxWaitTimeMs) {
           return false;
         }
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      } catch (InvalidProtocolBufferException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
+      } catch (InterruptedException | IOException e) {
         e.printStackTrace();
       }
     }

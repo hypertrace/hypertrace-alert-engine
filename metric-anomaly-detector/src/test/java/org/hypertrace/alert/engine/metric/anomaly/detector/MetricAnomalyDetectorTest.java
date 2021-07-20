@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -56,7 +57,7 @@ class MetricAnomalyDetectorTest {
 
   @Test
   @Disabled
-  void testRuleEvaluation() throws URISyntaxException, MalformedURLException {
+  void testRuleEvaluation() throws URISyntaxException, IOException {
 
     LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
     RhsExpression rhsExpression = createRhsExpression("customer");
@@ -108,7 +109,11 @@ class MetricAnomalyDetectorTest {
                 .toURI()
                 .toURL());
 
-    MetricAnomalyDetector metricAnomalyDetector = new MetricAnomalyDetector(config);
+    NotificationEventProducer notificationEventProducer =
+        new NotificationEventProducer(
+            config.getConfig(MetricAnomalyDetectorService.KAFKA_QUEUE_CONFIG_KEY));
+    MetricAnomalyDetector metricAnomalyDetector =
+        new MetricAnomalyDetector(config, notificationEventProducer);
 
     /**
      * Query that's hitting pinot
@@ -257,8 +262,13 @@ class MetricAnomalyDetectorTest {
                         }))
                 .iterator());
 
+    NotificationEventProducer notificationEventProducer =
+        new NotificationEventProducer(
+            config.getConfig(MetricAnomalyDetectorService.KAFKA_QUEUE_CONFIG_KEY));
     MetricAnomalyDetector metricAnomalyDetector =
-        new MetricAnomalyDetector(config, attributesServiceClient, queryServiceClient);
+        new MetricAnomalyDetector(
+            config, attributesServiceClient,
+            queryServiceClient, notificationEventProducer);
     //    Assertions.assertTrue(metricAnomalyDetector.process(alertTaskBuilder.build()));
   }
 

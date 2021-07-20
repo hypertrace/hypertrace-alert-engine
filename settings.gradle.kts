@@ -13,3 +13,5 @@ plugins {
 include(":metric-anomaly-detector")
 include(":metric-anomaly-task-manager")
 include(":metric-anomaly-data-model")
+include("notification-service")
+include("notification-transport")

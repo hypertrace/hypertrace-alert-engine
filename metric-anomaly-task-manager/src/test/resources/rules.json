@@ -5,6 +5,7 @@
     "description": "Alert for high avg latency of payment service",
     "eventConditionId": "event_condition_1",
     "eventConditionType": "MetricAnomalyEventCondition",
+    "channelId": "channel-1",
     "eventCondition" :  {
       "metricSelection": {
         "metricAttribute": {
