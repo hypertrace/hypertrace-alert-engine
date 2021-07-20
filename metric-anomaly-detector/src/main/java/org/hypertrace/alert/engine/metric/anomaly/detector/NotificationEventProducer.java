@@ -26,10 +26,14 @@ class NotificationEventProducer {
     producer = new KafkaProducer<String, ByteBuffer>(properties);
   }
 
-  public void publish(NotificationEvent notificationEvent) throws IOException {
-    producer.send(
-        new ProducerRecord<String, ByteBuffer>(
-            properties.getProperty("topic"), null, notificationEvent.toByteBuffer()));
+  public void publish(NotificationEvent notificationEvent) {
+    try {
+      producer.send(
+          new ProducerRecord<String, ByteBuffer>(
+              properties.getProperty("topic"), null, notificationEvent.toByteBuffer()));
+    } catch (IOException e) {
+      // log
+    }
   }
 
   public void close() {

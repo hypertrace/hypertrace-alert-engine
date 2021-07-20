@@ -1,15 +1,19 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager.job;
 
 public class AlertTaskJobConstants {
-  static final String JOB_DATA_MAP_RULE_SOURCE = "ruleSource";
-  static final String JOB_DATA_MAP_PRODUCER_QUEUE = "producerQueue";
-  static final String JOB_DATA_MAP_TASK_CONVERTER = "taskConverter";
-  static final String JOB_DATA_MAP_JOB_CONFIG = "jobConfig";
+  public static final String JOB_DATA_MAP_RULE_SOURCE = "ruleSource";
+  public static final String JOB_DATA_MAP_PRODUCER_QUEUE = "producerQueue";
+  public static final String JOB_DATA_MAP_TASK_CONVERTER = "taskConverter";
+  public static final String JOB_DATA_MAP_JOB_CONFIG = "jobConfig";
 
-  static final String JOB_NAME = "alert-task";
-  static final String JOB_GROUP = "alerting";
-  static final String JOB_TRIGGER_NAME = "alert-task-trigger";
-  static final String CRON_EXPRESSION = "0 * * * * ?";
+  public static final String JOB_NAME = "alert-task";
+  public static final String JOB_GROUP = "alerting";
+  public static final String JOB_TRIGGER_NAME = "alert-task-trigger";
+  public static final String CRON_EXPRESSION = "0 * * * * ?";
 
-  static final String METRIC_ANOMALY_EVENT_CONDITION = "MetricAnomalyEventCondition";
+  public static final String KAFKA_QUEUE_CONFIG = "queue.config.kafka";
+  public static final String JOB_CONFIG = "job.config";
+  public static final String JOB_CONFIG_CRON_EXPRESSION = "cronExpression";
+
+  public static final String METRIC_ANOMALY_EVENT_CONDITION = "MetricAnomalyEventCondition";
 }

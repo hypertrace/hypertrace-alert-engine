@@ -12,7 +12,7 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.notification.transport.webhook.WebhookSender;
 import org.hypertrace.alert.engine.notification.transport.webhook.http.HttpWithJsonSender;
 
-class NotificationEventProcessor {
+public class NotificationEventProcessor {
 
   static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
 
@@ -21,7 +21,7 @@ class NotificationEventProcessor {
   private final Map<String, NotificationChannel> notificationChannelMap;
   private final WebhookNotifier webhookNotifier;
 
-  NotificationEventProcessor(List<NotificationChannel> notificationChannels) {
+  public NotificationEventProcessor(List<NotificationChannel> notificationChannels) {
     this.notificationChannelMap = getNotificationChannelMap(notificationChannels);
     this.webhookNotifier = new WebhookNotifier(new WebhookSender(HTTP_WITH_JSON_SENDER));
   }
@@ -38,13 +38,18 @@ class NotificationEventProcessor {
         .collect(Collectors.toMap(NotificationChannel::getChannelId, Function.identity()));
   }
 
-  void process(NotificationEvent notificationEvent) throws IOException {
+  public void process(NotificationEvent notificationEvent) {
     EventRecord eventRecord = notificationEvent.getEventRecord();
     if (!eventRecord.getEventType().equals(METRIC_ANOMALY_ACTION_EVENT_TYPE)) {
       return;
     }
-    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
-        MetricAnomalyNotificationEvent.fromByteBuffer(eventRecord.getEventValue());
+    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent = null;
+    try {
+      metricAnomalyNotificationEvent =
+          MetricAnomalyNotificationEvent.fromByteBuffer(eventRecord.getEventValue());
+    } catch (IOException e) {
+      // e.printStackTrace();
+    }
     if (notificationChannelMap.containsKey(metricAnomalyNotificationEvent.getChannelId())) {
       webhookNotifier.notify(
           metricAnomalyNotificationEvent,

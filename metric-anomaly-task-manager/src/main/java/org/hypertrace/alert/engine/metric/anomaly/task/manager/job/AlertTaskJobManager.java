@@ -1,12 +1,15 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager.job;
 
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.CRON_EXPRESSION;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG_CRON_EXPRESSION;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_PRODUCER_QUEUE;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_TASK_CONVERTER;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_GROUP;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_NAME;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_TRIGGER_NAME;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.KAFKA_QUEUE_CONFIG;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -28,10 +31,6 @@ import org.slf4j.LoggerFactory;
 
 public class AlertTaskJobManager implements JobManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(AlertTaskJobManager.class);
-  private static final String RULE_SOURCE_CONFIG = "ruleSource";
-  private static final String KAFKA_QUEUE_CONFIG = "queue.config.kafka";
-  private static final String JOB_CONFIG = "job.config";
-  private static final String JOB_CONFIG_CRON_EXPRESSION = "cronExpression";
 
   private JobKey jobKey;
   private JobDetail jobDetail;
@@ -43,7 +42,8 @@ public class AlertTaskJobManager implements JobManager {
             ? appConfig.getConfig(JOB_CONFIG)
             : ConfigFactory.parseMap(Map.of());
 
-    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(RULE_SOURCE_CONFIG));
+    RuleSource ruleSource =
+        RuleSourceProvider.getProvider(appConfig.getConfig(JOB_DATA_MAP_RULE_SOURCE));
     KafkaAlertTaskProducer kafkaAlertTaskProducer =
         new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);

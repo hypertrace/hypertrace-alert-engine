@@ -263,7 +263,7 @@ class MetricQueryBuilder {
   String getTimestampAttributeId(String tenantId, String attributeScope) {
     Iterator<AttributeMetadata> attributeMetadataIterator =
         attributesServiceClient.findAttributes(
-            Map.of(MetricAnomalyDetector.TENANT_ID_KEY, tenantId),
+            Map.of(AlertRuleEvaluator.TENANT_ID_KEY, tenantId),
             AttributeMetadataFilter.newBuilder().addScopeString(attributeScope).build());
 
     while (attributeMetadataIterator.hasNext()) {
