@@ -1,8 +1,8 @@
-package org.hypertrace.alert.engine.anomaly.event.processor.notification;
+package org.hypertrace.alert.engine.notification.service.notification;
 
-import static org.hypertrace.alert.engine.anomaly.event.processor.notification.SlackMessage.addIfNotEmpty;
-import static org.hypertrace.alert.engine.anomaly.event.processor.notification.SlackMessage.addTimestamp;
-import static org.hypertrace.alert.engine.anomaly.event.processor.notification.SlackMessage.getTitleBlock;
+import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addIfNotEmpty;
+import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addTimestamp;
+import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.getTitleBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ import org.hypertrace.alert.engine.notification.transport.webhook.slack.Text;
 class MetricAnomalySlackEvent implements SlackMessage {
 
   public static final String EVENT_TIMESTAMP = "Event Timestamp";
+  public static final String VIOLATION_TIMESTAMP = "Violation Timestamp";
   public static final String METRIC_ANOMALY_EVENT_TYPE = "Metric Anomaly Event Type";
   private final List<Attachment> attachments;
 
@@ -28,7 +29,9 @@ class MetricAnomalySlackEvent implements SlackMessage {
 
     // create Metadata block
     List<Text> metadataFields = new ArrayList<>();
-    addTimestamp(metadataFields, metricAnomalyWebhookEvent.getEventTimeStamp(), EVENT_TIMESTAMP);
+    addTimestamp(metadataFields, metricAnomalyWebhookEvent.getEventTimestamp(), EVENT_TIMESTAMP);
+    addTimestamp(
+        metadataFields, metricAnomalyWebhookEvent.getViolationTimestamp(), VIOLATION_TIMESTAMP);
     addIfNotEmpty(
         metadataFields, metricAnomalyWebhookEvent.getEventConditionId(), METRIC_ANOMALY_EVENT_TYPE);
 

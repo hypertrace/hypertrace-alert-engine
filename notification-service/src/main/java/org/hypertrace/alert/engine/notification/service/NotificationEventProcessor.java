@@ -1,18 +1,22 @@
-package org.hypertrace.alert.engine.anomaly.event.processor;
+package org.hypertrace.alert.engine.notification.service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.hypertrace.alert.engine.anomaly.event.processor.notification.WebhookNotifier;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.hypertrace.alert.engine.notification.transport.webhook.WebhookSender;
 import org.hypertrace.alert.engine.notification.transport.webhook.http.HttpWithJsonSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NotificationEventProcessor {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(NotificationEventProcessor.class);
 
   static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
 
@@ -41,6 +45,7 @@ public class NotificationEventProcessor {
   public void process(NotificationEvent notificationEvent) {
     EventRecord eventRecord = notificationEvent.getEventRecord();
     if (!eventRecord.getEventType().equals(METRIC_ANOMALY_ACTION_EVENT_TYPE)) {
+      LOGGER.debug("Received unsupported event type {}", eventRecord.getEventType());
       return;
     }
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent = null;

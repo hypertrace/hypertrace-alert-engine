@@ -1,5 +1,9 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
+import static org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluatorTest.createLeafFilter;
+import static org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluatorTest.createLhsExpression;
+import static org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluatorTest.createRhsExpression;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
@@ -28,17 +32,10 @@ class MetricAnomalyDetectorTest {
   @Disabled
   void testRuleEvaluation() throws URISyntaxException, IOException {
 
-    LhsExpression lhsExpression =
-        LhsExpression.newBuilder()
-            .setAttribute(Attribute.newBuilder().setKey("name").setScope("SERVICE").build())
-            .build();
-    RhsExpression rhsExpression = RhsExpression.newBuilder().setStringValue("customer").build();
+    LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
+    RhsExpression rhsExpression = createRhsExpression("customer");
     LeafFilter leafFilter =
-        LeafFilter.newBuilder()
-            .setValueOperator(ValueOperator.VALUE_OPERATOR_EQ)
-            .setLhsExpression(lhsExpression)
-            .setRhsExpression(rhsExpression)
-            .build();
+        createLeafFilter(ValueOperator.VALUE_OPERATOR_EQ, lhsExpression, rhsExpression);
 
     MetricSelection metricSelection =
         MetricSelection.newBuilder()
@@ -103,6 +100,4 @@ class MetricAnomalyDetectorTest {
      */
     metricAnomalyDetector.process(alertTaskBuilder.build());
   }
-
-  // test
 }

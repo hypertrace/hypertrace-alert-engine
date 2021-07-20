@@ -1,13 +1,13 @@
-package org.hypertrace.alert.engine.anomaly.event.processor;
+package org.hypertrace.alert.engine.notification.service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import org.hypertrace.alert.engine.anomaly.event.processor.NotificationChannel.WebFormatNotificationChannelConfig;
-import org.hypertrace.alert.engine.anomaly.event.processor.notification.WebhookNotifier;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
+import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -46,7 +46,7 @@ class NotificationEventProcessorTest {
     NotificationEvent notificationEvent =
         NotificationEvent.newBuilder()
             .setEventRecord(eventRecord)
-            .setActionEventMetadata(Map.of())
+            .setNotificationEventMetadata(Map.of())
             .setTenantId("tenant-1")
             .setEventTimeMillis(System.currentTimeMillis())
             .build();

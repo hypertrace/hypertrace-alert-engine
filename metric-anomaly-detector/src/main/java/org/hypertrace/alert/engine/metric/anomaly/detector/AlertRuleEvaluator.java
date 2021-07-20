@@ -64,6 +64,16 @@ public class AlertRuleEvaluator {
     metricQueryBuilder = new MetricQueryBuilder(asClient);
   }
 
+  AlertRuleEvaluator(
+      Config appConfig, AttributeServiceClient asClient, QueryServiceClient queryServiceClient) {
+    this.queryServiceClient = queryServiceClient;
+    qsRequestTimeout =
+        appConfig.hasPath(REQUEST_TIMEOUT_CONFIG_KEY)
+            ? appConfig.getInt(REQUEST_TIMEOUT_CONFIG_KEY)
+            : DEFAULT_REQUEST_TIMEOUT_MILLIS;
+    metricQueryBuilder = new MetricQueryBuilder(asClient);
+  }
+
   public Optional<NotificationEvent> process(AlertTask alertTask) throws IOException {
     MetricAnomalyEventCondition metricAnomalyEventCondition;
     if (alertTask.getEventConditionType().equals(METRIC_ANOMALY_EVENT_CONDITION)) {
@@ -132,7 +142,7 @@ public class AlertRuleEvaluator {
         NotificationEvent notificationEvent =
             NotificationEvent.newBuilder()
                 .setTenantId(alertTask.getTenantId())
-                .setActionEventMetadata(Map.of())
+                .setNotificationEventMetadata(Map.of())
                 .setEventTimeMillis(alertTask.getCurrentExecutionTime())
                 .setEventRecord(eventRecord)
                 .build();

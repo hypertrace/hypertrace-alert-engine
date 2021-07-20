@@ -2,10 +2,10 @@ package org.hypertrace.alert.engine;
 
 import java.util.List;
 import java.util.Optional;
-import org.hypertrace.alert.engine.anomaly.event.processor.NotificationEventProcessor;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluator;
+import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;

@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.anomaly.event.processor.notification;
+package org.hypertrace.alert.engine.notification.service.notification;
 
 import com.google.common.base.Strings;
 import java.time.Instant;

@@ -3,7 +3,7 @@ protocol NotificationEventProtocol {
   record NotificationEvent {
     string tenant_id;
     long event_time_millis;
-    map<string> action_event_metadata;
+    map<string> notification_event_metadata;
     EventRecord event_record;
   }
 
