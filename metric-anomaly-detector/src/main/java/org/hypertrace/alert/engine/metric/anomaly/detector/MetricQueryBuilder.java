@@ -33,7 +33,6 @@ class MetricQueryBuilder {
 
   private static final String START_TIME_ATTRIBUTE_KEY = "startTime";
   private static final String DATE_TIME_CONVERTER = "dateTimeConvert";
-  private static final StringJoiner dotJoiner = new StringJoiner(".");
 
   private final AttributeServiceClient attributesServiceClient;
 
@@ -44,11 +43,17 @@ class MetricQueryBuilder {
   QueryRequest buildMetricQueryRequest(
       MetricSelection metricSelection, long startTime, long endTime, String tenantId) {
     QueryRequest.Builder builder = QueryRequest.newBuilder();
-    String timeColumn =
+    String timeColumnId =
         getTimestampAttributeId(tenantId, metricSelection.getMetricAttribute().getScope());
-    if (null == timeColumn) {
+    if (null == timeColumnId) {
       throw new IllegalArgumentException("Error time column is null");
     }
+    String timeColumn =
+        new StringJoiner(".")
+            .add(metricSelection.getMetricAttribute().getScope())
+            .add(timeColumnId)
+            .toString();
+
     org.hypertrace.core.query.service.api.Filter filter =
         convertFilter(metricSelection.getFilter());
     builder.setFilter(addTimeFilter(filter, startTime, endTime, timeColumn));
@@ -114,11 +119,12 @@ class MetricQueryBuilder {
         return builder.setColumnIdentifier(
             ColumnIdentifier.newBuilder()
                 .setColumnName(
-                    dotJoiner
+                    new StringJoiner(".")
                         .add(lhsExpression.getAttribute().getScope())
                         .add(lhsExpression.getAttribute().getKey())
                         .toString())
                 .build());
+
       default:
         throw new IllegalArgumentException(
             "Exception converting filter lhs expression: " + lhsExpression.getValueCase());
@@ -212,7 +218,7 @@ class MetricQueryBuilder {
                     .setColumnIdentifier(
                         ColumnIdentifier.newBuilder()
                             .setColumnName(
-                                dotJoiner
+                                new StringJoiner(".")
                                     .add(metricAttribute.getScope())
                                     .add(metricAttribute.getKey())
                                     .toString())
@@ -263,7 +269,7 @@ class MetricQueryBuilder {
   String getTimestampAttributeId(String tenantId, String attributeScope) {
     Iterator<AttributeMetadata> attributeMetadataIterator =
         attributesServiceClient.findAttributes(
-            Map.of(MetricAnomalyDetector.TENANT_ID_KEY, tenantId),
+            Map.of(AlertRuleEvaluator.TENANT_ID_KEY, tenantId),
             AttributeMetadataFilter.newBuilder().addScopeString(attributeScope).build());
 
     while (attributeMetadataIterator.hasNext()) {
