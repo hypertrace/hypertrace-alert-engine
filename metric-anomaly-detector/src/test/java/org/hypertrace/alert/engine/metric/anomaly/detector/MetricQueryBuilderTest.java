@@ -81,29 +81,6 @@ class MetricQueryBuilderTest {
 
   @Test
   void testAttributeCaching() {
-    LhsExpression lhsExpression =
-        LhsExpression.newBuilder()
-            .setAttribute(Attribute.newBuilder().setKey("id").setScope("SERVICE").build())
-            .build();
-    RhsExpression rhsExpression = RhsExpression.newBuilder().setStringValue("1234").build();
-    LeafFilter leafFilter =
-        LeafFilter.newBuilder()
-            .setValueOperator(ValueOperator.VALUE_OPERATOR_EQ)
-            .setLhsExpression(lhsExpression)
-            .setRhsExpression(rhsExpression)
-            .build();
-
-    MetricSelection metricSelection =
-        MetricSelection.newBuilder()
-            .setMetricAggregationInterval("PT15s")
-            .setMetricAggregationFunction(
-                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM)
-            .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
-            .setMetricAttribute(
-                Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
-            .build();
-
-    AttributeServiceClient attributesServiceClient = mock(AttributeServiceClient.class);
     List<AttributeMetadata> attributesList1 =
         List.of(
             AttributeMetadata.newBuilder()
@@ -116,6 +93,8 @@ class MetricQueryBuilderTest {
                 .setKey("startTime")
                 .setId("Service.startTime")
                 .build());
+
+    AttributeServiceClient attributesServiceClient = mock(AttributeServiceClient.class);
     when(attributesServiceClient.findAttributes(
             eq(Map.of("x-tenant-id", "__default")),
             eq(
