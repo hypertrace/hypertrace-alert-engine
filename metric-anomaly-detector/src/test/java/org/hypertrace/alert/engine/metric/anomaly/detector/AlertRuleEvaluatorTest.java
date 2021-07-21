@@ -1,17 +1,19 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
@@ -28,6 +30,8 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresh
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperator;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadata;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadataFilter;
@@ -45,19 +49,18 @@ import org.hypertrace.core.query.service.api.Value;
 import org.hypertrace.core.query.service.api.ValueType;
 import org.hypertrace.core.query.service.client.QueryServiceClient;
 import org.hypertrace.gateway.service.v1.common.FunctionType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 class AlertRuleEvaluatorTest {
 
-  static final StringJoiner dotJoiner = new StringJoiner(".");
-
   @Test
-  void testMetricAnomaly() throws URISyntaxException, MalformedURLException {
+  void testMetricAnomaly() throws URISyntaxException, IOException {
 
     // create mock alertTask
-    LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
+    LhsExpression lhsExpression = createLhsExpression("name", AttributeScope.SERVICE.name());
     RhsExpression rhsExpression = createRhsExpression("customer");
     LeafFilter leafFilter =
         createLeafFilter(ValueOperator.VALUE_OPERATOR_EQ, lhsExpression, rhsExpression);
@@ -87,14 +90,15 @@ class AlertRuleEvaluatorTest {
             .build());
 
     AlertTask.Builder alertTaskBuilder = AlertTask.newBuilder();
-    alertTaskBuilder.setCurrentExecutionTime(System.currentTimeMillis());
-    alertTaskBuilder.setLastExecutionTime(
-        System.currentTimeMillis() - Duration.ofMinutes(1).toMillis());
+    long timeStamp = System.currentTimeMillis();
+    alertTaskBuilder.setCurrentExecutionTime(timeStamp);
+    alertTaskBuilder.setLastExecutionTime(timeStamp - Duration.ofMinutes(1).toMillis());
     alertTaskBuilder.setEventConditionId("event-condition-1");
     alertTaskBuilder.setEventConditionType("MetricAnomalyEventCondition");
     alertTaskBuilder.setTenantId("__default");
     alertTaskBuilder.setEventConditionValue(
         metricAnomalyEventConditionBuilder.build().toByteString().asReadOnlyByteBuffer());
+    alertTaskBuilder.setChannelId("channel1");
 
     // create mock config
     Config config =
@@ -111,12 +115,12 @@ class AlertRuleEvaluatorTest {
             AttributeMetadata.newBuilder()
                 .setScopeString(AttributeScope.SERVICE.name())
                 .setKey("id")
-                .setId("Service.id")
+                .setId("id")
                 .build(),
             AttributeMetadata.newBuilder()
                 .setScopeString(AttributeScope.SERVICE.name())
                 .setKey("startTime")
-                .setId("Service.startTime")
+                .setId("startTime")
                 .build());
 
     AttributeServiceClient attributesServiceClient = mock(AttributeServiceClient.class);
@@ -137,12 +141,18 @@ class AlertRuleEvaluatorTest {
                     .setOperator(Operator.AND)
                     .addChildFilter(
                         MetricQueryBuilder.createLongFilter(
-                            "Service.startTime",
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
+                                .add("startTime")
+                                .toString(),
                             Operator.GE,
                             alertTaskBuilder.getLastExecutionTime()))
                     .addChildFilter(
                         MetricQueryBuilder.createLongFilter(
-                            "Service.startTime",
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
+                                .add("startTime")
+                                .toString(),
                             Operator.LT,
                             alertTaskBuilder.getCurrentExecutionTime())))
             .addChildFilter(MetricQueryBuilder.convertLeafFilter(leafFilter))
@@ -161,35 +171,60 @@ class AlertRuleEvaluatorTest {
                                     .setColumnIdentifier(
                                         ColumnIdentifier.newBuilder()
                                             .setColumnName(
-                                                dotJoiner.add("SERVICE").add("duration").toString())
+                                                new StringJoiner(".")
+                                                    .add(AttributeScope.SERVICE.name())
+                                                    .add("duration")
+                                                    .toString())
                                             .build()))
                             .build()))
             .setFilter(queryServiceFilter)
             .addGroupBy(
                 MetricQueryBuilder.createTimeColumnGroupByExpression(
-                    "Service.startTime", MetricQueryBuilder.isoDurationToSeconds("PT15s")))
+                    new StringJoiner(".")
+                        .add(AttributeScope.SERVICE.name())
+                        .add("startTime")
+                        .toString(),
+                    MetricQueryBuilder.isoDurationToSeconds("PT15s")))
             .setLimit(QueryServiceClient.DEFAULT_QUERY_SERVICE_GROUP_BY_LIMIT)
             .build();
 
     // create mock queryServiceClient
     QueryServiceClient queryServiceClient = Mockito.mock(QueryServiceClient.class);
     when(queryServiceClient.executeQuery(
-            eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), Mockito.anyInt()))
+            eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
         .thenReturn(
             List.of(
                     getResultSetChunk(
-                        List.of("API.apiId", "API.apiName"),
+                        List.of(
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
+                                .add("duration")
+                                .toString()),
                         new String[][] {
                           {
-                            "apiId1", "/login",
+                            "300",
                           },
-                          {"apiId2", "/checkout"}
+                          {"400"}
                         }))
                 .iterator());
 
     AlertRuleEvaluator alertRuleEvaluator =
         new AlertRuleEvaluator(config, attributesServiceClient, queryServiceClient);
-    //    Assertions.assertTrue(metricAnomalyDetector.process(alertTaskBuilder.build()));
+
+    Optional<NotificationEvent> notificationEventOptional =
+        alertRuleEvaluator.process(alertTaskBuilder.build());
+    Assertions.assertTrue(notificationEventOptional.isPresent());
+
+    NotificationEvent notificationEvent = notificationEventOptional.get();
+    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
+        MetricAnomalyNotificationEvent.fromByteBuffer(
+            notificationEvent.getEventRecord().getEventValue());
+
+    assertEquals("channel1", metricAnomalyNotificationEvent.getChannelId());
+    assertEquals("event-condition-1", metricAnomalyNotificationEvent.getEventConditionId());
+    assertEquals(
+        "MetricAnomalyEventCondition", metricAnomalyNotificationEvent.getEventConditionType());
+    assertEquals(timeStamp, metricAnomalyNotificationEvent.getViolationTimestamp());
   }
 
   public static ResultSetChunk getResultSetChunk(

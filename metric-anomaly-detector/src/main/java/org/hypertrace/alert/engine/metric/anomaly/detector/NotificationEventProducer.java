@@ -12,8 +12,12 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaConfigReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class NotificationEventProducer {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyDetector.class);
 
   private final Producer<String, ByteBuffer> producer;
   private final KafkaConfigReader kafkaConfigReader;
@@ -32,7 +36,7 @@ class NotificationEventProducer {
           new ProducerRecord<String, ByteBuffer>(
               properties.getProperty("topic"), null, notificationEvent.toByteBuffer()));
     } catch (IOException e) {
-      // log
+      LOGGER.error("Exception producing messages", e);
     }
   }
 
