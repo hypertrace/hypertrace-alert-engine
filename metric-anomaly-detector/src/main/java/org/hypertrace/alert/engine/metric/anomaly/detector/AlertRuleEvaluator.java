@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 public class AlertRuleEvaluator {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyDetector.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AlertRuleEvaluator.class);
 
   private static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
   private static final String QUERY_SERVICE_CONFIG_KEY = "query.service.config";
