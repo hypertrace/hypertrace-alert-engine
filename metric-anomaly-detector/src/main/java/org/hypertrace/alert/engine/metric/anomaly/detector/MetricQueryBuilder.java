@@ -47,7 +47,7 @@ class MetricQueryBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(MetricQueryBuilder.class);
 
   private final AttributeServiceClient attributesServiceClient;
-  private final LoadingCache<List<String>, String> attributeServiceCache;
+  final LoadingCache<List<String>, String> attributeServiceCache;
 
   MetricQueryBuilder(AttributeServiceClient attributesServiceClient) {
     this.attributesServiceClient = attributesServiceClient;
@@ -74,6 +74,7 @@ class MetricQueryBuilder {
 
     attributeServiceCache =
         CacheBuilder.newBuilder()
+            .recordStats() // for testing
             .maximumSize(DEFAULT_CACHE_SIZE)
             .expireAfterWrite(DEFAULT_EXPIRE_DURATION_MIN, TimeUnit.MINUTES)
             .build(cacheLoader);
