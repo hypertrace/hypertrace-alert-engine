@@ -60,16 +60,9 @@ public class RuleEvaluationJobManager implements JobManager {
     JobDataMap jobDataMap = new JobDataMap();
     jobDataMap.put(ALERT_TASKS, getAlertTasks(appConfig));
 
-    AlertRuleEvaluator alertRuleEvaluator = new AlertRuleEvaluator(appConfig);
-    jobDataMap.put(ALERT_RULE_EVALUATOR, alertRuleEvaluator);
+    addEvaluatorToJobData(jobDataMap, appConfig);
 
-    try {
-      List<NotificationChannel> notificationChannels =
-          NotificationChannelsReader.readNotificationChannels(appConfig);
-      jobDataMap.put(NOTIFICATION_PROCESSOR, new NotificationEventProcessor(notificationChannels));
-    } catch (IOException e) {
-      throw new RuntimeException();
-    }
+    addNotificationProcessorToJobData(jobDataMap, appConfig);
 
     jobDetail =
         JobBuilder.newJob(RuleEvaluationJob.class)
@@ -128,5 +121,20 @@ public class RuleEvaluationJobManager implements JobManager {
       LOGGER.error("AlertTask conversion failed with an exception", e);
     }
     return alertTasks;
+  }
+
+  private void addEvaluatorToJobData(JobDataMap jobDataMap, Config appConfig) {
+    AlertRuleEvaluator alertRuleEvaluator = new AlertRuleEvaluator(appConfig);
+    jobDataMap.put(ALERT_RULE_EVALUATOR, alertRuleEvaluator);
+  }
+
+  private void addNotificationProcessorToJobData(JobDataMap jobDataMap, Config appConfig) {
+    try {
+      List<NotificationChannel> notificationChannels =
+          NotificationChannelsReader.readNotificationChannels(appConfig);
+      jobDataMap.put(NOTIFICATION_PROCESSOR, new NotificationEventProcessor(notificationChannels));
+    } catch (IOException e) {
+      throw new RuntimeException();
+    }
   }
 }

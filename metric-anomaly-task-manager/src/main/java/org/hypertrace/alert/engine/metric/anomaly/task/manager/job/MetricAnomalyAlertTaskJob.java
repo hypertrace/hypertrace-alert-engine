@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class MetricAnomalyAlertTaskJob implements Job {
   private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyAlertTaskJob.class);
 
-  public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+  public void execute(JobExecutionContext jobExecutionContext) {
     JobDetail jobDetail = jobExecutionContext.getJobDetail();
     LOGGER.debug("Starting Metric Anomaly alert task Job:", jobDetail.getKey());
 

@@ -17,7 +17,7 @@ public class NotificationChannelsReader {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final String PATH_CONFIG = "rules.path";
+  private static final String PATH_CONFIG = "notification.rules.path";
   private static final String CHANNEL_ID = "channelId";
   private static final String CHANNEL_NAME = "channelName";
   private static final String CHANNEL_CONFIG = "channelConfig";
@@ -38,6 +38,8 @@ public class NotificationChannelsReader {
     if (!jsonNode.isArray()) {
       throw new IOException("File should contain an array of notification rules");
     }
+
+    LOGGER.info("Reading notification rules {}", jsonNode.toPrettyString());
 
     List<JsonNode> nodes =
         StreamSupport.stream(jsonNode.spliterator(), false)

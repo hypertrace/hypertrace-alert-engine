@@ -8,7 +8,7 @@ import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 
-class HypertraceAlertEngineService extends PlatformService {
+public class HypertraceAlertEngineService extends PlatformService {
 
   private Scheduler scheduler;
   private JobManager jobManager;
