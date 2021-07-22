@@ -1,5 +1,7 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.typesafe.config.Config;
 import io.grpc.ManagedChannel;
@@ -44,6 +46,7 @@ public class AlertRuleEvaluator {
   private final MetricQueryBuilder metricQueryBuilder;
   private final QueryServiceClient queryServiceClient;
   private final int qsRequestTimeout;
+  private final Multimap<Double, Double> metricValues = ArrayListMultimap.create();
 
   public AlertRuleEvaluator(Config appConfig) {
     AttributeServiceClientConfig asConfig = AttributeServiceClientConfig.from(appConfig);
@@ -195,20 +198,13 @@ public class AlertRuleEvaluator {
     StaticThresholdCondition thresholdCondition = violationCondition.getStaticThresholdCondition();
     double lhs = Double.parseDouble(value.getString());
     double rhs = thresholdCondition.getValue();
+    boolean isViolation = evalOperator(thresholdCondition.getOperator(), lhs, rhs);
 
-    switch (thresholdCondition.getOperator()) {
-      case STATIC_THRESHOLD_OPERATOR_GT:
-        return lhs > rhs;
-      case STATIC_THRESHOLD_OPERATOR_LT:
-        return lhs < rhs;
-      case STATIC_THRESHOLD_OPERATOR_GTE:
-        return lhs >= rhs;
-      case STATIC_THRESHOLD_OPERATOR_LTE:
-        return lhs <= rhs;
-      default:
-        throw new UnsupportedOperationException(
-            "Unsupported threshold condition operator: " + thresholdCondition.getOperator());
+    if (isViolation) {
+      metricValues.put(rhs, lhs);
     }
+
+    return isViolation;
   }
 
   Iterator<ResultSetChunk> executeQuery(
@@ -250,5 +246,24 @@ public class AlertRuleEvaluator {
             .build();
 
     return Optional.of(notificationEvent);
+  }
+
+  private boolean evalOperator(
+      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator operator,
+      double lhs,
+      double rhs) {
+    switch (operator) {
+      case STATIC_THRESHOLD_OPERATOR_GT:
+        return lhs > rhs;
+      case STATIC_THRESHOLD_OPERATOR_LT:
+        return lhs < rhs;
+      case STATIC_THRESHOLD_OPERATOR_GTE:
+        return lhs >= rhs;
+      case STATIC_THRESHOLD_OPERATOR_LTE:
+        return lhs <= rhs;
+      default:
+        throw new UnsupportedOperationException(
+            "Unsupported threshold condition operator: " + operator);
+    }
   }
 }
