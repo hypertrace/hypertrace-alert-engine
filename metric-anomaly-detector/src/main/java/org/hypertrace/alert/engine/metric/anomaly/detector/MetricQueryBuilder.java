@@ -43,7 +43,7 @@ class MetricQueryBuilder {
   private static final String DATE_TIME_CONVERTER = "dateTimeConvert";
   private static final StringJoiner dotJoiner = new StringJoiner(".");
   private static final int DEFAULT_CACHE_SIZE = 4096;
-  private static final int DEFAULT_EXPIRE_DURATION_MIN = 60; // 60 min
+  private static final int DEFAULT_EXPIRE_DURATION_MIN = 5; // 5 min
   private static final Logger LOG = LoggerFactory.getLogger(MetricQueryBuilder.class);
 
   private final AttributeServiceClient attributesServiceClient;
