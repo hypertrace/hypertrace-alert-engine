@@ -5,15 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-class KafkaConfigReader {
+public class KafkaConfigReader {
   static final String TOPIC_NAME_CONFIG = "topic";
   static final String BOOTSTRAP_SERVERS_CONFIG = "bootstrap.servers";
   static final String PRODUCER_CONFIG = "producer";
   static final String CONSUMER_CONFIG = "consumer";
 
-  private Config kafkaQueueConfig;
+  private final Config kafkaQueueConfig;
 
-  KafkaConfigReader(Config kafkaQueueConfig) {
+  public KafkaConfigReader(Config kafkaQueueConfig) {
     this.kafkaQueueConfig = kafkaQueueConfig;
   }
 

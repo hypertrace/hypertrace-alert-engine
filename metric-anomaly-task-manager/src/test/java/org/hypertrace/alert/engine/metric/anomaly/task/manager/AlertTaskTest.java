@@ -1,5 +1,7 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
@@ -14,7 +16,6 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.LhsExpressio
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.NotificationRule;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.RhsExpression;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Severity;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
@@ -29,7 +30,7 @@ import org.hypertrace.core.documentstore.Document;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class AlertTaskTest {
+class AlertTaskTest {
 
   @Test
   void testAlertTask() throws Exception {
@@ -50,21 +51,11 @@ public class AlertTaskTest {
                 "executionWindowInMinutes", 1,
                 "tenant_id", "__default"));
     AlertTask alertTask = new AlertTaskConverter(jobConfig).toAlertTask(documents.get(0));
-    Assertions.assertEquals("MetricAnomalyEventCondition", alertTask.getEventConditionType());
-
+    assertEquals("MetricAnomalyEventCondition", alertTask.getEventConditionType());
+    assertEquals("channel-1", alertTask.getChannelId());
     MetricAnomalyEventCondition actual =
         MetricAnomalyEventCondition.parseFrom(alertTask.getEventConditionValue());
-    Assertions.assertEquals(prepareMetricAnomalyEventCondition(), actual);
-  }
-
-  private NotificationRule prepareNotificationRule() {
-    NotificationRule.Builder nBuilder = NotificationRule.newBuilder();
-    nBuilder.setId("notification_rule_1");
-    nBuilder.setRuleName("high_avg_latency");
-    nBuilder.setDescription("Alert for high avg latency of payment service");
-    nBuilder.setEventConditionId("event_condition_1");
-    nBuilder.setEventConditionType("MetricAnomalyEventCondition");
-    return nBuilder.build();
+    assertEquals(prepareMetricAnomalyEventCondition(), actual);
   }
 
   private MetricAnomalyEventCondition prepareMetricAnomalyEventCondition() {
@@ -105,7 +96,6 @@ public class AlertTaskTest {
                     .setSeverity(Severity.SEVERITY_CRITICAL)
                     .build())
             .build());
-
     return builder.build();
   }
 }

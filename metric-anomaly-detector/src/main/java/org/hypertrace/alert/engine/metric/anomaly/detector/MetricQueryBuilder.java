@@ -59,7 +59,7 @@ class MetricQueryBuilder {
             // key = Pair<tenantId,attributeScope>
             Iterator<AttributeMetadata> attributeMetadataIterator =
                 attributesServiceClient.findAttributes(
-                    Map.of(MetricAnomalyDetector.TENANT_ID_KEY, key.getLeft()),
+                    Map.of(AlertRuleEvaluator.TENANT_ID_KEY, key.getLeft()),
                     AttributeMetadataFilter.newBuilder().addScopeString(key.getRight()).build());
 
             while (attributeMetadataIterator.hasNext()) {
@@ -83,11 +83,17 @@ class MetricQueryBuilder {
   QueryRequest buildMetricQueryRequest(
       MetricSelection metricSelection, long startTime, long endTime, String tenantId) {
     QueryRequest.Builder builder = QueryRequest.newBuilder();
-    String timeColumn =
+    String timeColumnId =
         getTimestampAttributeId(tenantId, metricSelection.getMetricAttribute().getScope());
-    if (null == timeColumn) {
+    if (null == timeColumnId) {
       throw new IllegalArgumentException("Error time column is null");
     }
+    String timeColumn =
+        new StringJoiner(".")
+            .add(metricSelection.getMetricAttribute().getScope())
+            .add(timeColumnId)
+            .toString();
+
     org.hypertrace.core.query.service.api.Filter filter =
         convertFilter(metricSelection.getFilter());
     builder.setFilter(addTimeFilter(filter, startTime, endTime, timeColumn));
@@ -153,11 +159,12 @@ class MetricQueryBuilder {
         return builder.setColumnIdentifier(
             ColumnIdentifier.newBuilder()
                 .setColumnName(
-                    dotJoiner
+                    new StringJoiner(".")
                         .add(lhsExpression.getAttribute().getScope())
                         .add(lhsExpression.getAttribute().getKey())
                         .toString())
                 .build());
+
       default:
         throw new IllegalArgumentException(
             "Exception converting filter lhs expression: " + lhsExpression.getValueCase());
@@ -251,7 +258,7 @@ class MetricQueryBuilder {
                     .setColumnIdentifier(
                         ColumnIdentifier.newBuilder()
                             .setColumnName(
-                                dotJoiner
+                                new StringJoiner(".")
                                     .add(metricAttribute.getScope())
                                     .add(metricAttribute.getKey())
                                     .toString())
