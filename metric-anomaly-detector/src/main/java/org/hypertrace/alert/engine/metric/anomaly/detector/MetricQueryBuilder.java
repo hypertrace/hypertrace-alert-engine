@@ -1,10 +1,16 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.CompositeFilter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
@@ -28,16 +34,50 @@ import org.hypertrace.core.query.service.api.Value;
 import org.hypertrace.core.query.service.api.ValueType;
 import org.hypertrace.core.query.service.client.QueryServiceClient;
 import org.hypertrace.gateway.service.v1.common.FunctionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class MetricQueryBuilder {
 
   private static final String START_TIME_ATTRIBUTE_KEY = "startTime";
   private static final String DATE_TIME_CONVERTER = "dateTimeConvert";
+  private static final StringJoiner dotJoiner = new StringJoiner(".");
+  private static final int DEFAULT_CACHE_SIZE = 4096;
+  private static final int DEFAULT_EXPIRE_DURATION_MIN = 5; // 5 min
+  private static final Logger LOG = LoggerFactory.getLogger(MetricQueryBuilder.class);
 
   private final AttributeServiceClient attributesServiceClient;
+  final LoadingCache<Pair<String, String>, String> attributeServiceCache;
 
   MetricQueryBuilder(AttributeServiceClient attributesServiceClient) {
     this.attributesServiceClient = attributesServiceClient;
+
+    CacheLoader<Pair<String, String>, String> cacheLoader =
+        new CacheLoader<>() {
+          @Override
+          public String load(Pair<String, String> key) {
+            // key = Pair<tenantId,attributeScope>
+            Iterator<AttributeMetadata> attributeMetadataIterator =
+                attributesServiceClient.findAttributes(
+                    Map.of(AlertRuleEvaluator.TENANT_ID_KEY, key.getLeft()),
+                    AttributeMetadataFilter.newBuilder().addScopeString(key.getRight()).build());
+
+            while (attributeMetadataIterator.hasNext()) {
+              AttributeMetadata metadata = attributeMetadataIterator.next();
+              if (metadata.getKey().equals(START_TIME_ATTRIBUTE_KEY)) {
+                return metadata.getId();
+              }
+            }
+            return null;
+          }
+        };
+
+    attributeServiceCache =
+        CacheBuilder.newBuilder()
+            .recordStats() // for testing
+            .maximumSize(DEFAULT_CACHE_SIZE)
+            .expireAfterWrite(DEFAULT_EXPIRE_DURATION_MIN, TimeUnit.MINUTES)
+            .build(cacheLoader);
   }
 
   QueryRequest buildMetricQueryRequest(
@@ -267,18 +307,18 @@ class MetricQueryBuilder {
   }
 
   String getTimestampAttributeId(String tenantId, String attributeScope) {
-    Iterator<AttributeMetadata> attributeMetadataIterator =
-        attributesServiceClient.findAttributes(
-            Map.of(AlertRuleEvaluator.TENANT_ID_KEY, tenantId),
-            AttributeMetadataFilter.newBuilder().addScopeString(attributeScope).build());
-
-    while (attributeMetadataIterator.hasNext()) {
-      AttributeMetadata metadata = attributeMetadataIterator.next();
-      if (metadata.getKey().equals(START_TIME_ATTRIBUTE_KEY)) {
-        return metadata.getId();
-      }
+    try {
+      return attributeServiceCache.get(Pair.of(tenantId, attributeScope));
+    } catch (ExecutionException e) {
+      LOG.error(
+          "Error retrieving timeStampAttribute for tenantId:{}, attributeScope:{}",
+          tenantId,
+          attributeScope);
+      throw new RuntimeException(
+          String.format(
+              "Error retrieving timeStampAttribute for tenantId:{}, attributeScope:{}",
+              tenantId,
+              attributeScope));
     }
-
-    return null;
   }
 }

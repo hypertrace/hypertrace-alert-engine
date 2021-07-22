@@ -34,12 +34,11 @@ import org.slf4j.LoggerFactory;
 public class AlertRuleEvaluator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AlertRuleEvaluator.class);
-
   private static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
   private static final String QUERY_SERVICE_CONFIG_KEY = "query.service.config";
   private static final String REQUEST_TIMEOUT_CONFIG_KEY = "request.timeout";
-  private static final int DEFAULT_REQUEST_TIMEOUT_MILLIS = 10000;
   private static final String METRIC_ANOMALY_EVENT_CONDITION = "MetricAnomalyEventCondition";
+  private static final int DEFAULT_REQUEST_TIMEOUT_MILLIS = 10000;
   static final String TENANT_ID_KEY = "x-tenant-id";
 
   private final MetricQueryBuilder metricQueryBuilder;
@@ -64,6 +63,7 @@ public class AlertRuleEvaluator {
     metricQueryBuilder = new MetricQueryBuilder(asClient);
   }
 
+  // used for testing with mock clients passed as parameters
   AlertRuleEvaluator(
       Config appConfig, AttributeServiceClient asClient, QueryServiceClient queryServiceClient) {
     this.queryServiceClient = queryServiceClient;
@@ -76,6 +76,7 @@ public class AlertRuleEvaluator {
 
   public Optional<NotificationEvent> process(AlertTask alertTask) throws IOException {
     MetricAnomalyEventCondition metricAnomalyEventCondition;
+
     if (alertTask.getEventConditionType().equals(METRIC_ANOMALY_EVENT_CONDITION)) {
       try {
         metricAnomalyEventCondition =
@@ -98,19 +99,10 @@ public class AlertRuleEvaluator {
       return Optional.empty();
     }
 
-    QueryRequest queryRequest =
-        metricQueryBuilder.buildMetricQueryRequest(
-            metricAnomalyEventCondition.getMetricSelection(),
-            alertTask.getLastExecutionTime(),
-            alertTask.getCurrentExecutionTime(),
-            alertTask.getTenantId());
-
-    // todo handle multiple violation conditions
-    ViolationCondition violationCondition =
-        metricAnomalyEventCondition.getViolationConditionList().get(0);
-
     Iterator<ResultSetChunk> iterator =
-        executeQuery(Map.of(TENANT_ID_KEY, alertTask.getTenantId()), queryRequest);
+        executeQuery(
+            Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
+            getQueryRequest(metricAnomalyEventCondition, alertTask));
 
     LOGGER.debug(
         "Starting rule evaluation for rule Id {} start {} & end time {}",
@@ -118,36 +110,19 @@ public class AlertRuleEvaluator {
         Instant.ofEpochMilli(alertTask.getLastExecutionTime()),
         Instant.ofEpochMilli(alertTask.getCurrentExecutionTime()));
 
+    // todo handle multiple violation conditions
+    ViolationCondition violationCondition =
+        metricAnomalyEventCondition.getViolationConditionList().get(0);
+
     if (violationCondition.hasStaticThresholdCondition()) {
       EvaluationResult evaluationResult =
           evaluateForStaticThreshold(
               iterator,
               violationCondition,
               metricAnomalyEventCondition.getMetricSelection().getMetricAttribute());
+
       if (evaluationResult.isViolation()) {
-
-        MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
-            MetricAnomalyNotificationEvent.newBuilder()
-                .setViolationTimestamp(alertTask.getCurrentExecutionTime())
-                .setChannelId(alertTask.getChannelId())
-                .setEventConditionId(alertTask.getEventConditionId())
-                .setEventConditionType(alertTask.getEventConditionType())
-                .build();
-        EventRecord eventRecord =
-            EventRecord.newBuilder()
-                .setEventType(METRIC_ANOMALY_ACTION_EVENT_TYPE)
-                .setEventRecordMetadata(Map.of())
-                .setEventValue(metricAnomalyNotificationEvent.toByteBuffer())
-                .build();
-        NotificationEvent notificationEvent =
-            NotificationEvent.newBuilder()
-                .setTenantId(alertTask.getTenantId())
-                .setNotificationEventMetadata(Map.of())
-                .setEventTimeMillis(alertTask.getCurrentExecutionTime())
-                .setEventRecord(eventRecord)
-                .build();
-
-        return Optional.of(notificationEvent);
+        return getNotificationEvent(alertTask);
       }
     }
 
@@ -239,5 +214,41 @@ public class AlertRuleEvaluator {
   Iterator<ResultSetChunk> executeQuery(
       Map<String, String> requestHeaders, QueryRequest aggQueryRequest) {
     return queryServiceClient.executeQuery(aggQueryRequest, requestHeaders, qsRequestTimeout);
+  }
+
+  private QueryRequest getQueryRequest(
+      MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask) {
+    return metricQueryBuilder.buildMetricQueryRequest(
+        metricAnomalyEventCondition.getMetricSelection(),
+        alertTask.getLastExecutionTime(),
+        alertTask.getCurrentExecutionTime(),
+        alertTask.getTenantId());
+  }
+
+  private Optional<NotificationEvent> getNotificationEvent(AlertTask alertTask) throws IOException {
+    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
+        MetricAnomalyNotificationEvent.newBuilder()
+            .setViolationTimestamp(alertTask.getCurrentExecutionTime())
+            .setChannelId(alertTask.getChannelId())
+            .setEventConditionId(alertTask.getEventConditionId())
+            .setEventConditionType(alertTask.getEventConditionType())
+            .build();
+
+    EventRecord eventRecord =
+        EventRecord.newBuilder()
+            .setEventType(METRIC_ANOMALY_ACTION_EVENT_TYPE)
+            .setEventRecordMetadata(Map.of())
+            .setEventValue(metricAnomalyNotificationEvent.toByteBuffer())
+            .build();
+
+    NotificationEvent notificationEvent =
+        NotificationEvent.newBuilder()
+            .setTenantId(alertTask.getTenantId())
+            .setNotificationEventMetadata(Map.of())
+            .setEventTimeMillis(alertTask.getCurrentExecutionTime())
+            .setEventRecord(eventRecord)
+            .build();
+
+    return Optional.of(notificationEvent);
   }
 }
