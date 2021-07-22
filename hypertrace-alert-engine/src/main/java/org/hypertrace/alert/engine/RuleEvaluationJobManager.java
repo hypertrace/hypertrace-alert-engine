@@ -19,7 +19,6 @@ import org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.MetricAnomalyAlertTaskJob;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel;
@@ -73,7 +72,7 @@ public class RuleEvaluationJobManager implements JobManager {
     }
 
     jobDetail =
-        JobBuilder.newJob(MetricAnomalyAlertTaskJob.class)
+        JobBuilder.newJob(RuleEvaluationJob.class)
             .withIdentity(jobKey)
             .usingJobData(jobDataMap)
             .build();
