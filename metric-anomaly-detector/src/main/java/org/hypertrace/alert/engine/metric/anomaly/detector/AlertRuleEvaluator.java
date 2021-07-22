@@ -8,7 +8,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Getter;
@@ -20,6 +22,7 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCon
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.client.config.AttributeServiceClientConfig;
@@ -222,12 +225,26 @@ public class AlertRuleEvaluator {
   }
 
   private Optional<NotificationEvent> getNotificationEvent(AlertTask alertTask) throws IOException {
+
+    List<MetricValues> metricValuesList = new ArrayList<>();
+    metricValues
+        .asMap()
+        .forEach(
+            (key, collection) -> {
+              metricValuesList.add(
+                  MetricValues.newBuilder()
+                      .setLhs(new ArrayList<>(collection))
+                      .setRhs(key)
+                      .build());
+            });
+
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
             .setViolationTimestamp(alertTask.getCurrentExecutionTime())
             .setChannelId(alertTask.getChannelId())
             .setEventConditionId(alertTask.getEventConditionId())
             .setEventConditionType(alertTask.getEventConditionType())
+            .setMetricValuesList(metricValuesList)
             .build();
 
     EventRecord eventRecord =

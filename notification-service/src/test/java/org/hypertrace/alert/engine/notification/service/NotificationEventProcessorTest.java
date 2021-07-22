@@ -34,6 +34,7 @@ class NotificationEventProcessorTest {
             .setEventConditionId("5")
             .setViolationTimestamp(System.currentTimeMillis())
             .setEventConditionType("grth")
+            .setMetricValuesList(List.of())
             .build();
 
     EventRecord eventRecord =

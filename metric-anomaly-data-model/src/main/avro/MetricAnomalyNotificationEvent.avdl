@@ -5,5 +5,11 @@ protocol MetricAnomalyNotificationEventProtocol {
     string event_condition_type;
     long violation_timestamp;
     string channel_id;
+    array<MetricValues> metric_values_list;
+  }
+
+  record MetricValues {
+    double rhs;
+    array<double> lhs;
   }
 }
