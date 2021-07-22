@@ -6,11 +6,11 @@ import com.google.common.cache.LoadingCache;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.CompositeFilter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
@@ -47,20 +47,20 @@ class MetricQueryBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(MetricQueryBuilder.class);
 
   private final AttributeServiceClient attributesServiceClient;
-  final LoadingCache<List<String>, String> attributeServiceCache;
+  final LoadingCache<Pair<String, String>, String> attributeServiceCache;
 
   MetricQueryBuilder(AttributeServiceClient attributesServiceClient) {
     this.attributesServiceClient = attributesServiceClient;
 
-    CacheLoader<List<String>, String> cacheLoader =
+    CacheLoader<Pair<String, String>, String> cacheLoader =
         new CacheLoader<>() {
           @Override
-          public String load(List<String> key) {
-            // key = List.of(tenantId,attributeScope)
+          public String load(Pair<String, String> key) {
+            // key = Pair<tenantId,attributeScope>
             Iterator<AttributeMetadata> attributeMetadataIterator =
                 attributesServiceClient.findAttributes(
-                    Map.of(MetricAnomalyDetector.TENANT_ID_KEY, key.get(0)),
-                    AttributeMetadataFilter.newBuilder().addScopeString(key.get(1)).build());
+                    Map.of(MetricAnomalyDetector.TENANT_ID_KEY, key.getLeft()),
+                    AttributeMetadataFilter.newBuilder().addScopeString(key.getRight()).build());
 
             while (attributeMetadataIterator.hasNext()) {
               AttributeMetadata metadata = attributeMetadataIterator.next();
@@ -301,7 +301,7 @@ class MetricQueryBuilder {
 
   String getTimestampAttributeId(String tenantId, String attributeScope) {
     try {
-      return attributeServiceCache.get(List.of(tenantId, attributeScope));
+      return attributeServiceCache.get(Pair.of(tenantId, attributeScope));
     } catch (ExecutionException e) {
       LOG.error(
           "Error retrieving timeStampAttribute for tenantId:{}, attributeScope:{}",
