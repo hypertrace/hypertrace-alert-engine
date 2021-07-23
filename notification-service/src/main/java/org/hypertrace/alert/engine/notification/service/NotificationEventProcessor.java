@@ -51,7 +51,8 @@ public class NotificationEventProcessor {
 
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent;
     try {
-      metricAnomalyNotificationEvent = MetricAnomalyNotificationEvent.fromByteBuffer(eventRecord.getEventValue());
+      metricAnomalyNotificationEvent =
+          MetricAnomalyNotificationEvent.fromByteBuffer(eventRecord.getEventValue());
     } catch (IOException e) {
       throw new RuntimeException("Exception deserializing MetricAnomalyNotificationEvent", e);
     }

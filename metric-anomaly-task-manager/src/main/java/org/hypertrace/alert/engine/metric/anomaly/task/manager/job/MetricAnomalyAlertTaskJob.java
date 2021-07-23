@@ -5,17 +5,12 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_TASK_CONVERTER;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.METRIC_ANOMALY_EVENT_CONDITION;
 
-import com.google.common.util.concurrent.RateLimiter;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSourceProvider;
 import org.hypertrace.core.documentstore.Document;
 import org.quartz.Job;
 import org.quartz.JobDataMap;

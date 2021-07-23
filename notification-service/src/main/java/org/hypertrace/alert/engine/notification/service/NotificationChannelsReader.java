@@ -29,7 +29,8 @@ public class NotificationChannelsReader {
   public static final String WEBHOOK_FORMAT_SLACK = "WEBHOOK_FORMAT_SLACK";
   public static final String WEBHOOK_FORMAT_JSON = "WEBHOOK_FORMAT_JSON";
 
-  public static List<NotificationChannel> readNotificationChannels(Config config) throws IOException {
+  public static List<NotificationChannel> readNotificationChannels(Config config)
+      throws IOException {
     String fsPath = config.getString(PATH_CONFIG);
     LOGGER.debug("Reading rules from file path:{}", fsPath);
 
