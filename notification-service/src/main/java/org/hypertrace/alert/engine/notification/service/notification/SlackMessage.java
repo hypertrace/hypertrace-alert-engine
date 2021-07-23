@@ -3,6 +3,7 @@ package org.hypertrace.alert.engine.notification.service.notification;
 import com.google.common.base.Strings;
 import java.time.Instant;
 import java.util.List;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.SectionBlock;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Text;
 
@@ -38,4 +39,6 @@ interface SlackMessage {
                   + " UTC >"));
     }
   }
+
+  static void addMetricValues(List<Text> metadataFields, List<MetricValues> metricValuesList) {}
 }

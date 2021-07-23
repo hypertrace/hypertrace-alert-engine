@@ -52,6 +52,7 @@ public class WebhookNotifier {
         .violationTimestamp(
             Instant.ofEpochMilli(metricAnomalyNotificationEvent.getViolationTimestamp()))
         .eventTimestamp(Instant.now())
+        .metricValuesList(metricAnomalyNotificationEvent.getMetricValuesList())
         .build();
   }
 

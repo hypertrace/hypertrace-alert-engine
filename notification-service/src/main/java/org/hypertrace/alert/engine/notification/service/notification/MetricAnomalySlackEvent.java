@@ -1,6 +1,7 @@
 package org.hypertrace.alert.engine.notification.service.notification;
 
 import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addIfNotEmpty;
+import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addMetricValues;
 import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addTimestamp;
 import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.getTitleBlock;
 
@@ -34,6 +35,7 @@ class MetricAnomalySlackEvent implements SlackMessage {
         metadataFields, metricAnomalyWebhookEvent.getViolationTimestamp(), VIOLATION_TIMESTAMP);
     addIfNotEmpty(
         metadataFields, metricAnomalyWebhookEvent.getEventConditionId(), METRIC_ANOMALY_EVENT_TYPE);
+    addMetricValues(metadataFields, metricAnomalyWebhookEvent.getMetricValuesList());
 
     SectionBlock metadataBlock = new SectionBlock();
     metadataBlock.setFields(metadataFields);
