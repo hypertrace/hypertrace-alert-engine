@@ -42,8 +42,8 @@ public class MetricAnomalyAlertTaskJob implements Job {
           } catch (IOException e) {
             LOGGER.debug("Failed execute alert task for task: {} with exception:{}", alertTask, e);
           }
-          LOGGER.debug("job finished");
         });
+    LOGGER.debug("job finished");
   }
 
   public static List<AlertTask> getAlertTasks(
