@@ -40,13 +40,10 @@ public class MetricAnomalyAlertTaskJob implements Job {
           try {
             kafkaAlertTaskProducer.enqueue(alertTask);
           } catch (IOException e) {
-            LOGGER.debug(
-                "Failed execute alert task for task: {} with exception:{}",
-                alertTask, e);
+            LOGGER.debug("Failed execute alert task for task: {} with exception:{}", alertTask, e);
           }
           LOGGER.debug("job finished");
-        }
-    );
+        });
   }
 
   public static List<AlertTask> getAlertTasks(
