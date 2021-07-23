@@ -14,7 +14,7 @@ import org.hypertrace.alert.engine.notification.transport.webhook.http.HttpWithJ
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class NotificationEventProcessor {
+public class NotificationEventProcessor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NotificationEventProcessor.class);
 
@@ -25,7 +25,7 @@ class NotificationEventProcessor {
   private final Map<String, NotificationChannel> notificationChannelMap;
   private final WebhookNotifier webhookNotifier;
 
-  NotificationEventProcessor(List<NotificationChannel> notificationChannels) {
+  public NotificationEventProcessor(List<NotificationChannel> notificationChannels) {
     this.notificationChannelMap = getNotificationChannelMap(notificationChannels);
     this.webhookNotifier = new WebhookNotifier(new WebhookSender(HTTP_WITH_JSON_SENDER));
   }
@@ -42,14 +42,19 @@ class NotificationEventProcessor {
         .collect(Collectors.toMap(NotificationChannel::getChannelId, Function.identity()));
   }
 
-  void process(NotificationEvent notificationEvent) throws IOException {
+  public void process(NotificationEvent notificationEvent) {
     EventRecord eventRecord = notificationEvent.getEventRecord();
     if (!eventRecord.getEventType().equals(METRIC_ANOMALY_ACTION_EVENT_TYPE)) {
       LOGGER.debug("Received unsupported event type {}", eventRecord.getEventType());
       return;
     }
-    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
-        MetricAnomalyNotificationEvent.fromByteBuffer(eventRecord.getEventValue());
+
+    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent;
+    try {
+      metricAnomalyNotificationEvent = MetricAnomalyNotificationEvent.fromByteBuffer(eventRecord.getEventValue());
+    } catch (IOException e) {
+      throw new RuntimeException("Exception deserializing MetricAnomalyNotificationEvent", e);
+    }
     if (notificationChannelMap.containsKey(metricAnomalyNotificationEvent.getChannelId())) {
       webhookNotifier.notify(
           metricAnomalyNotificationEvent,

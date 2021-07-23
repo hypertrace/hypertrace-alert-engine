@@ -17,7 +17,7 @@ public class NotificationChannelsReader {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final String PATH_CONFIG = "rules.path";
+  private static final String PATH_CONFIG = "notification.rules.path";
   private static final String CHANNEL_ID = "channelId";
   private static final String CHANNEL_NAME = "channelName";
   private static final String CHANNEL_CONFIG = "channelConfig";
@@ -29,7 +29,7 @@ public class NotificationChannelsReader {
   public static final String WEBHOOK_FORMAT_SLACK = "WEBHOOK_FORMAT_SLACK";
   public static final String WEBHOOK_FORMAT_JSON = "WEBHOOK_FORMAT_JSON";
 
-  static List<NotificationChannel> readNotificationChannels(Config config) throws IOException {
+  public static List<NotificationChannel> readNotificationChannels(Config config) throws IOException {
     String fsPath = config.getString(PATH_CONFIG);
     LOGGER.debug("Reading rules from file path:{}", fsPath);
 
@@ -37,6 +37,8 @@ public class NotificationChannelsReader {
     if (!jsonNode.isArray()) {
       throw new IOException("File should contain an array of notification rules");
     }
+
+    LOGGER.info("Reading notification rules {}", jsonNode.toPrettyString());
 
     List<JsonNode> nodes =
         StreamSupport.stream(jsonNode.spliterator(), false)

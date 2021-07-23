@@ -20,7 +20,7 @@ class FSRuleSource implements RuleSource {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private Config fsConfig;
+  private final Config fsConfig;
 
   public FSRuleSource(Config fsConfig) {
     this.fsConfig = fsConfig;
@@ -35,13 +35,15 @@ class FSRuleSource implements RuleSource {
       throw new IOException("File should contain an array of notification rules");
     }
 
+    LOGGER.info("Reading alert rules {}", jsonNode.toPrettyString());
+
     List<JsonNode> nodes =
         StreamSupport.stream(jsonNode.spliterator(), false)
             .collect(Collectors.toUnmodifiableList());
 
     return nodes.stream()
         .filter(node -> node.get(EVENT_CONDITION_TYPE_KEY).textValue().equals(type))
-        .map(node -> new JSONDocument(node))
+        .map(JSONDocument::new)
         .collect(Collectors.toList());
   }
 }
