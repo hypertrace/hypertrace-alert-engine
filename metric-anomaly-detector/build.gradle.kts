@@ -3,7 +3,6 @@ plugins {
     application
     jacoco
     id("org.hypertrace.jacoco-report-plugin")
-    id("org.hypertrace.docker-java-application-plugin")
 }
 
 application {
