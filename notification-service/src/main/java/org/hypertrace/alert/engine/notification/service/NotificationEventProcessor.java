@@ -58,7 +58,7 @@ public class NotificationEventProcessor {
       throw new RuntimeException("Exception deserializing MetricAnomalyNotificationEvent", e);
     }
     if (notificationChannelMap.containsKey(metricAnomalyNotificationEvent.getChannelId())) {
-      LOGGER.info("Sending notification event now {}", metricAnomalyNotificationEvent);
+      LOGGER.debug("Sending notification event {}", metricAnomalyNotificationEvent);
       webhookNotifier.notify(
           metricAnomalyNotificationEvent,
           notificationChannelMap.get(metricAnomalyNotificationEvent.getChannelId()));

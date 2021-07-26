@@ -254,7 +254,6 @@ class MetricQueryBuilder {
                     .setColumnIdentifier(
                         ColumnIdentifier.newBuilder()
                             .setColumnName(columnName)
-                            .setAlias(columnName)
                             .build()))
             .build();
     queryBuilder.addSelection(Expression.newBuilder().setFunction(function));

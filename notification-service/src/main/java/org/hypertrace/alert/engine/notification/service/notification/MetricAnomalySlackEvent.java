@@ -31,8 +31,8 @@ public class MetricAnomalySlackEvent implements SlackMessage {
     // create Metadata block
     List<Text> metadataFields = new ArrayList<>();
     addTimestamp(metadataFields, metricAnomalyWebhookEvent.getEventTimestamp(), EVENT_TIMESTAMP);
-    // addTimestamp(
-    //    metadataFields, metricAnomalyWebhookEvent.getViolationTimestamp(), VIOLATION_TIMESTAMP);
+    addTimestamp(
+        metadataFields, metricAnomalyWebhookEvent.getViolationTimestamp(), VIOLATION_TIMESTAMP);
     addIfNotEmpty(
         metadataFields, metricAnomalyWebhookEvent.getEventConditionId(), METRIC_ANOMALY_EVENT_TYPE);
 

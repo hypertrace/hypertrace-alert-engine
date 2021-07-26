@@ -115,12 +115,18 @@ class AlertRuleEvaluatorTest {
             AttributeMetadata.newBuilder()
                 .setScopeString(AttributeScope.SERVICE.name())
                 .setKey("id")
-                .setId("id")
+                .setId(new StringJoiner(".")
+                    .add(AttributeScope.SERVICE.name())
+                    .add("id")
+                    .toString())
                 .build(),
             AttributeMetadata.newBuilder()
                 .setScopeString(AttributeScope.SERVICE.name())
                 .setKey("startTime")
-                .setId("startTime")
+                .setId(new StringJoiner(".")
+                    .add(AttributeScope.SERVICE.name())
+                    .add("startTime")
+                    .toString())
                 .build());
 
     AttributeServiceClient attributesServiceClient = mock(AttributeServiceClient.class);
@@ -198,13 +204,15 @@ class AlertRuleEvaluatorTest {
                         List.of(
                             new StringJoiner(".")
                                 .add(AttributeScope.SERVICE.name())
+                                .add("startTime")
+                                .toString(),
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
                                 .add("duration")
                                 .toString()),
                         new String[][] {
-                          {
-                            "300",
-                          },
-                          {"400"}
+                          { "60",  "300",},
+                          { "120", "400"}
                         }))
                 .iterator());
 
