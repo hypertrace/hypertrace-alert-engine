@@ -252,9 +252,7 @@ class MetricQueryBuilder {
             .addArguments(
                 Expression.newBuilder()
                     .setColumnIdentifier(
-                        ColumnIdentifier.newBuilder()
-                            .setColumnName(columnName)
-                            .build()))
+                        ColumnIdentifier.newBuilder().setColumnName(columnName).build()))
             .build();
     queryBuilder.addSelection(Expression.newBuilder().setFunction(function));
   }
