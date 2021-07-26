@@ -24,7 +24,7 @@ public class MetricAnomalyAlertTaskJob implements Job {
 
   public void execute(JobExecutionContext jobExecutionContext) {
     JobDetail jobDetail = jobExecutionContext.getJobDetail();
-    LOGGER.debug("Starting Metric Anomaly alert task Job:", jobDetail.getKey());
+    LOGGER.debug("Starting Metric Anomaly alert task Job: {}", jobDetail.getKey());
 
     JobDataMap jobDataMap = jobDetail.getJobDataMap();
     RuleSource ruleSource = (RuleSource) jobDataMap.get(JOB_DATA_MAP_RULE_SOURCE);
@@ -33,27 +33,39 @@ public class MetricAnomalyAlertTaskJob implements Job {
     AlertTaskConverter alertTaskConverter =
         (AlertTaskConverter) jobDataMap.get(JOB_DATA_MAP_TASK_CONVERTER);
 
+    List<AlertTask.Builder> alertTasks = getAlertTasks(alertTaskConverter, ruleSource);
+    LOGGER.debug("Number of task to execute as part of this run: {}", alertTasks.size());
+    alertTasks.forEach(
+        alertTask -> {
+          try {
+            kafkaAlertTaskProducer.enqueue(alertTask.build());
+          } catch (IOException e) {
+            LOGGER.debug("Failed execute alert task for task: {} with exception:{}", alertTask, e);
+          }
+        });
+    LOGGER.debug("job finished");
+  }
+
+  public static List<AlertTask.Builder> getAlertTasks(
+      AlertTaskConverter alertTaskConverter, RuleSource ruleSource) {
+    List<AlertTask.Builder> alertTasks = new ArrayList<>();
     try {
       List<Document> documents = ruleSource.getAllEventConditions(METRIC_ANOMALY_EVENT_CONDITION);
-      LOGGER.debug("Number of task to execute as part of this run: {}", documents.size());
-      List<Document> queued = new ArrayList<>();
       documents.forEach(
           document -> {
             try {
-              AlertTask.Builder task = alertTaskConverter.toAlertTaskBuilder(document);
-              kafkaAlertTaskProducer.enqueue(task.build());
-              queued.add(document);
+              AlertTask.Builder alertTaskBuilder = alertTaskConverter.toAlertTaskBuilder(document);
+              alertTasks.add(alertTaskBuilder);
             } catch (Exception e) {
-              LOGGER.debug(
-                  "Failed execute alert task for document:{} with exception:{}",
+              LOGGER.error(
+                  "Failed to convert alert task for document:{} with exception:{}",
                   document.toJson(),
                   e);
             }
           });
-      LOGGER.debug("Total number of tasks queued as part of this run:{}", queued.size());
-      LOGGER.debug("job finished");
     } catch (IOException e) {
       LOGGER.error("Job failed with exception", e);
     }
+    return alertTasks;
   }
 }

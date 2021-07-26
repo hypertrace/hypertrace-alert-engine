@@ -58,7 +58,8 @@ public class RuleEvaluationJobManager implements JobManager {
     jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP);
 
     JobDataMap jobDataMap = new JobDataMap();
-    jobDataMap.put(ALERT_TASKS, getAlertTasks(appConfig));
+
+    addAlertTasksToJobData(jobDataMap, appConfig);
 
     addEvaluatorToJobData(jobDataMap, appConfig);
 
@@ -94,11 +95,11 @@ public class RuleEvaluationJobManager implements JobManager {
     }
   }
 
-  private List<AlertTask.Builder> getAlertTasks(Config config) {
+  private void addAlertTasksToJobData(JobDataMap jobDataMap, Config appConfig) {
     RuleSource ruleSource =
         RuleSourceProvider.getProvider(
-            config.getConfig(AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE));
-    Config jobConfig = getJobConfig(config);
+            appConfig.getConfig(AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE));
+    Config jobConfig = getJobConfig(appConfig);
 
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
     List<AlertTask.Builder> alertTasks = new ArrayList<>();
@@ -119,7 +120,8 @@ public class RuleEvaluationJobManager implements JobManager {
     } catch (IOException e) {
       LOGGER.error("AlertTask conversion failed with an exception", e);
     }
-    return alertTasks;
+
+    jobDataMap.put(ALERT_TASKS, alertTasks);
   }
 
   private void addEvaluatorToJobData(JobDataMap jobDataMap, Config appConfig) {

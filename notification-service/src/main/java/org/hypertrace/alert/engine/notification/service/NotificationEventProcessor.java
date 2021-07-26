@@ -43,18 +43,19 @@ public class NotificationEventProcessor {
   }
 
   public void process(NotificationEvent notificationEvent) {
-    LOGGER.info("Processing notification {} {}", notificationEvent, notificationChannelMap);
+    LOGGER.debug("Processing notification {} {}", notificationEvent, notificationChannelMap);
     EventRecord eventRecord = notificationEvent.getEventRecord();
     if (!eventRecord.getEventType().equals(METRIC_ANOMALY_ACTION_EVENT_TYPE)) {
       LOGGER.debug("Received unsupported event type {}", eventRecord.getEventType());
       return;
     }
-    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent = null;
+
+    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent;
     try {
       metricAnomalyNotificationEvent =
           MetricAnomalyNotificationEvent.fromByteBuffer(eventRecord.getEventValue());
     } catch (IOException e) {
-      // e.printStackTrace();
+      throw new RuntimeException("Exception deserializing MetricAnomalyNotificationEvent", e);
     }
     if (notificationChannelMap.containsKey(metricAnomalyNotificationEvent.getChannelId())) {
       LOGGER.info("Sending notification event now {}", metricAnomalyNotificationEvent);

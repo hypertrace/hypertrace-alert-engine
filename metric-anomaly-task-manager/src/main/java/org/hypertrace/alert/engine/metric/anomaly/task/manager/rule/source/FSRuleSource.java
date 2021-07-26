@@ -36,6 +36,7 @@ class FSRuleSource implements RuleSource {
     }
 
     LOGGER.info("Reading alert rules {}", jsonNode.toPrettyString());
+
     List<JsonNode> nodes =
         StreamSupport.stream(jsonNode.spliterator(), false)
             .collect(Collectors.toUnmodifiableList());
