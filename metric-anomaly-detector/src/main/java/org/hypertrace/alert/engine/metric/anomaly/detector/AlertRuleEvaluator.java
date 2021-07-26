@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
@@ -92,17 +91,18 @@ public class AlertRuleEvaluator {
     }
 
     if (metricAnomalyEventCondition.getViolationConditionList().isEmpty()) {
-      LOGGER.info(
+      LOGGER.debug(
           "Received rule with empty violation conditions. tenantId: {}, eventConditionId: {}",
           alertTask.getTenantId(),
           alertTask.getEventConditionId());
       return Optional.empty();
     }
 
+    QueryRequest queryRequest = getQueryRequest(metricAnomalyEventCondition, alertTask);
+    LOGGER.debug("Query request {}", queryRequest);
+
     Iterator<ResultSetChunk> iterator =
-        executeQuery(
-            Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
-            getQueryRequest(metricAnomalyEventCondition, alertTask));
+        executeQuery(Map.of(TENANT_ID_KEY, alertTask.getTenantId()), queryRequest);
 
     LOGGER.debug(
         "Starting rule evaluation for rule Id {} start {} & end time {}",
@@ -115,12 +115,12 @@ public class AlertRuleEvaluator {
         metricAnomalyEventCondition.getViolationConditionList().get(0);
 
     if (violationCondition.hasStaticThresholdCondition()) {
-      EvaluationResult evaluationResult =
-          evaluateForStaticThreshold(
-              iterator,
-              violationCondition,
-              metricAnomalyEventCondition.getMetricSelection().getMetricAttribute());
-
+      EvaluationResult evaluationResult = evaluateForStaticThreshold(iterator, violationCondition);
+      LOGGER.debug(
+          "Eval result {} {} {}",
+          evaluationResult.isViolation(),
+          evaluationResult.getDataCount(),
+          evaluationResult.getViolationCount());
       if (evaluationResult.isViolation()) {
         return getNotificationEvent(alertTask);
       }
@@ -130,34 +130,12 @@ public class AlertRuleEvaluator {
   }
 
   EvaluationResult evaluateForStaticThreshold(
-      Iterator<ResultSetChunk> iterator,
-      ViolationCondition violationCondition,
-      Attribute attribute) {
+      Iterator<ResultSetChunk> iterator, ViolationCondition violationCondition) {
     int dataCount = 0, violationCount = 0;
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
-      int metricDataColumnIndex = -1;
       for (Row row : resultSetChunk.getRowList()) {
-
-        if (metricDataColumnIndex == -1 && resultSetChunk.hasResultSetMetadata()) {
-          for (int i = 0; i < resultSetChunk.getResultSetMetadata().getColumnMetadataCount(); i++) {
-            if (resultSetChunk
-                .getResultSetMetadata()
-                .getColumnMetadata(i)
-                .getColumnName()
-                .equals(String.join(".", attribute.getScope(), attribute.getKey()))) {
-              metricDataColumnIndex = i;
-              break;
-            }
-          }
-        }
-
-        if (metricDataColumnIndex == -1) {
-          LOGGER.warn("Couldn't find the requested metric data column in result");
-          continue;
-        }
-
-        Value value = row.getColumn(metricDataColumnIndex);
+        Value value = row.getColumn(1);
         if (value.getValueType() != ValueType.STRING) {
           throw new IllegalArgumentException(
               "Expecting value of type string, received valueType: " + value.getValueType());
@@ -249,6 +227,7 @@ public class AlertRuleEvaluator {
             .setEventRecord(eventRecord)
             .build();
 
+    LOGGER.debug("Notification Event {}", notificationEvent);
     return Optional.of(notificationEvent);
   }
 }

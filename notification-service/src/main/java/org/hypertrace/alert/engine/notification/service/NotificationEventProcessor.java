@@ -43,6 +43,7 @@ public class NotificationEventProcessor {
   }
 
   public void process(NotificationEvent notificationEvent) {
+    LOGGER.info("Processing notification {} {}", notificationEvent, notificationChannelMap);
     EventRecord eventRecord = notificationEvent.getEventRecord();
     if (!eventRecord.getEventType().equals(METRIC_ANOMALY_ACTION_EVENT_TYPE)) {
       LOGGER.debug("Received unsupported event type {}", eventRecord.getEventType());
@@ -56,6 +57,7 @@ public class NotificationEventProcessor {
       // e.printStackTrace();
     }
     if (notificationChannelMap.containsKey(metricAnomalyNotificationEvent.getChannelId())) {
+      LOGGER.info("Sending notification event now {}", metricAnomalyNotificationEvent);
       webhookNotifier.notify(
           metricAnomalyNotificationEvent,
           notificationChannelMap.get(metricAnomalyNotificationEvent.getChannelId()));

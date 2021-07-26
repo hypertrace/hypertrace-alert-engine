@@ -15,6 +15,10 @@ tasks.test {
 }
 
 dependencies {
+    constraints {
+        implementation("com.fasterxml.jackson.core:jackson-databind:2.12.1")
+        implementation("org.apache.httpcomponents:httpclient:4.5.13")
+    }
     implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.23")
     implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
 

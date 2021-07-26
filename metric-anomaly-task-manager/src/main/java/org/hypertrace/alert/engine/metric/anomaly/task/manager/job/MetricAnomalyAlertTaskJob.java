@@ -36,12 +36,12 @@ public class MetricAnomalyAlertTaskJob implements Job {
     try {
       List<Document> documents = ruleSource.getAllEventConditions(METRIC_ANOMALY_EVENT_CONDITION);
       LOGGER.debug("Number of task to execute as part of this run: {}", documents.size());
-      List<Document> queued = new ArrayList();
+      List<Document> queued = new ArrayList<>();
       documents.forEach(
           document -> {
             try {
-              AlertTask task = alertTaskConverter.toAlertTask(document);
-              kafkaAlertTaskProducer.enqueue(task);
+              AlertTask.Builder task = alertTaskConverter.toAlertTaskBuilder(document);
+              kafkaAlertTaskProducer.enqueue(task.build());
               queued.add(document);
             } catch (Exception e) {
               LOGGER.debug(
@@ -53,7 +53,7 @@ public class MetricAnomalyAlertTaskJob implements Job {
       LOGGER.debug("Total number of tasks queued as part of this run:{}", queued.size());
       LOGGER.debug("job finished");
     } catch (IOException e) {
-      LOGGER.error("Job failed with exception:{}", e);
+      LOGGER.error("Job failed with exception", e);
     }
   }
 }

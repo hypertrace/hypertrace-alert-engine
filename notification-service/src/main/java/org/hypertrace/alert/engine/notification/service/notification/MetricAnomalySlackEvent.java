@@ -12,26 +12,27 @@ import org.hypertrace.alert.engine.notification.transport.webhook.slack.Button;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.SectionBlock;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Text;
 
-class MetricAnomalySlackEvent implements SlackMessage {
+public class MetricAnomalySlackEvent implements SlackMessage {
 
   public static final String EVENT_TIMESTAMP = "Event Timestamp";
   public static final String VIOLATION_TIMESTAMP = "Violation Timestamp";
   public static final String METRIC_ANOMALY_EVENT_TYPE = "Metric Anomaly Event Type";
   private final List<Attachment> attachments;
 
-  MetricAnomalySlackEvent(List<Attachment> attachments) {
+  public MetricAnomalySlackEvent(List<Attachment> attachments) {
     this.attachments = attachments;
   }
 
-  static MetricAnomalySlackEvent getMessage(MetricAnomalyWebhookEvent metricAnomalyWebhookEvent) {
+  public static MetricAnomalySlackEvent getMessage(
+      MetricAnomalyWebhookEvent metricAnomalyWebhookEvent) {
     String titleMessage = "Alert for Metric Anomaly Event";
     SectionBlock titleBlock = getTitleBlock(titleMessage);
 
     // create Metadata block
     List<Text> metadataFields = new ArrayList<>();
     addTimestamp(metadataFields, metricAnomalyWebhookEvent.getEventTimestamp(), EVENT_TIMESTAMP);
-    addTimestamp(
-        metadataFields, metricAnomalyWebhookEvent.getViolationTimestamp(), VIOLATION_TIMESTAMP);
+    // addTimestamp(
+    //    metadataFields, metricAnomalyWebhookEvent.getViolationTimestamp(), VIOLATION_TIMESTAMP);
     addIfNotEmpty(
         metadataFields, metricAnomalyWebhookEvent.getEventConditionId(), METRIC_ANOMALY_EVENT_TYPE);
 
@@ -55,7 +56,7 @@ class MetricAnomalySlackEvent implements SlackMessage {
     return new MetricAnomalySlackEvent(List.of(attachments));
   }
 
-  List<Attachment> getAttachments() {
+  public List<Attachment> getAttachments() {
     return attachments;
   }
 }

@@ -64,6 +64,8 @@ public class RuleEvaluationJobManager implements JobManager {
 
     addNotificationProcessorToJobData(jobDataMap, appConfig);
 
+    addJobConfigToJobData(jobDataMap, appConfig);
+
     jobDetail =
         JobBuilder.newJob(RuleEvaluationJob.class)
             .withIdentity(jobKey)
@@ -92,24 +94,21 @@ public class RuleEvaluationJobManager implements JobManager {
     }
   }
 
-  private List<AlertTask> getAlertTasks(Config config) {
+  private List<AlertTask.Builder> getAlertTasks(Config config) {
     RuleSource ruleSource =
         RuleSourceProvider.getProvider(
             config.getConfig(AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE));
-    Config jobConfig =
-        config.hasPath(AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG)
-            ? config.getConfig(AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG)
-            : ConfigFactory.parseMap(Map.of());
+    Config jobConfig = getJobConfig(config);
 
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
-    List<AlertTask> alertTasks = new ArrayList<>();
+    List<AlertTask.Builder> alertTasks = new ArrayList<>();
     try {
       List<Document> documents = ruleSource.getAllEventConditions(METRIC_ANOMALY_EVENT_CONDITION);
       documents.forEach(
           document -> {
             try {
-              AlertTask task = alertTaskConverter.toAlertTask(document);
-              alertTasks.add(task);
+              AlertTask.Builder taskBuilder = alertTaskConverter.toAlertTaskBuilder(document);
+              alertTasks.add(taskBuilder);
             } catch (Exception e) {
               LOGGER.error(
                   "Failed to convert alert task for document:{} with exception:{}",
@@ -126,6 +125,16 @@ public class RuleEvaluationJobManager implements JobManager {
   private void addEvaluatorToJobData(JobDataMap jobDataMap, Config appConfig) {
     AlertRuleEvaluator alertRuleEvaluator = new AlertRuleEvaluator(appConfig);
     jobDataMap.put(ALERT_RULE_EVALUATOR, alertRuleEvaluator);
+  }
+
+  private void addJobConfigToJobData(JobDataMap jobDataMap, Config appConfig) {
+    jobDataMap.put(AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG, getJobConfig(appConfig));
+  }
+
+  private Config getJobConfig(Config appConfig) {
+    return appConfig.hasPath(AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG)
+        ? appConfig.getConfig(AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG)
+        : ConfigFactory.parseMap(Map.of());
   }
 
   private void addNotificationProcessorToJobData(JobDataMap jobDataMap, Config appConfig) {
