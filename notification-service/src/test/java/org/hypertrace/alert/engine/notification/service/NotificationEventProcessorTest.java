@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
@@ -23,10 +24,13 @@ class NotificationEventProcessorTest {
                 List.of(
                     WebFormatNotificationChannelConfig.builder()
                         .channelConfigType(NotificationChannelsReader.CHANNEL_CONFIG_TYPE_WEBHOOK)
-                        .url("https://hooks.slack.com/services/abcd")
+                        .url("https://hooks.slack.com/services/abc")
                         .webhookFormat(NotificationChannelsReader.WEBHOOK_FORMAT_SLACK)
                         .build()))
             .build();
+
+    List<MetricValues> metricValuesList =
+        List.of(MetricValues.newBuilder().setRhs(1324).setLhs(List.of(1d, 2d)).build());
 
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
@@ -35,6 +39,7 @@ class NotificationEventProcessorTest {
             .setViolationTimestamp(System.currentTimeMillis())
             .setEventConditionType("grth")
             .setMetricValuesList(List.of())
+            .setMetricValuesList(metricValuesList)
             .build();
 
     EventRecord eventRecord =
@@ -53,6 +58,15 @@ class NotificationEventProcessorTest {
             .build();
 
     WebhookNotifier webhookNotifier = Mockito.mock(WebhookNotifier.class);
+
+    /*
+      For testing purposes
+      Provide webhook url
+      Make all methods public in MetricAnomalySlackEvent.java
+      Uncomment below line
+    */
+    //    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
+
     new NotificationEventProcessor(List.of(notificationChannel), webhookNotifier)
         .process(notificationEvent);
 

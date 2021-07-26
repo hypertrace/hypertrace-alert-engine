@@ -1,12 +1,13 @@
 package org.hypertrace.alert.engine.notification.service.notification;
 
 import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addIfNotEmpty;
-import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addMetricValues;
 import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addTimestamp;
 import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.getTitleBlock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.ActionBlock;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Attachment;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Button;
@@ -18,6 +19,8 @@ class MetricAnomalySlackEvent implements SlackMessage {
   public static final String EVENT_TIMESTAMP = "Event Timestamp";
   public static final String VIOLATION_TIMESTAMP = "Violation Timestamp";
   public static final String METRIC_ANOMALY_EVENT_TYPE = "Metric Anomaly Event Type";
+  public static final String METRIC_VALUES_FOR_VIOLATED_CONDITION =
+      "Metric Values for Violated Condition";
   private final List<Attachment> attachments;
 
   MetricAnomalySlackEvent(List<Attachment> attachments) {
@@ -35,7 +38,10 @@ class MetricAnomalySlackEvent implements SlackMessage {
         metadataFields, metricAnomalyWebhookEvent.getViolationTimestamp(), VIOLATION_TIMESTAMP);
     addIfNotEmpty(
         metadataFields, metricAnomalyWebhookEvent.getEventConditionId(), METRIC_ANOMALY_EVENT_TYPE);
-    addMetricValues(metadataFields, metricAnomalyWebhookEvent.getMetricValuesList());
+    addIfNotEmpty(
+        metadataFields,
+        getMetricValues(metricAnomalyWebhookEvent.getMetricValuesList()),
+        METRIC_VALUES_FOR_VIOLATED_CONDITION);
 
     SectionBlock metadataBlock = new SectionBlock();
     metadataBlock.setFields(metadataFields);
@@ -59,5 +65,17 @@ class MetricAnomalySlackEvent implements SlackMessage {
 
   List<Attachment> getAttachments() {
     return attachments;
+  }
+
+  private static String getMetricValues(List<MetricValues> metricValuesList) {
+    return metricValuesList.stream()
+        .map(
+            metricValues ->
+                String.valueOf(metricValues.getRhs())
+                    + " : "
+                    + metricValues.getLhs().stream()
+                        .map(lhs -> String.valueOf(lhs))
+                        .collect(Collectors.joining(" , ")))
+        .collect(Collectors.joining("\n"));
   }
 }

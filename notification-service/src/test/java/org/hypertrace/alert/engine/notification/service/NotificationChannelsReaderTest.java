@@ -32,7 +32,7 @@ class NotificationChannelsReaderTest {
                 notificationChannels.get(0).getNotificationChannelConfig().get(0))
             .getWebhookFormat());
     assertEquals(
-        "https://hooks.slack.com/services/abcde",
+        "https://hooks.slack.com/services/abc",
         ((WebFormatNotificationChannelConfig)
                 notificationChannels.get(0).getNotificationChannelConfig().get(0))
             .getUrl());
