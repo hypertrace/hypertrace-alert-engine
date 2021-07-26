@@ -33,12 +33,12 @@ public class MetricAnomalyAlertTaskJob implements Job {
     AlertTaskConverter alertTaskConverter =
         (AlertTaskConverter) jobDataMap.get(JOB_DATA_MAP_TASK_CONVERTER);
 
-    List<AlertTask> alertTasks = getAlertTasks(alertTaskConverter, ruleSource);
+    List<AlertTask.Builder> alertTasks = getAlertTasks(alertTaskConverter, ruleSource);
     LOGGER.debug("Number of task to execute as part of this run: {}", alertTasks.size());
     alertTasks.forEach(
         alertTask -> {
           try {
-            kafkaAlertTaskProducer.enqueue(alertTask);
+            kafkaAlertTaskProducer.enqueue(alertTask.build());
           } catch (IOException e) {
             LOGGER.debug("Failed execute alert task for task: {} with exception:{}", alertTask, e);
           }
@@ -46,16 +46,16 @@ public class MetricAnomalyAlertTaskJob implements Job {
     LOGGER.debug("job finished");
   }
 
-  public static List<AlertTask> getAlertTasks(
+  public static List<AlertTask.Builder> getAlertTasks(
       AlertTaskConverter alertTaskConverter, RuleSource ruleSource) {
-    List<AlertTask> alertTasks = new ArrayList<>();
+    List<AlertTask.Builder> alertTasks = new ArrayList<>();
     try {
       List<Document> documents = ruleSource.getAllEventConditions(METRIC_ANOMALY_EVENT_CONDITION);
       documents.forEach(
           document -> {
             try {
-              AlertTask task = alertTaskConverter.toAlertTask(document);
-              alertTasks.add(task);
+              AlertTask.Builder alertTaskBuilder = alertTaskConverter.toAlertTaskBuilder(document);
+              alertTasks.add(alertTaskBuilder);
             } catch (Exception e) {
               LOGGER.error(
                   "Failed to convert alert task for document:{} with exception:{}",
@@ -64,7 +64,7 @@ public class MetricAnomalyAlertTaskJob implements Job {
             }
           });
     } catch (IOException e) {
-      LOGGER.error("AlertTask conversion failed with an exception", e);
+      LOGGER.error("Job failed with exception", e);
     }
     return alertTasks;
   }
