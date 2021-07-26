@@ -8,6 +8,7 @@ plugins {
     id("org.hypertrace.publish-plugin") version "1.0.2" apply false
     id("org.hypertrace.integration-test-plugin") version "0.2.0" apply false
     id("io.freefair.lombok") version "5.0.0" apply false
+    id("org.hypertrace.docker-publish-plugin") version "0.9.0" apply false
 }
 
 subprojects {
