@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.ActionBlock;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Attachment;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Button;
@@ -74,10 +75,26 @@ class MetricAnomalySlackEvent implements SlackMessage {
                     + " out of "
                     + String.valueOf(metricValues.getDataCount())
                     + " metric data points were "
-                    + String.valueOf(metricValues.getOperator())
+                    + String.valueOf(getStringFromOperator(metricValues.getOperator()))
                     + " than the threshold "
                     + String.valueOf(metricValues.getRhs())
-                    + " in last 1 minute")
+                    + " in last 1 minute.")
         .collect(Collectors.joining("\n"));
+  }
+
+  private static String getStringFromOperator(Operator operator) {
+    switch (operator) {
+      case STATIC_THRESHOLD_OPERATOR_GT:
+        return "greater";
+      case STATIC_THRESHOLD_OPERATOR_LT:
+        return "less";
+      case STATIC_THRESHOLD_OPERATOR_GTE:
+        return "greater than or equal to";
+      case STATIC_THRESHOLD_OPERATOR_LTE:
+        return "less than or equal to";
+      default:
+        throw new UnsupportedOperationException(
+            "Unsupported threshold condition operator: " + operator);
+    }
   }
 }
