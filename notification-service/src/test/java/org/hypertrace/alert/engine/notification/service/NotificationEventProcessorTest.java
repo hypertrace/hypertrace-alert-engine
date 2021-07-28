@@ -7,6 +7,7 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,14 @@ class NotificationEventProcessorTest {
             .build();
 
     List<MetricValues> metricValuesList =
-        List.of(MetricValues.newBuilder().setRhs(1324).setLhs(List.of(1d, 2d)).build());
+        List.of(
+            MetricValues.newBuilder()
+                .setRhs(1324)
+                .setLhs(List.of(1d, 2d))
+                .setOperator(Operator.STATIC_THRESHOLD_OPERATOR_LT)
+                .setViolationCount(2)
+                .setDataCount(2)
+                .build());
 
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()

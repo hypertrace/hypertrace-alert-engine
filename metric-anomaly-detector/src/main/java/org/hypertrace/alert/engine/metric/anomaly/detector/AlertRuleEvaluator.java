@@ -24,6 +24,7 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.client.config.AttributeServiceClientConfig;
 import org.hypertrace.core.query.service.api.QueryRequest;
@@ -128,7 +129,12 @@ public class AlertRuleEvaluator {
               metricAnomalyEventCondition.getMetricSelection().getMetricAttribute());
 
       if (evaluationResult.isViolation()) {
-        return getNotificationEvent(alertTask);
+        return getNotificationEvent(
+            alertTask,
+            evaluationResult.dataCount,
+            evaluationResult.violationCount,
+            staticThresholdOperatorToOperatorConvertor(
+                violationCondition.getStaticThresholdCondition().getOperator()));
       }
     }
 
@@ -224,7 +230,9 @@ public class AlertRuleEvaluator {
         alertTask.getTenantId());
   }
 
-  private Optional<NotificationEvent> getNotificationEvent(AlertTask alertTask) throws IOException {
+  private Optional<NotificationEvent> getNotificationEvent(
+      AlertTask alertTask, int dataCount, int violationCount, Operator operator)
+      throws IOException {
 
     List<MetricValues> metricValuesList = new ArrayList<>();
     metricValues
@@ -235,6 +243,9 @@ public class AlertRuleEvaluator {
                   MetricValues.newBuilder()
                       .setLhs(new ArrayList<>(collection))
                       .setRhs(key)
+                      .setDataCount(dataCount)
+                      .setViolationCount(violationCount)
+                      .setOperator(operator)
                       .build());
             });
 
@@ -278,6 +289,24 @@ public class AlertRuleEvaluator {
         return lhs >= rhs;
       case STATIC_THRESHOLD_OPERATOR_LTE:
         return lhs <= rhs;
+      default:
+        throw new UnsupportedOperationException(
+            "Unsupported threshold condition operator: " + operator);
+    }
+  }
+
+  private Operator staticThresholdOperatorToOperatorConvertor(
+      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator
+          operator) {
+    switch (operator) {
+      case STATIC_THRESHOLD_OPERATOR_GT:
+        return Operator.STATIC_THRESHOLD_OPERATOR_GT;
+      case STATIC_THRESHOLD_OPERATOR_LT:
+        return Operator.STATIC_THRESHOLD_OPERATOR_LT;
+      case STATIC_THRESHOLD_OPERATOR_GTE:
+        return Operator.STATIC_THRESHOLD_OPERATOR_GTE;
+      case STATIC_THRESHOLD_OPERATOR_LTE:
+        return Operator.STATIC_THRESHOLD_OPERATOR_LTE;
       default:
         throw new UnsupportedOperationException(
             "Unsupported threshold condition operator: " + operator);

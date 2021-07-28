@@ -19,8 +19,7 @@ class MetricAnomalySlackEvent implements SlackMessage {
   public static final String EVENT_TIMESTAMP = "Event Timestamp";
   public static final String VIOLATION_TIMESTAMP = "Violation Timestamp";
   public static final String METRIC_ANOMALY_EVENT_TYPE = "Metric Anomaly Event Type";
-  public static final String VIOLATION_SUMMARY =
-      "Violation Summary";
+  public static final String VIOLATION_SUMMARY = "Violation Summary";
   private final List<Attachment> attachments;
 
   MetricAnomalySlackEvent(List<Attachment> attachments) {
@@ -71,11 +70,14 @@ class MetricAnomalySlackEvent implements SlackMessage {
     return metricValuesList.stream()
         .map(
             metricValues ->
-                String.valueOf(metricValues.getRhs())
-                    + " : "
-                    + metricValues.getLhs().stream()
-                        .map(lhs -> String.valueOf(lhs))
-                        .collect(Collectors.joining(" , ")))
+                String.valueOf(metricValues.getViolationCount())
+                    + " out of "
+                    + String.valueOf(metricValues.getDataCount())
+                    + " metric data points were "
+                    + String.valueOf(metricValues.getOperator())
+                    + " than the threshold "
+                    + String.valueOf(metricValues.getRhs())
+                    + " in last 1 minute")
         .collect(Collectors.joining("\n"));
   }
 }
