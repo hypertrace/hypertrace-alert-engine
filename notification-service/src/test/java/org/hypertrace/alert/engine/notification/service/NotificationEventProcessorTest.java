@@ -67,14 +67,6 @@ class NotificationEventProcessorTest {
 
     WebhookNotifier webhookNotifier = Mockito.mock(WebhookNotifier.class);
 
-    /*
-      For testing purposes
-      Provide webhook url
-      Make all methods public in MetricAnomalySlackEvent.java
-      Uncomment below line
-    */
-    //    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
-
     new NotificationEventProcessor(List.of(notificationChannel), webhookNotifier)
         .process(notificationEvent);
 
