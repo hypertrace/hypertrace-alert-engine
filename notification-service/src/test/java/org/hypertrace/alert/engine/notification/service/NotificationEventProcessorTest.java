@@ -6,6 +6,8 @@ import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.junit.jupiter.api.Test;
@@ -23,10 +25,20 @@ class NotificationEventProcessorTest {
                 List.of(
                     WebFormatNotificationChannelConfig.builder()
                         .channelConfigType(NotificationChannelsReader.CHANNEL_CONFIG_TYPE_WEBHOOK)
-                        .url("https://hooks.slack.com/services/abcd")
+                        .url("https://hooks.slack.com/services/abc")
                         .webhookFormat(NotificationChannelsReader.WEBHOOK_FORMAT_SLACK)
                         .build()))
             .build();
+
+    List<ViolationSummary> violationSummaryList =
+        List.of(
+            ViolationSummary.newBuilder()
+                .setRhs(1324)
+                .setLhs(List.of(1d, 2d))
+                .setOperator(Operator.STATIC_THRESHOLD_OPERATOR_LT)
+                .setViolationCount(2)
+                .setDataCount(2)
+                .build());
 
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
@@ -34,6 +46,8 @@ class NotificationEventProcessorTest {
             .setEventConditionId("5")
             .setViolationTimestamp(System.currentTimeMillis())
             .setEventConditionType("grth")
+            .setViolationSummaryList(List.of())
+            .setViolationSummaryList(violationSummaryList)
             .build();
 
     EventRecord eventRecord =
@@ -52,6 +66,7 @@ class NotificationEventProcessorTest {
             .build();
 
     WebhookNotifier webhookNotifier = Mockito.mock(WebhookNotifier.class);
+
     new NotificationEventProcessor(List.of(notificationChannel), webhookNotifier)
         .process(notificationEvent);
 

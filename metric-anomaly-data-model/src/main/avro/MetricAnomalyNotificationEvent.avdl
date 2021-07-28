@@ -1,9 +1,26 @@
 @namespace("org.hypertrace.alert.engine.metric.anomaly.datamodel")
 protocol MetricAnomalyNotificationEventProtocol {
+
+  enum Operator {
+    STATIC_THRESHOLD_OPERATOR_LTE,
+    STATIC_THRESHOLD_OPERATOR_GTE,
+    STATIC_THRESHOLD_OPERATOR_LT,
+    STATIC_THRESHOLD_OPERATOR_GT
+  }
+
   record MetricAnomalyNotificationEvent {
     string event_condition_id;
     string event_condition_type;
     long violation_timestamp;
     string channel_id;
+    array<ViolationSummary> violation_summary_list;
+  }
+
+  record ViolationSummary {
+    double rhs;
+    array<double> lhs;
+    int dataCount;
+    int violationCount;
+    Operator operator;
   }
 }

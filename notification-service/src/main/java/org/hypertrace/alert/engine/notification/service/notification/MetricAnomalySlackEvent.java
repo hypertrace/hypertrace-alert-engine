@@ -6,6 +6,9 @@ import static org.hypertrace.alert.engine.notification.service.notification.Slac
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.ActionBlock;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Attachment;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Button;
@@ -17,6 +20,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
   public static final String EVENT_TIMESTAMP = "Event Timestamp";
   public static final String VIOLATION_TIMESTAMP = "Violation Timestamp";
   public static final String METRIC_ANOMALY_EVENT_TYPE = "Metric Anomaly Event Type";
+  public static final String VIOLATION_SUMMARY = "Violation Summary";
   private final List<Attachment> attachments;
 
   public MetricAnomalySlackEvent(List<Attachment> attachments) {
@@ -35,6 +39,10 @@ public class MetricAnomalySlackEvent implements SlackMessage {
         metadataFields, metricAnomalyWebhookEvent.getViolationTimestamp(), VIOLATION_TIMESTAMP);
     addIfNotEmpty(
         metadataFields, metricAnomalyWebhookEvent.getEventConditionId(), METRIC_ANOMALY_EVENT_TYPE);
+    addIfNotEmpty(
+        metadataFields,
+        getViolationSummary(metricAnomalyWebhookEvent.getViolationSummaryList()),
+        VIOLATION_SUMMARY);
 
     SectionBlock metadataBlock = new SectionBlock();
     metadataBlock.setFields(metadataFields);
@@ -58,5 +66,36 @@ public class MetricAnomalySlackEvent implements SlackMessage {
 
   public List<Attachment> getAttachments() {
     return attachments;
+  }
+
+  private static String getViolationSummary(List<ViolationSummary> violationSummaryList) {
+    return violationSummaryList.stream()
+        .map(
+            metricValues ->
+                String.valueOf(metricValues.getViolationCount())
+                    + " out of "
+                    + String.valueOf(metricValues.getDataCount())
+                    + " metric data points were "
+                    + String.valueOf(getStringFromOperator(metricValues.getOperator()))
+                    + " than the threshold "
+                    + String.valueOf(metricValues.getRhs())
+                    + " in last 1 minute.")
+        .collect(Collectors.joining("\n"));
+  }
+
+  private static String getStringFromOperator(Operator operator) {
+    switch (operator) {
+      case STATIC_THRESHOLD_OPERATOR_GT:
+        return "greater";
+      case STATIC_THRESHOLD_OPERATOR_LT:
+        return "less";
+      case STATIC_THRESHOLD_OPERATOR_GTE:
+        return "greater than or equal to";
+      case STATIC_THRESHOLD_OPERATOR_LTE:
+        return "less than or equal to";
+      default:
+        throw new UnsupportedOperationException(
+            "Unsupported threshold condition operator: " + operator);
+    }
   }
 }

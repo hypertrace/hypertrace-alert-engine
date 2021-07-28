@@ -1,12 +1,16 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.typesafe.config.Config;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Getter;
@@ -18,6 +22,8 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.client.config.AttributeServiceClientConfig;
 import org.hypertrace.core.query.service.api.QueryRequest;
@@ -43,6 +49,7 @@ public class AlertRuleEvaluator {
   private final MetricQueryBuilder metricQueryBuilder;
   private final QueryServiceClient queryServiceClient;
   private final int qsRequestTimeout;
+  private final Multimap<Double, Double> violationSummaryMap = ArrayListMultimap.create();
 
   public AlertRuleEvaluator(Config appConfig) {
     AttributeServiceClientConfig asConfig = AttributeServiceClientConfig.from(appConfig);
@@ -122,7 +129,12 @@ public class AlertRuleEvaluator {
           evaluationResult.getDataCount(),
           evaluationResult.getViolationCount());
       if (evaluationResult.isViolation()) {
-        return getNotificationEvent(alertTask);
+        return getNotificationEvent(
+            alertTask,
+            evaluationResult.dataCount,
+            evaluationResult.violationCount,
+            staticThresholdOperatorToOperatorConvertor(
+                violationCondition.getStaticThresholdCondition().getOperator()));
       }
     }
 
@@ -173,20 +185,13 @@ public class AlertRuleEvaluator {
     StaticThresholdCondition thresholdCondition = violationCondition.getStaticThresholdCondition();
     double lhs = Double.parseDouble(value.getString());
     double rhs = thresholdCondition.getValue();
+    boolean isViolation = evalOperator(thresholdCondition.getOperator(), lhs, rhs);
 
-    switch (thresholdCondition.getOperator()) {
-      case STATIC_THRESHOLD_OPERATOR_GT:
-        return lhs > rhs;
-      case STATIC_THRESHOLD_OPERATOR_LT:
-        return lhs < rhs;
-      case STATIC_THRESHOLD_OPERATOR_GTE:
-        return lhs >= rhs;
-      case STATIC_THRESHOLD_OPERATOR_LTE:
-        return lhs <= rhs;
-      default:
-        throw new UnsupportedOperationException(
-            "Unsupported threshold condition operator: " + thresholdCondition.getOperator());
+    if (isViolation) {
+      violationSummaryMap.put(rhs, lhs);
     }
+
+    return isViolation;
   }
 
   Iterator<ResultSetChunk> executeQuery(
@@ -203,13 +208,32 @@ public class AlertRuleEvaluator {
         alertTask.getTenantId());
   }
 
-  private Optional<NotificationEvent> getNotificationEvent(AlertTask alertTask) throws IOException {
+  private Optional<NotificationEvent> getNotificationEvent(
+      AlertTask alertTask, int dataCount, int violationCount, Operator operator)
+      throws IOException {
+
+    List<ViolationSummary> violationSummaryList = new ArrayList<>();
+    violationSummaryMap
+        .asMap()
+        .forEach(
+            (key, collection) -> {
+              violationSummaryList.add(
+                  ViolationSummary.newBuilder()
+                      .setLhs(new ArrayList<>(collection))
+                      .setRhs(key)
+                      .setDataCount(dataCount)
+                      .setViolationCount(violationCount)
+                      .setOperator(operator)
+                      .build());
+            });
+
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
             .setViolationTimestamp(alertTask.getCurrentExecutionTime())
             .setChannelId(alertTask.getChannelId())
             .setEventConditionId(alertTask.getEventConditionId())
             .setEventConditionType(alertTask.getEventConditionType())
+            .setViolationSummaryList(violationSummaryList)
             .build();
 
     EventRecord eventRecord =
@@ -229,5 +253,42 @@ public class AlertRuleEvaluator {
 
     LOGGER.debug("Notification Event {}", notificationEvent);
     return Optional.of(notificationEvent);
+  }
+
+  private boolean evalOperator(
+      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator operator,
+      double lhs,
+      double rhs) {
+    switch (operator) {
+      case STATIC_THRESHOLD_OPERATOR_GT:
+        return lhs > rhs;
+      case STATIC_THRESHOLD_OPERATOR_LT:
+        return lhs < rhs;
+      case STATIC_THRESHOLD_OPERATOR_GTE:
+        return lhs >= rhs;
+      case STATIC_THRESHOLD_OPERATOR_LTE:
+        return lhs <= rhs;
+      default:
+        throw new UnsupportedOperationException(
+            "Unsupported threshold condition operator: " + operator);
+    }
+  }
+
+  private Operator staticThresholdOperatorToOperatorConvertor(
+      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator
+          operator) {
+    switch (operator) {
+      case STATIC_THRESHOLD_OPERATOR_GT:
+        return Operator.STATIC_THRESHOLD_OPERATOR_GT;
+      case STATIC_THRESHOLD_OPERATOR_LT:
+        return Operator.STATIC_THRESHOLD_OPERATOR_LT;
+      case STATIC_THRESHOLD_OPERATOR_GTE:
+        return Operator.STATIC_THRESHOLD_OPERATOR_GTE;
+      case STATIC_THRESHOLD_OPERATOR_LTE:
+        return Operator.STATIC_THRESHOLD_OPERATOR_LTE;
+      default:
+        throw new UnsupportedOperationException(
+            "Unsupported threshold condition operator: " + operator);
+    }
   }
 }
