@@ -4,6 +4,7 @@ plugins {
     jacoco
     id("org.hypertrace.jacoco-report-plugin")
     id("org.hypertrace.integration-test-plugin")
+    id("org.hypertrace.docker-publish-plugin")
 }
 
 application {
