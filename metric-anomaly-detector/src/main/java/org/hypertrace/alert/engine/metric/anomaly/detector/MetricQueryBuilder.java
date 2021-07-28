@@ -41,17 +41,13 @@ class MetricQueryBuilder {
 
   private static final String START_TIME_ATTRIBUTE_KEY = "startTime";
   private static final String DATE_TIME_CONVERTER = "dateTimeConvert";
-  private static final StringJoiner dotJoiner = new StringJoiner(".");
   private static final int DEFAULT_CACHE_SIZE = 4096;
   private static final int DEFAULT_EXPIRE_DURATION_MIN = 5; // 5 min
   private static final Logger LOG = LoggerFactory.getLogger(MetricQueryBuilder.class);
 
-  private final AttributeServiceClient attributesServiceClient;
   final LoadingCache<Pair<String, String>, String> attributeServiceCache;
 
   MetricQueryBuilder(AttributeServiceClient attributesServiceClient) {
-    this.attributesServiceClient = attributesServiceClient;
-
     CacheLoader<Pair<String, String>, String> cacheLoader =
         new CacheLoader<>() {
           @Override
@@ -83,16 +79,11 @@ class MetricQueryBuilder {
   QueryRequest buildMetricQueryRequest(
       MetricSelection metricSelection, long startTime, long endTime, String tenantId) {
     QueryRequest.Builder builder = QueryRequest.newBuilder();
-    String timeColumnId =
+    String timeColumn =
         getTimestampAttributeId(tenantId, metricSelection.getMetricAttribute().getScope());
-    if (null == timeColumnId) {
+    if (null == timeColumn) {
       throw new IllegalArgumentException("Error time column is null");
     }
-    String timeColumn =
-        new StringJoiner(".")
-            .add(metricSelection.getMetricAttribute().getScope())
-            .add(timeColumnId)
-            .toString();
 
     org.hypertrace.core.query.service.api.Filter filter =
         convertFilter(metricSelection.getFilter());
@@ -250,19 +241,18 @@ class MetricQueryBuilder {
       QueryRequest.Builder queryBuilder,
       Attribute metricAttribute,
       MetricAggregationFunction metricAggregationFunction) {
+    String columnName =
+        new StringJoiner(".")
+            .add(metricAttribute.getScope())
+            .add(metricAttribute.getKey())
+            .toString();
     Function function =
         Function.newBuilder()
             .setFunctionName(convertToQueryRequestFunctionName(metricAggregationFunction))
             .addArguments(
                 Expression.newBuilder()
                     .setColumnIdentifier(
-                        ColumnIdentifier.newBuilder()
-                            .setColumnName(
-                                new StringJoiner(".")
-                                    .add(metricAttribute.getScope())
-                                    .add(metricAttribute.getKey())
-                                    .toString())
-                            .build()))
+                        ColumnIdentifier.newBuilder().setColumnName(columnName).build()))
             .build();
     queryBuilder.addSelection(Expression.newBuilder().setFunction(function));
   }

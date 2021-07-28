@@ -20,7 +20,7 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.core.documentstore.Document;
 
 public class AlertTaskConverter {
-  private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Parser JSON_PARSER = JsonFormat.parser().ignoringUnknownFields();
 
   static final String EVENT_CONDITION_ID = "eventConditionId";
@@ -41,7 +41,7 @@ public class AlertTaskConverter {
     this.jobConfig = jobConfig;
   }
 
-  public AlertTask toAlertTask(Document document) throws IOException {
+  public AlertTask.Builder toAlertTaskBuilder(Document document) throws IOException {
     JsonNode rule = OBJECT_MAPPER.readTree(document.toJson());
 
     AlertTask.Builder builder = AlertTask.newBuilder();
@@ -50,11 +50,9 @@ public class AlertTaskConverter {
     builder.setTenantId(getTenantId());
 
     // set execution window
-    Instant current =
-        adjustDelay(roundHalfDown(Instant.now(), ChronoUnit.MINUTES), getDelayInMinutes());
-    builder.setCurrentExecutionTime(current.toEpochMilli());
-    builder.setLastExecutionTime(
-        adjustDelay(current, getExecutionWindowInMinutes()).toEpochMilli());
+    Instant now = getCurrent(jobConfig);
+    setCurrentExecutionTime(builder, now);
+    setLastExecutionTime(builder, now, jobConfig);
 
     // set event condition
     String conditionType = rule.get(EVENT_CONDITION_TYPE).textValue();
@@ -65,7 +63,7 @@ public class AlertTaskConverter {
     builder.setEventConditionType(rule.get(EVENT_CONDITION_TYPE).textValue());
     builder.setEventConditionValue(eventConditionValueAsBytes);
     builder.setChannelId(rule.get(CHANNEL_ID).asText());
-    return builder.build();
+    return builder;
   }
 
   private static ByteBuffer getEventConditionBytes(String conditionType, JsonNode jsonNode)
@@ -82,6 +80,21 @@ public class AlertTaskConverter {
     throw new RuntimeException(String.format("Un-supported condition type:%s", conditionType));
   }
 
+  public static void setCurrentExecutionTime(AlertTask.Builder builder, Instant now) {
+    builder.setCurrentExecutionTime(now.toEpochMilli());
+  }
+
+  public static void setLastExecutionTime(
+      AlertTask.Builder builder, Instant now, Config jobConfig) {
+    builder.setLastExecutionTime(
+        adjustDelay(now, getExecutionWindowInMinutes(jobConfig)).toEpochMilli());
+  }
+
+  public static Instant getCurrent(Config jobConfig) {
+    return adjustDelay(
+        roundHalfDown(Instant.now(), ChronoUnit.MINUTES), getDelayInMinutes(jobConfig));
+  }
+
   private static Instant roundHalfDown(Instant instant, TemporalUnit unit) {
     return instant.minus(unit.getDuration().dividedBy(2)).truncatedTo(unit);
   }
@@ -90,13 +103,13 @@ public class AlertTaskConverter {
     return instant.minus(Duration.of(delayInMinutes, ChronoUnit.MINUTES));
   }
 
-  private int getExecutionWindowInMinutes() {
+  private static int getExecutionWindowInMinutes(Config jobConfig) {
     return jobConfig.hasPath(EXECUTION_WINDOW_IN_MINUTES_CONFIG)
         ? jobConfig.getInt(EXECUTION_WINDOW_IN_MINUTES_CONFIG)
         : DEFAULT_EXECUTION_WINDOW_IN_MINUTES;
   }
 
-  private int getDelayInMinutes() {
+  private static int getDelayInMinutes(Config jobConfig) {
     return jobConfig.hasPath(DELAY_IN_MINUTES_CONFIG)
         ? jobConfig.getInt(DELAY_IN_MINUTES_CONFIG)
         : DEFAULT_DELAY_IN_MINUTES;

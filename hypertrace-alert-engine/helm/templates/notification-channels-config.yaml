@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.notificationChannelsConfig.name }}
+  labels:
+    release: {{ .Release.Name }}
+data:
+  notification-channels.json: |-
+    {{ .Values.notificationChannelsConfig.channels |  toJson  }}
