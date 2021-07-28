@@ -1,0 +1,103 @@
+# Default values for the helm chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+#
+# Note about Namespace
+# --------------------
+# It is deliberately left out here and using the helm -n or --namespace flag you can deploy your resources to the same
+# namespace as the release. If you leave it out, your resources will be deployed to the default namespace.
+# Also, not that the namespace you are deploying to should already exist otherwise the helm command will fail.
+# You can always specify a different namespace for a resource by setting it directly in it's yaml file or
+# making it configurable by defining it in this file.
+
+###########
+# Deployment
+###########
+replicaCount: 1
+maxUnavailable: 0
+
+image:
+  repository: hypertrace/notification-service
+  pullPolicy: IfNotPresent
+  tagOverride: ""
+
+imagePullSecrets: []
+
+nodeLabels: {}
+
+# This is defined in resources/configs/notification-service/application.conf as service.admin.port
+containerAdminPort: 8099
+
+javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
+
+livenessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  failureThreshold: 5
+
+resources:
+  requests:
+    cpu: 0.1
+    memory: 1024Mi
+  limits:
+    cpu: 0.2
+    memory: 1024Mi
+
+deploymentLabels:
+  app: notification-service
+
+podLabels:
+  app: notification-service
+
+podAnnotations: {}
+
+# The Deployment Selector match labels are different from the pod labels. Note that they should be a subset of the pod
+# labels. You append new labels to them but cannot remove labels. If you remove or modify the labels you will need to
+# delete the existing deployment bearing the same name and then redeploy. This is the reason why they are separated from
+# the pod labels. You can add and remove pod labels without having an effect on the deployment.
+# Also, please use "apiVersion: apps/v1" instead of the deprecated "apiVersion: extensions/v1beta1" for the deployment
+# apiVersion in the yaml file.
+deploymentSelectorMatchLabels:
+  app: notification-service
+
+serviceSelectorLabels:
+  app: notification-service
+
+###########
+# Config Maps
+###########
+notificationServiceConfig:
+  name: notification-service-config
+  queueConfig:
+    inputTopic: action-events
+    bootstrapServers: bootstrap
+
+logConfig:
+  name: notification-service-log-appender-config
+  monitorInterval: 30
+  rootLogger:
+    level: INFO
+  appender:
+    rolling:
+      enabled: false
+
+notificationChannelsConfig:
+  name: hypertrace-alert-engine-notification-channels-config
+  channels:
+    [
+      {
+        "channelName": "channel-1",
+        "channelId": "channel-id-1",
+        "channelConfig": [
+          {
+            "channelConfigType": "WEBHOOK",
+            "url": "<https://hooks.slack.com/services/abc>",
+            "webhookFormat": "WEBHOOK_FORMAT_SLACK"
+          }
+        ]
+      }
+    ]
