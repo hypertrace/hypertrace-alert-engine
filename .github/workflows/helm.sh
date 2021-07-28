@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-SUB_PROJECTS_DIRS="./hypertrace-alert-engine"
+SUB_PROJECTS_DIRS="./hypertrace-alert-engine ./metric-anomaly-task-manager"
 
 subcommand=$1; shift
 case "$subcommand" in
