@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.hypertraceAlertEngineConfig.name }}
+  labels:
+    release: {{ .Release.Name }}
+data:
+  application.conf: |-
+    query.service.config = {
+      host = {{ .Values.hypertraceAlertEngineConfig.queryService.host }}
+      port = {{ .Values.hypertraceAlertEngineConfig.queryService.port }}
+    }
+
+    attributes.service.config = {
+      host = {{ .Values.hypertraceAlertEngineConfig.attributeService.host }}
+      port = {{ .Values.hypertraceAlertEngineConfig.attributeService.port }}
+    }
