@@ -160,7 +160,7 @@ public class AlertRuleEvaluator {
       }
     }
 
-    if (dataCount > 0 && violationCount == dataCount) {
+    if (isViolation(dataCount, violationCount)) {
       LOGGER.debug("Rule violated. dataCount {}, violationCount {}", dataCount, violationCount);
     } else {
       LOGGER.debug("Rule normal. dataCount {} violationCount {}", dataCount, violationCount);
@@ -169,8 +169,12 @@ public class AlertRuleEvaluator {
     return EvaluationResult.builder()
         .dataCount(dataCount)
         .violationCount(violationCount)
-        .isViolation(dataCount == violationCount)
+        .isViolation(isViolation(dataCount, violationCount))
         .build();
+  }
+
+  private boolean isViolation(int dataCount, int violationCount) {
+    return dataCount > 0 && (dataCount == violationCount);
   }
 
   @SuperBuilder
