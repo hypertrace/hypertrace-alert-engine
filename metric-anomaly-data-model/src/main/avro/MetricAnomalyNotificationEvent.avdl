@@ -13,10 +13,10 @@ protocol MetricAnomalyNotificationEventProtocol {
     string event_condition_type;
     long violation_timestamp;
     string channel_id;
-    array<MetricValues> metric_values_list;
+    array<ViolationSummary> violation_summary_list;
   }
 
-  record MetricValues {
+  record ViolationSummary {
     double rhs;
     array<double> lhs;
     int dataCount;

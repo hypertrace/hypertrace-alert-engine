@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.junit.jupiter.api.Test;
@@ -30,9 +30,9 @@ class NotificationEventProcessorTest {
                         .build()))
             .build();
 
-    List<MetricValues> metricValuesList =
+    List<ViolationSummary> violationSummaryList =
         List.of(
-            MetricValues.newBuilder()
+            ViolationSummary.newBuilder()
                 .setRhs(1324)
                 .setLhs(List.of(1d, 2d))
                 .setOperator(Operator.STATIC_THRESHOLD_OPERATOR_LT)
@@ -46,8 +46,8 @@ class NotificationEventProcessorTest {
             .setEventConditionId("5")
             .setViolationTimestamp(System.currentTimeMillis())
             .setEventConditionType("grth")
-            .setMetricValuesList(List.of())
-            .setMetricValuesList(metricValuesList)
+            .setViolationSummaryList(List.of())
+            .setViolationSummaryList(violationSummaryList)
             .build();
 
     EventRecord eventRecord =

@@ -7,8 +7,8 @@ import static org.hypertrace.alert.engine.notification.service.notification.Slac
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.ActionBlock;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Attachment;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Button;
@@ -41,7 +41,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
         metadataFields, metricAnomalyWebhookEvent.getEventConditionId(), METRIC_ANOMALY_EVENT_TYPE);
     addIfNotEmpty(
         metadataFields,
-        getMetricValues(metricAnomalyWebhookEvent.getMetricValuesList()),
+        getViolationSummary(metricAnomalyWebhookEvent.getViolationSummaryList()),
         VIOLATION_SUMMARY);
 
     SectionBlock metadataBlock = new SectionBlock();
@@ -68,8 +68,8 @@ public class MetricAnomalySlackEvent implements SlackMessage {
     return attachments;
   }
 
-  private static String getMetricValues(List<MetricValues> metricValuesList) {
-    return metricValuesList.stream()
+  private static String getViolationSummary(List<ViolationSummary> violationSummaryList) {
+    return violationSummaryList.stream()
         .map(
             metricValues ->
                 String.valueOf(metricValues.getViolationCount())

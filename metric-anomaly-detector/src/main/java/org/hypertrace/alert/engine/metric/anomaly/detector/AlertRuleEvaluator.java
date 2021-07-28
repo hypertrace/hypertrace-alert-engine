@@ -21,9 +21,9 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCon
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricValues;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.client.config.AttributeServiceClientConfig;
 import org.hypertrace.core.query.service.api.QueryRequest;
@@ -49,7 +49,7 @@ public class AlertRuleEvaluator {
   private final MetricQueryBuilder metricQueryBuilder;
   private final QueryServiceClient queryServiceClient;
   private final int qsRequestTimeout;
-  private final Multimap<Double, Double> metricValues = ArrayListMultimap.create();
+  private final Multimap<Double, Double> violationSummaryMap = ArrayListMultimap.create();
 
   public AlertRuleEvaluator(Config appConfig) {
     AttributeServiceClientConfig asConfig = AttributeServiceClientConfig.from(appConfig);
@@ -188,7 +188,7 @@ public class AlertRuleEvaluator {
     boolean isViolation = evalOperator(thresholdCondition.getOperator(), lhs, rhs);
 
     if (isViolation) {
-      metricValues.put(rhs, lhs);
+      violationSummaryMap.put(rhs, lhs);
     }
 
     return isViolation;
@@ -212,13 +212,13 @@ public class AlertRuleEvaluator {
       AlertTask alertTask, int dataCount, int violationCount, Operator operator)
       throws IOException {
 
-    List<MetricValues> metricValuesList = new ArrayList<>();
-    metricValues
+    List<ViolationSummary> violationSummaryList = new ArrayList<>();
+    violationSummaryMap
         .asMap()
         .forEach(
             (key, collection) -> {
-              metricValuesList.add(
-                  MetricValues.newBuilder()
+              violationSummaryList.add(
+                  ViolationSummary.newBuilder()
                       .setLhs(new ArrayList<>(collection))
                       .setRhs(key)
                       .setDataCount(dataCount)
@@ -233,7 +233,7 @@ public class AlertRuleEvaluator {
             .setChannelId(alertTask.getChannelId())
             .setEventConditionId(alertTask.getEventConditionId())
             .setEventConditionType(alertTask.getEventConditionType())
-            .setMetricValuesList(metricValuesList)
+            .setViolationSummaryList(violationSummaryList)
             .build();
 
     EventRecord eventRecord =
