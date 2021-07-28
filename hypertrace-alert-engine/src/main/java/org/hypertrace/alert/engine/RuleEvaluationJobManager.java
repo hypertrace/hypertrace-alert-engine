@@ -6,12 +6,10 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_GROUP;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_NAME;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_TRIGGER_NAME;
-import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.METRIC_ANOMALY_EVENT_CONDITION;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
@@ -25,7 +23,6 @@ import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleS
 import org.hypertrace.alert.engine.notification.service.NotificationChannel;
 import org.hypertrace.alert.engine.notification.service.NotificationChannelsReader;
 import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;
-import org.hypertrace.core.documentstore.Document;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -103,7 +100,8 @@ public class RuleEvaluationJobManager implements JobManager {
     Config jobConfig = getJobConfig(appConfig);
 
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
-    List<AlertTask.Builder> alertTasks = MetricAnomalyAlertTaskJob.getAlertTasks(alertTaskConverter, ruleSource);
+    List<AlertTask.Builder> alertTasks =
+        MetricAnomalyAlertTaskJob.getAlertTasks(alertTaskConverter, ruleSource);
 
     jobDataMap.put(ALERT_TASKS, alertTasks);
   }
