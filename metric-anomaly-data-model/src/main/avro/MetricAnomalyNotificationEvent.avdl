@@ -2,10 +2,10 @@
 protocol MetricAnomalyNotificationEventProtocol {
 
   enum Operator {
-            STATIC_THRESHOLD_OPERATOR_LTE,
-            STATIC_THRESHOLD_OPERATOR_GTE,
-            STATIC_THRESHOLD_OPERATOR_LT,
-            STATIC_THRESHOLD_OPERATOR_GT
+    STATIC_THRESHOLD_OPERATOR_LTE,
+    STATIC_THRESHOLD_OPERATOR_GTE,
+    STATIC_THRESHOLD_OPERATOR_LT,
+    STATIC_THRESHOLD_OPERATOR_GT
   }
 
   record MetricAnomalyNotificationEvent {
