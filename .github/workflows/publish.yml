@@ -43,6 +43,32 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKERHUB_PUBLISH_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PUBLISH_TOKEN }}
 
+  publish-helm-charts:
+    runs-on: ubuntu-20.04
+    needs: publish-artifacts
+    container:
+      image: hypertrace/helm-gcs-packager:0.3.1
+      credentials:
+        username: ${{ secrets.DOCKERHUB_READ_USER }}
+        password: ${{ secrets.DOCKERHUB_READ_TOKEN }}
+    steps:
+      # Set fetch-depth: 0 to fetch commit history and tags for use in version calculation
+      - name: Checkout Repository
+        uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0
+
+      - name: package charts
+        run: |
+          ./.github/workflows/helm.sh package
+
+      - name: release charts
+        env:
+          HELM_GCS_CREDENTIALS: ${{ secrets.HELM_GCS_CREDENTIALS }}
+          HELM_GCS_REPOSITORY: ${{ secrets.HELM_GCS_REPOSITORY }}
+        run: |
+          ./.github/workflows/helm.sh publish
+
   publish-release-notes:
     runs-on: ubuntu-20.04
     steps:
