@@ -19,6 +19,7 @@ import org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.MetricAnomalyAlertTaskJob;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel;
@@ -102,24 +103,7 @@ public class RuleEvaluationJobManager implements JobManager {
     Config jobConfig = getJobConfig(appConfig);
 
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
-    List<AlertTask.Builder> alertTasks = new ArrayList<>();
-    try {
-      List<Document> documents = ruleSource.getAllEventConditions(METRIC_ANOMALY_EVENT_CONDITION);
-      documents.forEach(
-          document -> {
-            try {
-              AlertTask.Builder taskBuilder = alertTaskConverter.toAlertTaskBuilder(document);
-              alertTasks.add(taskBuilder);
-            } catch (Exception e) {
-              LOGGER.error(
-                  "Failed to convert alert task for document:{} with exception:{}",
-                  document.toJson(),
-                  e);
-            }
-          });
-    } catch (IOException e) {
-      LOGGER.error("AlertTask conversion failed with an exception", e);
-    }
+    List<AlertTask.Builder> alertTasks = MetricAnomalyAlertTaskJob.getAlertTasks(alertTaskConverter, ruleSource);
 
     jobDataMap.put(ALERT_TASKS, alertTasks);
   }
