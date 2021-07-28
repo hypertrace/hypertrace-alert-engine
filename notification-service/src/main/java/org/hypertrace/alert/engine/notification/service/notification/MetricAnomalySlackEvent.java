@@ -19,8 +19,8 @@ class MetricAnomalySlackEvent implements SlackMessage {
   public static final String EVENT_TIMESTAMP = "Event Timestamp";
   public static final String VIOLATION_TIMESTAMP = "Violation Timestamp";
   public static final String METRIC_ANOMALY_EVENT_TYPE = "Metric Anomaly Event Type";
-  public static final String METRIC_VALUES_FOR_VIOLATED_CONDITION =
-      "Metric Values for Violated Condition";
+  public static final String VIOLATION_SUMMARY =
+      "Violation Summary";
   private final List<Attachment> attachments;
 
   MetricAnomalySlackEvent(List<Attachment> attachments) {
@@ -41,7 +41,7 @@ class MetricAnomalySlackEvent implements SlackMessage {
     addIfNotEmpty(
         metadataFields,
         getMetricValues(metricAnomalyWebhookEvent.getMetricValuesList()),
-        METRIC_VALUES_FOR_VIOLATED_CONDITION);
+        VIOLATION_SUMMARY);
 
     SectionBlock metadataBlock = new SectionBlock();
     metadataBlock.setFields(metadataFields);
