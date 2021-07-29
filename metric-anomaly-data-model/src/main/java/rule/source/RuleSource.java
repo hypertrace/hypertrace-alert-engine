@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source;
+package org.hypertrace.alert.engine.metric.anomaly.data.model.rule.source;
 
 import java.io.IOException;
 import java.util.List;

@@ -38,6 +38,7 @@ dependencies {
     api("org.apache.avro:avro:1.10.2")
     implementation("com.typesafe:config:1.4.1")
     implementation("org.apache.kafka:kafka-clients:2.6.0")
+    implementation("org.hypertrace.core.documentstore:document-store:0.5.7")
 
     annotationProcessor("org.projectlombok:lombok:1.18.18")
     compileOnly("org.projectlombok:lombok:1.18.18")

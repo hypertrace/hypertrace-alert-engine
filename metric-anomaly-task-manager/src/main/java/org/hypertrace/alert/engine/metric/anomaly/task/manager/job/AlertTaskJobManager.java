@@ -14,9 +14,9 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.Map;
+import org.hypertrace.alert.engine.metric.anomaly.data.model.rule.source.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.data.model.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSourceProvider;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
