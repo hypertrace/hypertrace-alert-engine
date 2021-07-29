@@ -1,9 +1,10 @@
 package org.hypertrace.alert.engine.notification.service;
 
+import static org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.FSRuleSource.getJsonNodes;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,21 +32,7 @@ public class NotificationChannelsReader {
 
   public static List<NotificationChannel> readNotificationChannels(Config config)
       throws IOException {
-    String fsPath = config.getString(PATH_CONFIG);
-    LOGGER.debug("Reading rules from file path:{}", fsPath);
-
-    JsonNode jsonNode = OBJECT_MAPPER.readTree(new File(fsPath).getAbsoluteFile());
-    if (!jsonNode.isArray()) {
-      throw new IOException("File should contain an array of notification rules");
-    }
-
-    LOGGER.info("Reading notification rules {}", jsonNode.toPrettyString());
-
-    List<JsonNode> nodes =
-        StreamSupport.stream(jsonNode.spliterator(), false)
-            .collect(Collectors.toUnmodifiableList());
-
-    return nodes.stream()
+    return getJsonNodes(config, PATH_CONFIG).stream()
         .map(
             node ->
                 NotificationChannel.builder()

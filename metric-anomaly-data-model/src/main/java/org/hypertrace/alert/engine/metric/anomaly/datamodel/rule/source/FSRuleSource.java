@@ -13,7 +13,7 @@ import org.hypertrace.core.documentstore.JSONDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class FSRuleSource implements RuleSource {
+public class FSRuleSource implements RuleSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(FSRuleSource.class);
   private static final String PATH_CONFIG = "path";
   private static final String EVENT_CONDITION_TYPE_KEY = "eventConditionType";
@@ -27,23 +27,22 @@ class FSRuleSource implements RuleSource {
   }
 
   public List<Document> getAllEventConditions(String type) throws IOException {
-    String fsPath = fsConfig.getString(PATH_CONFIG);
-    LOGGER.debug("Reading rules from file path:{}", fsPath);
+    return getJsonNodes(fsConfig, PATH_CONFIG).stream()
+        .filter(node -> node.get(EVENT_CONDITION_TYPE_KEY).textValue().equals(type))
+        .map(JSONDocument::new)
+        .collect(Collectors.toList());
+  }
 
-    JsonNode jsonNode = OBJECT_MAPPER.readTree(new File(fsPath));
+  public static List<JsonNode> getJsonNodes(Config config, String pathConfig) throws IOException {
+    String fsPath = config.getString(pathConfig);
+    LOGGER.debug("Reading rules from file path:{}", fsPath);
+    JsonNode jsonNode = OBJECT_MAPPER.readTree(new File(fsPath).getAbsoluteFile());
     if (!jsonNode.isArray()) {
       throw new IOException("File should contain an array of notification rules");
     }
 
-    LOGGER.info("Reading alert rules {}", jsonNode.toPrettyString());
-
-    List<JsonNode> nodes =
-        StreamSupport.stream(jsonNode.spliterator(), false)
-            .collect(Collectors.toUnmodifiableList());
-
-    return nodes.stream()
-        .filter(node -> node.get(EVENT_CONDITION_TYPE_KEY).textValue().equals(type))
-        .map(JSONDocument::new)
-        .collect(Collectors.toList());
+    LOGGER.info("Reading rules {}", jsonNode.toPrettyString());
+    return StreamSupport.stream(jsonNode.spliterator(), false)
+        .collect(Collectors.toUnmodifiableList());
   }
 }
