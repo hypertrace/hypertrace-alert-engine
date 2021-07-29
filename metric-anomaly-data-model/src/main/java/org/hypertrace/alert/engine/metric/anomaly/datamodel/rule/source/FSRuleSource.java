@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.metric.anomaly.data.model.rule.source;
+package org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

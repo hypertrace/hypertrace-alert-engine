@@ -22,9 +22,9 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresh
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperator;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
-import org.hypertrace.alert.engine.metric.anomaly.data.model.rule.source.RuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.data.model.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.core.documentstore.Document;
 import org.junit.jupiter.api.Assertions;

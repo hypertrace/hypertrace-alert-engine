@@ -8,9 +8,9 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.hypertrace.alert.engine.metric.anomaly.data.model.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.core.documentstore.Document;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
