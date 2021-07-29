@@ -19,7 +19,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
 
   public static final String EVENT_TIMESTAMP = "Event Timestamp";
   public static final String VIOLATION_TIMESTAMP = "Violation Timestamp";
-  public static final String METRIC_ANOMALY_EVENT_TYPE = "Metric Anomaly Event Type";
+  public static final String METRIC_ANOMALY_EVENT_ID = "MetricAnomalyEvent Id";
   public static final String VIOLATION_SUMMARY = "Violation Summary";
   private final List<Attachment> attachments;
 
@@ -29,7 +29,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
 
   public static MetricAnomalySlackEvent getMessage(
       MetricAnomalyWebhookEvent metricAnomalyWebhookEvent) {
-    String titleMessage = "Alert for Metric Anomaly Event";
+    String titleMessage = "Hypertrace detected MetricAnomalyEvent violation";
     SectionBlock titleBlock = getTitleBlock(titleMessage);
 
     // create Metadata block
@@ -38,7 +38,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
     addTimestamp(
         metadataFields, metricAnomalyWebhookEvent.getViolationTimestamp(), VIOLATION_TIMESTAMP);
     addIfNotEmpty(
-        metadataFields, metricAnomalyWebhookEvent.getEventConditionId(), METRIC_ANOMALY_EVENT_TYPE);
+        metadataFields, metricAnomalyWebhookEvent.getEventConditionId(), METRIC_ANOMALY_EVENT_ID);
     addIfNotEmpty(
         metadataFields,
         getViolationSummary(metricAnomalyWebhookEvent.getViolationSummaryList()),
@@ -72,13 +72,13 @@ public class MetricAnomalySlackEvent implements SlackMessage {
     return violationSummaryList.stream()
         .map(
             metricValues ->
-                String.valueOf(metricValues.getViolationCount())
+                metricValues.getViolationCount()
                     + " out of "
-                    + String.valueOf(metricValues.getDataCount())
+                    + metricValues.getDataCount()
                     + " metric data points were "
-                    + String.valueOf(getStringFromOperator(metricValues.getOperator()))
+                    + getStringFromOperator(metricValues.getOperator())
                     + " than the threshold "
-                    + String.valueOf(metricValues.getRhs())
+                    + metricValues.getRhs()
                     + " in last 1 minute.")
         .collect(Collectors.joining("\n"));
   }
