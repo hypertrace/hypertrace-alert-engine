@@ -1,14 +1,12 @@
 package org.hypertrace.alert.engine.notification.service;
 
-import static org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.FSRuleSource.getJsonNodes;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.NotificationChannelConfig;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.slf4j.Logger;
@@ -17,7 +15,6 @@ import org.slf4j.LoggerFactory;
 public class NotificationChannelsReader {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String PATH_CONFIG = "notification.channels.path";
   private static final String CHANNEL_ID = "channelId";
   private static final String CHANNEL_NAME = "channelName";
@@ -25,14 +22,13 @@ public class NotificationChannelsReader {
   private static final String CHANNEL_CONFIG_TYPE = "channelConfigType";
   private static final String WEBFORMAT_CHANNEL_CONFIG_URL = "url";
   private static final String WEBFORMAT_CHANNEL_CONFIG_WEBHOOK_FORMAT = "webhookFormat";
-
   public static final String CHANNEL_CONFIG_TYPE_WEBHOOK = "WEBHOOK";
   public static final String WEBHOOK_FORMAT_SLACK = "WEBHOOK_FORMAT_SLACK";
   public static final String WEBHOOK_FORMAT_JSON = "WEBHOOK_FORMAT_JSON";
 
   public static List<NotificationChannel> readNotificationChannels(Config config)
       throws IOException {
-    return getJsonNodes(config, PATH_CONFIG).stream()
+    return RuleSource.getJsonNodes(config, PATH_CONFIG, LOGGER).stream()
         .map(
             node ->
                 NotificationChannel.builder()
