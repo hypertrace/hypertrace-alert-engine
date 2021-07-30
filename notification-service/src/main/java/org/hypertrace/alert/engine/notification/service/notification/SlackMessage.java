@@ -24,6 +24,7 @@ public interface SlackMessage {
   static void addTimestamp(List<Text> metadataFields, Instant value, String type) {
     if (!Strings.isNullOrEmpty(type)) {
       String currentDate = value.toString();
+      long epochSeconds = value.getEpochSecond()-19800;
       metadataFields.add(
           new Text(
               Text.MARKDOWN_TYPE,
@@ -31,7 +32,7 @@ public interface SlackMessage {
                   + type
                   + ": *\n"
                   + "<!date^"
-                  + value.getEpochSecond()
+                  + epochSeconds
                   + "^"
                   + "{date_num} {time_secs}| "
                   + currentDate
