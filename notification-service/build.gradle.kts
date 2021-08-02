@@ -21,6 +21,7 @@ dependencies {
     implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
     implementation("org.hypertrace.core.documentstore:document-store:0.5.7")
 
+    implementation(project(":metric-anomaly-task-manager"))
     implementation(project(":metric-anomaly-data-model"))
     implementation(project(":notification-transport"))
 

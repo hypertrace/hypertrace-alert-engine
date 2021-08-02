@@ -1,12 +1,13 @@
 package org.hypertrace.alert.engine.notification.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.NotificationChannelConfig;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.slf4j.Logger;
@@ -25,10 +26,11 @@ public class NotificationChannelsReader {
   public static final String CHANNEL_CONFIG_TYPE_WEBHOOK = "WEBHOOK";
   public static final String WEBHOOK_FORMAT_SLACK = "WEBHOOK_FORMAT_SLACK";
   public static final String WEBHOOK_FORMAT_JSON = "WEBHOOK_FORMAT_JSON";
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public static List<NotificationChannel> readNotificationChannels(Config config)
       throws IOException {
-    return RuleSource.getJsonNodes(config, PATH_CONFIG, LOGGER).stream()
+    return getJsonNodes(config, PATH_CONFIG, LOGGER).stream()
         .map(
             node ->
                 NotificationChannel.builder()
@@ -58,5 +60,19 @@ public class NotificationChannelsReader {
                     .channelConfigType(webFormatChannelConfig.get(CHANNEL_CONFIG_TYPE).asText())
                     .build())
         .collect(Collectors.toList());
+  }
+
+  public static List<JsonNode> getJsonNodes(Config config, String pathConfig, Logger logger)
+      throws IOException {
+    String fsPath = config.getString(pathConfig);
+    logger.debug("Reading rules from file path:{}", fsPath);
+    JsonNode jsonNode = OBJECT_MAPPER.readTree(new File(fsPath).getAbsoluteFile());
+    if (!jsonNode.isArray()) {
+      throw new IOException("File should contain an array of notification rules");
+    }
+
+    logger.info("Reading rules {}", jsonNode.toPrettyString());
+    return StreamSupport.stream(jsonNode.spliterator(), false)
+        .collect(Collectors.toUnmodifiableList());
   }
 }
