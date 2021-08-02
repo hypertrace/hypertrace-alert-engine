@@ -24,23 +24,22 @@ public class FSRuleSource implements RuleSource {
     this.fsConfig = fsConfig;
   }
 
-  public List<Document> getAllEventConditions(String type) throws IOException { // getruledoc
-    return getJsonNodes(fsConfig, PATH_CONFIG, LOGGER).stream()
+  public List<Document> getAllEventConditions(String type)
+      throws IOException { // getruledoc //add predicate in param
+    return getJsonNodes(fsConfig.getString(PATH_CONFIG)).stream()
         .filter(node -> node.get(EVENT_CONDITION_TYPE_KEY).textValue().equals(type))
         .map(JSONDocument::new)
         .collect(Collectors.toList());
   }
 
-  public List<JsonNode> getJsonNodes(Config config, String pathConfig, Logger logger)
-      throws IOException {
-    String fsPath = config.getString(pathConfig);
-    logger.debug("Reading rules from file path:{}", fsPath);
+  public List<JsonNode> getJsonNodes(String fsPath) throws IOException {
+    LOGGER.debug("Reading rules from file path:{}", fsPath);
     JsonNode jsonNode = OBJECT_MAPPER.readTree(new File(fsPath).getAbsoluteFile());
     if (!jsonNode.isArray()) {
       throw new IOException("File should contain an array of notification rules");
     }
 
-    logger.info("Reading rules {}", jsonNode.toPrettyString());
+    LOGGER.info("Reading document {}", jsonNode.toPrettyString());
     return StreamSupport.stream(jsonNode.spliterator(), false)
         .collect(Collectors.toUnmodifiableList());
   }
