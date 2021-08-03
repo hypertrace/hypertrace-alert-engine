@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class MetricAnomalyAlertTaskJob implements Job {
   private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyAlertTaskJob.class);
   private static final String EVENT_CONDITION_TYPE_KEY = "eventConditionType";
-  private static final Predicate<JsonNode> PREDICATE =
+  private static final Predicate<JsonNode> RULE_FILTER_PREDICATE =
       node ->
           (node.get(EVENT_CONDITION_TYPE_KEY).textValue().equals(METRIC_ANOMALY_EVENT_CONDITION));
 
@@ -56,7 +56,7 @@ public class MetricAnomalyAlertTaskJob implements Job {
       AlertTaskConverter alertTaskConverter, RuleSource ruleSource) {
     List<AlertTask.Builder> alertTasks = new ArrayList<>();
     try {
-      List<Document> documents = ruleSource.getAllRules(PREDICATE);
+      List<Document> documents = ruleSource.getAllRules(RULE_FILTER_PREDICATE);
       documents.forEach(
           document -> {
             try {

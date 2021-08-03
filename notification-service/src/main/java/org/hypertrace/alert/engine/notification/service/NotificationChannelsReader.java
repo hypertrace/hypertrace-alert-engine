@@ -12,6 +12,8 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSour
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.NotificationChannelConfig;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NotificationChannelsReader {
 
@@ -25,6 +27,7 @@ public class NotificationChannelsReader {
   public static final String WEBHOOK_FORMAT_SLACK = "WEBHOOK_FORMAT_SLACK";
   public static final String WEBHOOK_FORMAT_JSON = "WEBHOOK_FORMAT_JSON";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
 
   public static List<NotificationChannel> readNotificationChannels(Config config)
       throws IOException {
@@ -35,7 +38,7 @@ public class NotificationChannelsReader {
               try {
                 return OBJECT_MAPPER.readTree(document.toJson());
               } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                LOGGER.info("Error converting document to Json node.");
               }
               return null;
             })
