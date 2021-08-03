@@ -15,7 +15,7 @@ class NotificationChannelsReaderTest {
   @Test
   @SetEnvironmentVariable(key = "SERVICE_NAME", value = "notification-service")
   void testReadNotificationChannels() throws IOException {
-    Config config = ConfigClientFactory.getClient().getConfig();
+    Config config = ConfigClientFactory.getClient().getConfig().getConfig("ruleSource");
 
     List<NotificationChannel> notificationChannels =
         NotificationChannelsReader.readNotificationChannels(config);

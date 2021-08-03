@@ -1,22 +1,20 @@
 package org.hypertrace.alert.engine.notification.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.NotificationChannelConfig;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NotificationChannelsReader {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
-  private static final String PATH_CONFIG = "notification.channels.path";
   private static final String CHANNEL_ID = "channelId";
   private static final String CHANNEL_NAME = "channelName";
   private static final String CHANNEL_CONFIG = "channelConfig";
@@ -30,7 +28,17 @@ public class NotificationChannelsReader {
 
   public static List<NotificationChannel> readNotificationChannels(Config config)
       throws IOException {
-    return getJsonNodes(config, PATH_CONFIG, LOGGER).stream()
+    RuleSource ruleSource = RuleSourceProvider.getProvider(config);
+    return ruleSource.getAllRules(jsonNode -> true).stream()
+        .map(
+            document -> {
+              try {
+                return OBJECT_MAPPER.readTree(document.toJson());
+              } catch (JsonProcessingException e) {
+                e.printStackTrace();
+              }
+              return null;
+            })
         .map(
             node ->
                 NotificationChannel.builder()
@@ -60,19 +68,5 @@ public class NotificationChannelsReader {
                     .channelConfigType(webFormatChannelConfig.get(CHANNEL_CONFIG_TYPE).asText())
                     .build())
         .collect(Collectors.toList());
-  }
-
-  public static List<JsonNode> getJsonNodes(Config config, String pathConfig, Logger logger)
-      throws IOException {
-    String fsPath = config.getString(pathConfig);
-    logger.debug("Reading rules from file path:{}", fsPath);
-    JsonNode jsonNode = OBJECT_MAPPER.readTree(new File(fsPath).getAbsoluteFile());
-    if (!jsonNode.isArray()) {
-      throw new IOException("File should contain an array of notification rules");
-    }
-
-    logger.info("Reading rules {}", jsonNode.toPrettyString());
-    return StreamSupport.stream(jsonNode.spliterator(), false)
-        .collect(Collectors.toUnmodifiableList());
   }
 }
