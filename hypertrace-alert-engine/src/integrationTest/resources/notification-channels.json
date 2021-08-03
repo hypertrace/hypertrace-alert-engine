@@ -5,7 +5,7 @@
     "channelConfig": [
       {
         "channelConfigType": "WEBHOOK",
-        "url": "https://hooks.slack.com/services/abcde",
+        "url": "http://localhost:11502/slack/url",
         "webhookFormat": "WEBHOOK_FORMAT_SLACK"
       }
     ]

@@ -18,13 +18,13 @@
           "leafFilter": {
             "lhsExpression": {
               "attribute": {
-                "key": "id",
+                "key": "name",
                 "scope": "SERVICE"
               }
             },
             "valueOperator": "VALUE_OPERATOR_EQ",
             "rhsExpression": {
-              "stringValue": "1234"
+              "stringValue": "customer"
             }
           }
         }
@@ -32,7 +32,7 @@
       "violationCondition": [{
         "staticThresholdCondition": {
           "operator": "STATIC_THRESHOLD_OPERATOR_GT",
-          "value": 15.0,
+          "value": 0.0,
           "minimumViolationDuration": "PT5M",
           "severity": "SEVERITY_CRITICAL"
         }
