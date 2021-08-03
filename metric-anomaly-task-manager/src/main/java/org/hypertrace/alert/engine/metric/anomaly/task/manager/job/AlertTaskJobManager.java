@@ -42,8 +42,7 @@ public class AlertTaskJobManager implements JobManager {
             ? appConfig.getConfig(JOB_CONFIG)
             : ConfigFactory.parseMap(Map.of());
 
-    RuleSource ruleSource =
-        RuleSourceProvider.getProvider(appConfig.getConfig(JOB_DATA_MAP_RULE_SOURCE));
+    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig("alertRuleSource"));
     KafkaAlertTaskProducer kafkaAlertTaskProducer =
         new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
