@@ -8,6 +8,4 @@ import org.hypertrace.core.documentstore.Document;
 
 public interface RuleSource {
   List<Document> getAllRules(Predicate<JsonNode> predicate) throws IOException;
-
-  List<JsonNode> getJsonNodes(String fsPath) throws IOException;
 }

@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 public class FSRuleSource implements RuleSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(FSRuleSource.class);
   private static final String PATH_CONFIG = "path";
-  private static final String EVENT_CONDITION_TYPE_KEY = "eventConditionType";
   private final Config fsConfig;
   ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -32,7 +31,7 @@ public class FSRuleSource implements RuleSource {
         .collect(Collectors.toList());
   }
 
-  public List<JsonNode> getJsonNodes(String fsPath) throws IOException {
+  private List<JsonNode> getJsonNodes(String fsPath) throws IOException {
     LOGGER.debug("Reading rules from file path:{}", fsPath);
     JsonNode jsonNode = OBJECT_MAPPER.readTree(new File(fsPath).getAbsoluteFile());
     if (!jsonNode.isArray()) {
