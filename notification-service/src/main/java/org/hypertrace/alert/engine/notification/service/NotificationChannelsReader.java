@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class NotificationChannelsReader {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
   private static final String CHANNEL_ID = "channelId";
   private static final String CHANNEL_NAME = "channelName";
   private static final String CHANNEL_CONFIG = "channelConfig";
@@ -27,18 +28,18 @@ public class NotificationChannelsReader {
   public static final String WEBHOOK_FORMAT_SLACK = "WEBHOOK_FORMAT_SLACK";
   public static final String WEBHOOK_FORMAT_JSON = "WEBHOOK_FORMAT_JSON";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
 
   public static List<NotificationChannel> readNotificationChannels(Config config)
       throws IOException {
-    RuleSource ruleSource = RuleSourceProvider.getProvider(config);
+    RuleSource ruleSource =
+        RuleSourceProvider.getProvider(config.getConfig("notificationRuleSource"));
     return ruleSource.getAllRules(jsonNode -> true).stream()
         .map(
             document -> {
               try {
                 return OBJECT_MAPPER.readTree(document.toJson());
               } catch (JsonProcessingException e) {
-                LOGGER.info("Error converting document to Json node.");
+                LOGGER.error("Error converting document to Json node.");
               }
               return null;
             })
