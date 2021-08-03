@@ -48,6 +48,8 @@ public class RuleEvaluationJobManager implements JobManager {
 
   public void initJob(Config appConfig) {
 
+    LOGGER.info("Application config {}", appConfig);
+
     Config jobConfig =
         appConfig.hasPath(JOB_CONFIG)
             ? appConfig.getConfig(JOB_CONFIG)
@@ -79,6 +81,7 @@ public class RuleEvaluationJobManager implements JobManager {
         TriggerBuilder.newTrigger()
             .withIdentity(JOB_TRIGGER_NAME, JOB_GROUP)
             .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
+            .startNow()
             .build();
   }
 
@@ -116,8 +119,8 @@ public class RuleEvaluationJobManager implements JobManager {
   }
 
   private Config getJobConfig(Config appConfig) {
-    return appConfig.hasPath(AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG)
-        ? appConfig.getConfig(AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG)
+    return appConfig.hasPath(JOB_CONFIG)
+        ? appConfig.getConfig(JOB_CONFIG)
         : ConfigFactory.parseMap(Map.of());
   }
 

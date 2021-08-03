@@ -98,7 +98,7 @@ notificationChannelsConfig:
         "channelConfig": [
           {
             "channelConfigType": "WEBHOOK",
-            "url": "https://hooks.slack.com/services/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",
+            "url": "https://hooks.slack.com/services/abc",
             "webhookFormat": "WEBHOOK_FORMAT_SLACK"
           }
         ]

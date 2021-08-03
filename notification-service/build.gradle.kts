@@ -43,6 +43,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:3.9.0")
     testImplementation("org.mockito:mockito-inline:3.9.0")
     testImplementation("org.junit-pioneer:junit-pioneer:1.3.8")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
 }
 
 tasks.test {

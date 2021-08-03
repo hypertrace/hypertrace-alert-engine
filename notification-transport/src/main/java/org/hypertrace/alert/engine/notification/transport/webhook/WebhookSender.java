@@ -43,7 +43,7 @@ public class WebhookSender {
     }
     Response response = responseOptional.get();
     int responseCode = response.code();
-    LOGGER.info("Code to logger: " + response.code());
+    LOGGER.debug("Code to logger: " + response.code());
     if (responseCode != OK_CODE) {
       LOGGER.error(
           "Error response from Slack when attempting to send notification. "
