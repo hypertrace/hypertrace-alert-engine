@@ -3,20 +3,39 @@ package org.hypertrace.alert.engine.notification.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
-import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 class NotificationEventProcessorTest {
 
+  public static MockWebServer mockWebServer;
+
+  @BeforeEach
+  public void setUp() throws IOException {
+    mockWebServer = new MockWebServer();
+    mockWebServer.start(11502);
+  }
+
   @Test
-  void testProcess() throws IOException {
+  void testProcess() throws IOException, InterruptedException {
+    MockResponse mockedResponse =
+        new MockResponse()
+            .setResponseCode(200) // Sample
+            .addHeader("Content-Type", "application/json");
+
+    mockWebServer.enqueue(mockedResponse);
+    // var httpUrl = mockWebServer.url("/hello/world").toString();
+
     NotificationChannel notificationChannel =
         NotificationChannel.builder()
             .channelName("1")
@@ -25,7 +44,7 @@ class NotificationEventProcessorTest {
                 List.of(
                     WebFormatNotificationChannelConfig.builder()
                         .channelConfigType(NotificationChannelsReader.CHANNEL_CONFIG_TYPE_WEBHOOK)
-                        .url("https://hooks.slack.com/services/abc")
+                        .url("http://localhost:11502/hello/world")
                         .webhookFormat(NotificationChannelsReader.WEBHOOK_FORMAT_SLACK)
                         .build()))
             .build();
@@ -65,11 +84,15 @@ class NotificationEventProcessorTest {
             .setEventTimeMillis(System.currentTimeMillis())
             .build();
 
-    WebhookNotifier webhookNotifier = Mockito.mock(WebhookNotifier.class);
+    Assertions.assertEquals(0, mockWebServer.getRequestCount());
+    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
+    Assertions.assertEquals(1, mockWebServer.getRequestCount());
+    // verify body
+    // RecordedRequest request = mockWebServer.takeRequest();
+  }
 
-    new NotificationEventProcessor(List.of(notificationChannel), webhookNotifier)
-        .process(notificationEvent);
-
-    Mockito.verify(webhookNotifier).notify(Mockito.any(), Mockito.any());
+  @AfterEach
+  public void tearDown() throws IOException {
+    mockWebServer.shutdown();
   }
 }
