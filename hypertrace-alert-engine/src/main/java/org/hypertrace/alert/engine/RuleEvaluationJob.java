@@ -41,6 +41,10 @@ public class RuleEvaluationJob implements Job {
       Instant now = AlertTaskConverter.getCurrent(jobConfig);
       AlertTaskConverter.setCurrentExecutionTime(alertTaskBuilder, now);
       AlertTaskConverter.setLastExecutionTime(alertTaskBuilder, now, jobConfig);
+      LOGGER.debug(
+          "Current and last time {} {}",
+          Instant.ofEpochMilli(alertTaskBuilder.getCurrentExecutionTime()),
+          Instant.ofEpochMilli(alertTaskBuilder.getLastExecutionTime()));
       try {
         Optional<NotificationEvent> notificationEventOptional =
             alertRuleEvaluator.process(alertTaskBuilder.build());
