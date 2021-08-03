@@ -97,9 +97,7 @@ public class RuleEvaluationJobManager implements JobManager {
   }
 
   private void addAlertTasksToJobData(JobDataMap jobDataMap, Config appConfig) {
-    RuleSource ruleSource =
-        RuleSourceProvider.getProvider(
-            appConfig.getConfig(AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE));
+    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig("alertRuleSource"));
     Config jobConfig = getJobConfig(appConfig);
 
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
