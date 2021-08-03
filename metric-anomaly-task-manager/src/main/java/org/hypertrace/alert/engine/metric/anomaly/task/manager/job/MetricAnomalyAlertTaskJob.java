@@ -5,9 +5,11 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_TASK_CONVERTER;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.METRIC_ANOMALY_EVENT_CONDITION;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
@@ -21,6 +23,10 @@ import org.slf4j.LoggerFactory;
 
 public class MetricAnomalyAlertTaskJob implements Job {
   private static final Logger LOGGER = LoggerFactory.getLogger(MetricAnomalyAlertTaskJob.class);
+  private static final String EVENT_CONDITION_TYPE_KEY = "eventConditionType";
+  private static final Predicate<JsonNode> PREDICATE =
+      node ->
+          (node.get(EVENT_CONDITION_TYPE_KEY).textValue().equals(METRIC_ANOMALY_EVENT_CONDITION));
 
   public void execute(JobExecutionContext jobExecutionContext) {
     JobDetail jobDetail = jobExecutionContext.getJobDetail();
@@ -50,7 +56,7 @@ public class MetricAnomalyAlertTaskJob implements Job {
       AlertTaskConverter alertTaskConverter, RuleSource ruleSource) {
     List<AlertTask.Builder> alertTasks = new ArrayList<>();
     try {
-      List<Document> documents = ruleSource.getAllEventConditions(METRIC_ANOMALY_EVENT_CONDITION);
+      List<Document> documents = ruleSource.getAllRules(PREDICATE);
       documents.forEach(
           document -> {
             try {

@@ -6,6 +6,7 @@ import com.typesafe.config.Config;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hypertrace.core.documentstore.Document;
@@ -24,10 +25,9 @@ public class FSRuleSource implements RuleSource {
     this.fsConfig = fsConfig;
   }
 
-  public List<Document> getAllEventConditions(String type)
-      throws IOException { // getruledoc //add predicate in param
+  public List<Document> getAllRules(Predicate<JsonNode> predicate) throws IOException {
     return getJsonNodes(fsConfig.getString(PATH_CONFIG)).stream()
-        .filter(node -> node.get(EVENT_CONDITION_TYPE_KEY).textValue().equals(type))
+        .filter(predicate)
         .map(JSONDocument::new)
         .collect(Collectors.toList());
   }
