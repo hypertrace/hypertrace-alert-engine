@@ -32,7 +32,7 @@ public class NotificationChannelsReader {
   public static List<NotificationChannel> readNotificationChannels(Config config)
       throws IOException {
     RuleSource ruleSource =
-        RuleSourceProvider.getProvider(config.getConfig("notificationRuleSource"));
+        RuleSourceProvider.getProvider(config.getConfig("notificationChannelsSource"));
     return ruleSource.getAllRules(jsonNode -> true).stream()
         .map(
             document -> {
