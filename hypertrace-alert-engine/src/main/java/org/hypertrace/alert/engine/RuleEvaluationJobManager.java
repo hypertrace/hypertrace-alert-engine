@@ -1,5 +1,6 @@
 package org.hypertrace.alert.engine;
 
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.ALERT_RULE_SOURCE;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.CRON_EXPRESSION;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG_CRON_EXPRESSION;
@@ -13,13 +14,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.MetricAnomalyAlertTaskJob;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel;
 import org.hypertrace.alert.engine.notification.service.NotificationChannelsReader;
 import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;
@@ -97,9 +98,7 @@ public class RuleEvaluationJobManager implements JobManager {
   }
 
   private void addAlertTasksToJobData(JobDataMap jobDataMap, Config appConfig) {
-    RuleSource ruleSource =
-        RuleSourceProvider.getProvider(
-            appConfig.getConfig(AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE));
+    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(ALERT_RULE_SOURCE));
     Config jobConfig = getJobConfig(appConfig);
 
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);

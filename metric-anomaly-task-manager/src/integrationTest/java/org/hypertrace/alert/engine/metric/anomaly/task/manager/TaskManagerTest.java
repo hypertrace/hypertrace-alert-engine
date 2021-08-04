@@ -66,7 +66,7 @@ public class TaskManagerTest {
         Map.of(
             "queue.config.kafka.bootstrap.servers",
             "localhost:" + port,
-            "ruleSource.fs.path",
+            "alertRuleSource.fs.path",
             absolutePath);
     Config appConfig =
         ConfigFactory.parseMap(testConfigMap)

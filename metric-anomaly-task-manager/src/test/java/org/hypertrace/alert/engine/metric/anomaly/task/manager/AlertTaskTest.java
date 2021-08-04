@@ -1,7 +1,9 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager;
 
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.METRIC_ANOMALY_EVENT_CONDITION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
@@ -9,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.LeafFilter;
@@ -23,9 +26,9 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresh
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperator;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSourceProvider;
 import org.hypertrace.core.documentstore.Document;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -41,7 +44,9 @@ class AlertTaskTest {
 
     Config ruleSourceConfig = ConfigFactory.parseMap(Map.of("type", "fs", "fs.path", absolutePath));
     RuleSource ruleSource = RuleSourceProvider.getProvider(ruleSourceConfig);
-    List<Document> documents = ruleSource.getAllEventConditions("MetricAnomalyEventCondition");
+    Predicate<JsonNode> PREDICATE =
+        node -> (node.get("eventConditionType").textValue().equals(METRIC_ANOMALY_EVENT_CONDITION));
+    List<Document> documents = ruleSource.getAllRules(PREDICATE);
     Assertions.assertTrue(documents.size() > 0);
 
     Config jobConfig =

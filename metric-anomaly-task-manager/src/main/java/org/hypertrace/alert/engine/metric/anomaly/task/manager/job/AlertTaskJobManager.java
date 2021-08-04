@@ -1,5 +1,6 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager.job;
 
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.ALERT_RULE_SOURCE;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.CRON_EXPRESSION;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG_CRON_EXPRESSION;
@@ -15,8 +16,8 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.rule.source.RuleSourceProvider;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -42,8 +43,7 @@ public class AlertTaskJobManager implements JobManager {
             ? appConfig.getConfig(JOB_CONFIG)
             : ConfigFactory.parseMap(Map.of());
 
-    RuleSource ruleSource =
-        RuleSourceProvider.getProvider(appConfig.getConfig(JOB_DATA_MAP_RULE_SOURCE));
+    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(ALERT_RULE_SOURCE));
     KafkaAlertTaskProducer kafkaAlertTaskProducer =
         new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);

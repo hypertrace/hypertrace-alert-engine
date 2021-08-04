@@ -1,13 +1,15 @@
 package org.hypertrace.alert.engine.notification.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.NotificationChannelConfig;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.slf4j.Logger;
@@ -16,36 +18,32 @@ import org.slf4j.LoggerFactory;
 public class NotificationChannelsReader {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final String PATH_CONFIG = "notification.channels.path";
+  public static final String NOTIIFICATION_CHANNELS_SOURCE = "notificationChannelsSource";
   private static final String CHANNEL_ID = "channelId";
   private static final String CHANNEL_NAME = "channelName";
   private static final String CHANNEL_CONFIG = "channelConfig";
   private static final String CHANNEL_CONFIG_TYPE = "channelConfigType";
   private static final String WEBFORMAT_CHANNEL_CONFIG_URL = "url";
   private static final String WEBFORMAT_CHANNEL_CONFIG_WEBHOOK_FORMAT = "webhookFormat";
-
   public static final String CHANNEL_CONFIG_TYPE_WEBHOOK = "WEBHOOK";
   public static final String WEBHOOK_FORMAT_SLACK = "WEBHOOK_FORMAT_SLACK";
   public static final String WEBHOOK_FORMAT_JSON = "WEBHOOK_FORMAT_JSON";
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public static List<NotificationChannel> readNotificationChannels(Config config)
       throws IOException {
-    String fsPath = config.getString(PATH_CONFIG);
-    LOGGER.debug("Reading rules from file path:{}", fsPath);
-
-    JsonNode jsonNode = OBJECT_MAPPER.readTree(new File(fsPath).getAbsoluteFile());
-    if (!jsonNode.isArray()) {
-      throw new IOException("File should contain an array of notification rules");
-    }
-
-    LOGGER.info("Reading notification rules {}", jsonNode.toPrettyString());
-
-    List<JsonNode> nodes =
-        StreamSupport.stream(jsonNode.spliterator(), false)
-            .collect(Collectors.toUnmodifiableList());
-
-    return nodes.stream()
+    RuleSource ruleSource =
+        RuleSourceProvider.getProvider(config.getConfig(NOTIIFICATION_CHANNELS_SOURCE));
+    return ruleSource.getAllRules(jsonNode -> true).stream()
+        .map(
+            document -> {
+              try {
+                return OBJECT_MAPPER.readTree(document.toJson());
+              } catch (JsonProcessingException e) {
+                LOGGER.error("Error converting document to Json node.");
+              }
+              return null;
+            })
         .map(
             node ->
                 NotificationChannel.builder()
