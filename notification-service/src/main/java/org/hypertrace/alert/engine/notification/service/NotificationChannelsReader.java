@@ -1,7 +1,5 @@
 package org.hypertrace.alert.engine.notification.service;
 
-import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.NOTIIFICATION_CHANNELS_SOURCE;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class NotificationChannelsReader {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
+  public static final String NOTIIFICATION_CHANNELS_SOURCE = "notificationChannelsSource";
   private static final String CHANNEL_ID = "channelId";
   private static final String CHANNEL_NAME = "channelName";
   private static final String CHANNEL_CONFIG = "channelConfig";
