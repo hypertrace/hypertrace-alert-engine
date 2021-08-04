@@ -1,5 +1,6 @@
 package org.hypertrace.alert.engine.metric.anomaly.task.manager.job;
 
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.ALERT_RULE_SOURCE;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.CRON_EXPRESSION;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG_CRON_EXPRESSION;
@@ -42,7 +43,7 @@ public class AlertTaskJobManager implements JobManager {
             ? appConfig.getConfig(JOB_CONFIG)
             : ConfigFactory.parseMap(Map.of());
 
-    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig("alertRuleSource"));
+    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(ALERT_RULE_SOURCE));
     KafkaAlertTaskProducer kafkaAlertTaskProducer =
         new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);

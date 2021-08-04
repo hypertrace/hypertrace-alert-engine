@@ -1,5 +1,7 @@
 package org.hypertrace.alert.engine.notification.service;
 
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.NOTIIFICATION_CHANNELS_SOURCE;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +34,7 @@ public class NotificationChannelsReader {
   public static List<NotificationChannel> readNotificationChannels(Config config)
       throws IOException {
     RuleSource ruleSource =
-        RuleSourceProvider.getProvider(config.getConfig("notificationChannelsSource"));
+        RuleSourceProvider.getProvider(config.getConfig(NOTIIFICATION_CHANNELS_SOURCE));
     return ruleSource.getAllRules(jsonNode -> true).stream()
         .map(
             document -> {

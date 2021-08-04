@@ -1,5 +1,6 @@
 package org.hypertrace.alert.engine;
 
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.ALERT_RULE_SOURCE;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.CRON_EXPRESSION;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG_CRON_EXPRESSION;
@@ -97,7 +98,7 @@ public class RuleEvaluationJobManager implements JobManager {
   }
 
   private void addAlertTasksToJobData(JobDataMap jobDataMap, Config appConfig) {
-    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig("alertRuleSource"));
+    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(ALERT_RULE_SOURCE));
     Config jobConfig = getJobConfig(appConfig);
 
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
