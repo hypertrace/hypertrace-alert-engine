@@ -222,17 +222,17 @@ public class HTAETest {
 
     ManagedChannel channel =
         ManagedChannelBuilder.forAddress(
-            attributeService.getHost(), attributeService.getMappedPort(9012))
+                attributeService.getHost(), attributeService.getMappedPort(9012))
             .usePlaintext()
             .build();
     AttributeServiceClient client = new AttributeServiceClient(channel);
     int retry = 0;
     while (Streams.stream(
-        client.findAttributes(
-            TENANT_ID_MAP, AttributeMetadataFilter.getDefaultInstance()))
-        .collect(Collectors.toList())
-        .size()
-        == 0
+                    client.findAttributes(
+                        TENANT_ID_MAP, AttributeMetadataFilter.getDefaultInstance()))
+                .collect(Collectors.toList())
+                .size()
+            == 0
         && retry++ < 5) {
       Thread.sleep(2000);
     }
