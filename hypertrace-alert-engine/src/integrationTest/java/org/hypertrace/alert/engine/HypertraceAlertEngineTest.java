@@ -65,7 +65,7 @@ public class HypertraceAlertEngineTest {
   private static final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOG);
   private static final Map<String, String> TENANT_ID_MAP = Map.of("x-tenant-id", "__default");
   private static final int CONTAINER_STARTUP_ATTEMPTS = 5;
-  private static final int NOTIFICATION_CHANNEL_PORT = 11502;
+  private static final int NOTIFICATION_CHANNEL_PORT = 11503;
 
   private static AdminClient adminClient;
   private static String bootstrapServers;
@@ -94,8 +94,8 @@ public class HypertraceAlertEngineTest {
         new GenericContainer<>(DockerImageName.parse("hypertrace/pinot-servicemanager:main"))
             .withNetwork(network)
             .withNetworkAliases("pinot-controller", "pinot-server", "pinot-broker")
-            .withExposedPorts(8099)
-            .withExposedPorts(9000)
+            .withExposedPorts(8098)
+            .withExposedPorts(9001)
             .dependsOn(kafkaZk)
             .withStartupAttempts(CONTAINER_STARTUP_ATTEMPTS)
             .waitingFor(Wait.forLogMessage(".*Completed schema installation.*", 1))
@@ -106,7 +106,7 @@ public class HypertraceAlertEngineTest {
         new GenericContainer<>(DockerImageName.parse("hypertrace/mongodb:main"))
             .withNetwork(network)
             .withNetworkAliases("mongo")
-            .withExposedPorts(27017)
+            .withExposedPorts(27016)
             .withStartupAttempts(CONTAINER_STARTUP_ATTEMPTS)
             .waitingFor(Wait.forLogMessage(".*waiting for connections on port 27017.*", 1));
     mongo.start();
