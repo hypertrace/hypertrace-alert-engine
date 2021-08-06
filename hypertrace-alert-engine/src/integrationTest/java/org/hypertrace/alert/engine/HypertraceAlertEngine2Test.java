@@ -60,7 +60,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 public class HypertraceAlertEngine2Test {
-  private static final Logger LOG = LoggerFactory.getLogger(HypertraceAlertEngineTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HypertraceAlertEngine2Test.class);
 
   private static final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOG);
   private static final Map<String, String> TENANT_ID_MAP = Map.of("x-tenant-id", "__default");

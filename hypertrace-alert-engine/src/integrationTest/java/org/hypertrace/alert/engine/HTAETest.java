@@ -59,8 +59,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-public class HypertraceAlertEngineTest {
-  private static final Logger LOG = LoggerFactory.getLogger(HypertraceAlertEngineTest.class);
+public class HTAETest {
+  private static final Logger LOG = LoggerFactory.getLogger(HTAETest.class);
 
   private static final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOG);
   private static final Map<String, String> TENANT_ID_MAP = Map.of("x-tenant-id", "__default");
