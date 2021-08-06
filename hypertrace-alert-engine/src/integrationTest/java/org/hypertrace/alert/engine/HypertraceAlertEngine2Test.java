@@ -163,10 +163,10 @@ public class HypertraceAlertEngine2Test {
     LOG.info("Bootstrap Complete");
     long traceTimeStamp = System.currentTimeMillis();
     LOG.info("TraceTimeStamp for trace is {}", Instant.ofEpochMilli(traceTimeStamp));
-    assertTrue(generateData(traceTimeStamp)); // add data in pinot for metrics and all
+    assertTrue(generateData(traceTimeStamp));
     LOG.info("Generate Data Complete");
 
-    mockWebServer = new MockWebServer(); // for notifications
+    mockWebServer = new MockWebServer();
     mockWebServer.start(NOTIFICATION_CHANNEL_PORT);
     MockResponse mockedResponse =
         new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json");
