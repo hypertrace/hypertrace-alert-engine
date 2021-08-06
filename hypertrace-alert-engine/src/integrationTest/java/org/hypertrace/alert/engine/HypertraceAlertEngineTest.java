@@ -172,6 +172,7 @@ public class HypertraceAlertEngineTest {
         new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json");
     mockWebServer.enqueue(mockedResponse);
     withEnvironmentVariable("ATTRIBUTE_SERVICE_HOST_CONFIG", attributeService.getHost())
+        .and("SERVICE_ADMIN_PORT", String.valueOf(10010))
         .and("ATTRIBUTE_SERVICE_PORT_CONFIG", attributeService.getMappedPort(9012).toString())
         .and("QUERY_SERVICE_HOST_CONFIG", queryService.getHost())
         .and("QUERY_SERVICE_PORT_CONFIG", queryService.getMappedPort(8090).toString())
