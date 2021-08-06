@@ -163,10 +163,10 @@ public class HTAETest {
     LOG.info("Bootstrap Complete");
     long traceTimeStamp = System.currentTimeMillis();
     LOG.info("TraceTimeStamp for trace is {}", Instant.ofEpochMilli(traceTimeStamp));
-    assertTrue(generateData(traceTimeStamp)); // add data for metrics and all
+    assertTrue(generateData(traceTimeStamp));
     LOG.info("Generate Data Complete");
 
-    mockWebServer = new MockWebServer(); // for notifications
+    mockWebServer = new MockWebServer();
     mockWebServer.start(NOTIFICATION_CHANNEL_PORT);
     MockResponse mockedResponse =
         new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json");
@@ -222,17 +222,17 @@ public class HTAETest {
 
     ManagedChannel channel =
         ManagedChannelBuilder.forAddress(
-                attributeService.getHost(), attributeService.getMappedPort(9012))
+            attributeService.getHost(), attributeService.getMappedPort(9012))
             .usePlaintext()
             .build();
     AttributeServiceClient client = new AttributeServiceClient(channel);
     int retry = 0;
     while (Streams.stream(
-                    client.findAttributes(
-                        TENANT_ID_MAP, AttributeMetadataFilter.getDefaultInstance()))
-                .collect(Collectors.toList())
-                .size()
-            == 0
+        client.findAttributes(
+            TENANT_ID_MAP, AttributeMetadataFilter.getDefaultInstance()))
+        .collect(Collectors.toList())
+        .size()
+        == 0
         && retry++ < 5) {
       Thread.sleep(2000);
     }
