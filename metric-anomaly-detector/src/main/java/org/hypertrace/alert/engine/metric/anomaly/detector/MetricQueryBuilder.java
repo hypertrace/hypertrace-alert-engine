@@ -1,5 +1,7 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
+import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -21,6 +23,7 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggreg
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.RhsExpression;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperator;
+import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadata;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadataFilter;
@@ -37,7 +40,7 @@ import org.hypertrace.gateway.service.v1.common.FunctionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class MetricQueryBuilder {
+public class MetricQueryBuilder {
 
   private static final String START_TIME_ATTRIBUTE_KEY = "startTime";
   private static final String DATE_TIME_CONVERTER = "dateTimeConvert";
@@ -47,7 +50,7 @@ class MetricQueryBuilder {
 
   final LoadingCache<Pair<String, String>, String> attributeServiceCache;
 
-  MetricQueryBuilder(AttributeServiceClient attributesServiceClient) {
+  public MetricQueryBuilder(AttributeServiceClient attributesServiceClient) {
     CacheLoader<Pair<String, String>, String> cacheLoader =
         new CacheLoader<>() {
           @Override
@@ -55,7 +58,7 @@ class MetricQueryBuilder {
             // key = Pair<tenantId,attributeScope>
             Iterator<AttributeMetadata> attributeMetadataIterator =
                 attributesServiceClient.findAttributes(
-                    Map.of(AlertRuleEvaluator.TENANT_ID_KEY, key.getLeft()),
+                    Map.of(TENANT_ID_KEY, key.getLeft()),
                     AttributeMetadataFilter.newBuilder().addScopeString(key.getRight()).build());
 
             while (attributeMetadataIterator.hasNext()) {
@@ -76,7 +79,7 @@ class MetricQueryBuilder {
             .build(cacheLoader);
   }
 
-  QueryRequest buildMetricQueryRequest(
+  public QueryRequest buildMetricQueryRequest(
       MetricSelection metricSelection, long startTime, long endTime, String tenantId) {
     QueryRequest.Builder builder = QueryRequest.newBuilder();
     String timeColumn =
@@ -102,7 +105,7 @@ class MetricQueryBuilder {
     return builder.build();
   }
 
-  static long isoDurationToSeconds(String duration) {
+  public static long isoDurationToSeconds(String duration) {
     Duration d = java.time.Duration.parse(duration);
     return d.get(ChronoUnit.SECONDS);
   }
@@ -121,7 +124,7 @@ class MetricQueryBuilder {
     }
   }
 
-  static org.hypertrace.core.query.service.api.Filter convertLeafFilter(LeafFilter filter) {
+  public static org.hypertrace.core.query.service.api.Filter convertLeafFilter(LeafFilter filter) {
     org.hypertrace.core.query.service.api.Filter.Builder builder =
         org.hypertrace.core.query.service.api.Filter.newBuilder();
     builder.setLhs(convertFilterLhsExpression(filter.getLhsExpression()));
@@ -270,7 +273,7 @@ class MetricQueryBuilder {
     }
   }
 
-  static Expression createTimeColumnGroupByExpression(String timeColumn, long periodSecs) {
+  public static Expression createTimeColumnGroupByExpression(String timeColumn, long periodSecs) {
     return Expression.newBuilder()
         .setFunction(
             Function.newBuilder()
