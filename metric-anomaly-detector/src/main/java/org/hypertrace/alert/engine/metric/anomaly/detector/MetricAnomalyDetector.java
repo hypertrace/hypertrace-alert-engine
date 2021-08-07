@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Optional;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
