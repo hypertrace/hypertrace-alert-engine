@@ -182,7 +182,7 @@ public class HTAETest {
   }
 
   @AfterAll
-  public static void shutdown() throws IOException {
+  public static void shutdown() throws IOException, InterruptedException {
     LOG.info("Initiating shutdown");
     attributeService.stop();
     queryService.stop();
@@ -191,6 +191,7 @@ public class HTAETest {
     kafkaZk.stop();
     network.close();
     mockWebServer.close();
+    Thread.sleep(10000);
   }
 
   @Test
@@ -243,6 +244,7 @@ public class HTAETest {
 
   private static boolean generateData(long timeStamp) throws Exception {
     // start view-gen service
+    LOG.info("Creating viewGen HTAE");
     GenericContainer<?> viewGen =
         new GenericContainer<>(DockerImageName.parse("hypertrace/hypertrace-view-generator:main"))
             .withNetwork(network)
@@ -258,11 +260,13 @@ public class HTAETest {
             .waitingFor(Wait.forLogMessage(".* Started admin service on port: 8099.*", 1));
     viewGen.start();
     viewGen.followOutput(logConsumer);
+    LOG.info("started viewGen HTAE");
 
     // produce data
     StructuredTrace trace = getTrace();
     updateTraceTimeStamp(trace, timeStamp);
 
+    LOG.info("Creating producer HTAE");
     KafkaProducer<String, StructuredTrace> producer =
         new KafkaProducer<>(
             ImmutableMap.of(
@@ -273,6 +277,7 @@ public class HTAETest {
             new StringSerializer(),
             new AvroSerde<StructuredTrace>().serializer());
     producer.send(new ProducerRecord<>("enriched-structured-traces", "", trace)).get();
+    LOG.info("send producer HTAE");
 
     Map<String, Long> endOffSetMap =
         Map.of(

@@ -80,6 +80,8 @@ public class HypertraceAlertEngineTest {
 
   @BeforeAll
   public static void setup() throws Exception {
+    LOG.info("Initiating startup");
+
     network = org.testcontainers.containers.Network.newNetwork();
 
     kafkaZk =
@@ -176,6 +178,7 @@ public class HypertraceAlertEngineTest {
         .and(
             "NOTIFICATION_CHANNELS_PATH",
             "build/resources/integrationTest/notification-channels2.json")
+        .and("ALERT_RULES_PATH", "build/resources/integrationTest/alert-rules2.json")
         .and("ATTRIBUTE_SERVICE_PORT_CONFIG", attributeService.getMappedPort(9012).toString())
         .and("QUERY_SERVICE_HOST_CONFIG", queryService.getHost())
         .and("QUERY_SERVICE_PORT_CONFIG", queryService.getMappedPort(8090).toString())
@@ -186,7 +189,7 @@ public class HypertraceAlertEngineTest {
   }
 
   @AfterAll
-  public static void shutdown() throws IOException {
+  public static void shutdown() throws IOException, InterruptedException {
     LOG.info("Initiating shutdown");
     attributeService.stop();
     queryService.stop();
@@ -195,6 +198,7 @@ public class HypertraceAlertEngineTest {
     kafkaZk.stop();
     network.close();
     mockWebServer.close();
+    Thread.sleep(10000);
   }
 
   @Test
@@ -247,6 +251,7 @@ public class HypertraceAlertEngineTest {
 
   private static boolean generateData(long timeStamp) throws Exception {
     // start view-gen service
+    LOG.info("Creating viewGen");
     GenericContainer<?> viewGen =
         new GenericContainer<>(DockerImageName.parse("hypertrace/hypertrace-view-generator:main"))
             .withNetwork(network)
@@ -262,11 +267,13 @@ public class HypertraceAlertEngineTest {
             .waitingFor(Wait.forLogMessage(".* Started admin service on port: 8099.*", 1));
     viewGen.start();
     viewGen.followOutput(logConsumer);
+    LOG.info("started viewGen");
 
     // produce data
     StructuredTrace trace = getTrace();
     updateTraceTimeStamp(trace, timeStamp);
 
+    LOG.info("Creating producer");
     KafkaProducer<String, StructuredTrace> producer =
         new KafkaProducer<>(
             ImmutableMap.of(
@@ -277,6 +284,7 @@ public class HypertraceAlertEngineTest {
             new StringSerializer(),
             new AvroSerde<StructuredTrace>().serializer());
     producer.send(new ProducerRecord<>("enriched-structured-traces", "", trace)).get();
+    LOG.info("send producer");
 
     Map<String, Long> endOffSetMap =
         Map.of(

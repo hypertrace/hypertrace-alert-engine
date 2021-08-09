@@ -1,7 +1,7 @@
 [
   {
-    "channelName": "channel-1",
-    "channelId": "channel-id-1",
+    "channelName": "channel-2",
+    "channelId": "channel-id-2",
     "channelConfig": [
       {
         "channelConfigType": "WEBHOOK",
