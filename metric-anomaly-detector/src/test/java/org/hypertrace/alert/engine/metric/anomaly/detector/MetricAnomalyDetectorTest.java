@@ -1,8 +1,8 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector;
 
-import static org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluatorTest.createLeafFilter;
-import static org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluatorTest.createLhsExpression;
-import static org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluatorTest.createRhsExpression;
+import static org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluatorTest.createLeafFilter;
+import static org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluatorTest.createLhsExpression;
+import static org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluatorTest.createRhsExpression;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;

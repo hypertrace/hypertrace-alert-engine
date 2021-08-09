@@ -1,4 +1,4 @@
-package org.hypertrace.alert.engine.metric.anomaly.detector;
+package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,7 +32,7 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCon
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
+import org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadata;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadataFilter;
@@ -55,7 +55,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
-class AlertRuleEvaluatorTest {
+public class AlertRuleEvaluatorTest {
 
   @Test
   void testMetricAnomaly() throws URISyntaxException, IOException {
@@ -267,17 +267,17 @@ class AlertRuleEvaluatorTest {
     return resultSetChunkBuilder.build();
   }
 
-  static LhsExpression createLhsExpression(String key, String scope) {
+  public static LhsExpression createLhsExpression(String key, String scope) {
     return LhsExpression.newBuilder()
         .setAttribute(Attribute.newBuilder().setKey(key).setScope(scope).build())
         .build();
   }
 
-  static RhsExpression createRhsExpression(String stringValue) {
+  public static RhsExpression createRhsExpression(String stringValue) {
     return RhsExpression.newBuilder().setStringValue(stringValue).build();
   }
 
-  static LeafFilter createLeafFilter(
+  public static LeafFilter createLeafFilter(
       ValueOperator valueOperator, LhsExpression lhsExpression, RhsExpression rhsExpression) {
     return LeafFilter.newBuilder()
         .setValueOperator(valueOperator)
