@@ -1,7 +1,7 @@
-package org.hypertrace.alert.engine.metric.anomaly.detector;
+package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.typesafe.config.Config;
 import io.grpc.ManagedChannel;
@@ -13,10 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lombok.Getter;
-import lombok.experimental.SuperBuilder;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
@@ -24,13 +21,11 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotific
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
+import org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.client.config.AttributeServiceClientConfig;
 import org.hypertrace.core.query.service.api.QueryRequest;
 import org.hypertrace.core.query.service.api.ResultSetChunk;
-import org.hypertrace.core.query.service.api.Row;
-import org.hypertrace.core.query.service.api.Value;
-import org.hypertrace.core.query.service.api.ValueType;
 import org.hypertrace.core.query.service.client.QueryServiceClient;
 import org.hypertrace.core.query.service.client.QueryServiceConfig;
 import org.slf4j.Logger;
@@ -44,12 +39,10 @@ public class AlertRuleEvaluator {
   private static final String REQUEST_TIMEOUT_CONFIG_KEY = "request.timeout";
   private static final String METRIC_ANOMALY_EVENT_CONDITION = "MetricAnomalyEventCondition";
   private static final int DEFAULT_REQUEST_TIMEOUT_MILLIS = 10000;
-  static final String TENANT_ID_KEY = "x-tenant-id";
 
   private final MetricQueryBuilder metricQueryBuilder;
   private final QueryServiceClient queryServiceClient;
   private final int qsRequestTimeout;
-  private final Multimap<Double, Double> violationSummaryMap = ArrayListMultimap.create();
 
   public AlertRuleEvaluator(Config appConfig) {
     AttributeServiceClientConfig asConfig = AttributeServiceClientConfig.from(appConfig);
@@ -122,7 +115,8 @@ public class AlertRuleEvaluator {
         metricAnomalyEventCondition.getViolationConditionList().get(0);
 
     if (violationCondition.hasStaticThresholdCondition()) {
-      EvaluationResult evaluationResult = evaluateForStaticThreshold(iterator, violationCondition);
+      EvaluationResult evaluationResult =
+          StaticRuleEvaluator.evaluateForStaticThreshold(iterator, violationCondition);
       LOGGER.debug(
           "Eval result {} {} {}",
           evaluationResult.isViolation(),
@@ -131,71 +125,15 @@ public class AlertRuleEvaluator {
       if (evaluationResult.isViolation()) {
         return getNotificationEvent(
             alertTask,
-            evaluationResult.dataCount,
-            evaluationResult.violationCount,
-            staticThresholdOperatorToOperatorConvertor(
-                violationCondition.getStaticThresholdCondition().getOperator()));
+            evaluationResult.getDataCount(),
+            evaluationResult.getViolationCount(),
+            evaluationResult.getOperator(),
+            evaluationResult.getMetricValues(),
+            evaluationResult.getRhs());
       }
     }
 
     return Optional.empty();
-  }
-
-  EvaluationResult evaluateForStaticThreshold(
-      Iterator<ResultSetChunk> iterator, ViolationCondition violationCondition) {
-    int dataCount = 0, violationCount = 0;
-    while (iterator.hasNext()) {
-      ResultSetChunk resultSetChunk = iterator.next();
-      for (Row row : resultSetChunk.getRowList()) {
-        Value value = row.getColumn(1);
-        if (value.getValueType() != ValueType.STRING) {
-          throw new IllegalArgumentException(
-              "Expecting value of type string, received valueType: " + value.getValueType());
-        }
-        dataCount++;
-        LOGGER.debug("Metric data {}", value.getString());
-        if (compareThreshold(value, violationCondition)) {
-          violationCount++;
-        }
-      }
-    }
-
-    if (isViolation(dataCount, violationCount)) {
-      LOGGER.debug("Rule violated. dataCount {}, violationCount {}", dataCount, violationCount);
-    } else {
-      LOGGER.debug("Rule normal. dataCount {} violationCount {}", dataCount, violationCount);
-    }
-
-    return EvaluationResult.builder()
-        .dataCount(dataCount)
-        .violationCount(violationCount)
-        .isViolation(isViolation(dataCount, violationCount))
-        .build();
-  }
-
-  private boolean isViolation(int dataCount, int violationCount) {
-    return dataCount > 0 && (dataCount == violationCount);
-  }
-
-  @SuperBuilder
-  @Getter
-  private static class EvaluationResult {
-    private final int violationCount;
-    private final int dataCount;
-    private final boolean isViolation;
-  }
-
-  boolean compareThreshold(Value value, ViolationCondition violationCondition) {
-    StaticThresholdCondition thresholdCondition = violationCondition.getStaticThresholdCondition();
-    double lhs = Double.parseDouble(value.getString());
-    double rhs = thresholdCondition.getValue();
-    boolean isViolation = evalOperator(thresholdCondition.getOperator(), lhs, rhs);
-
-    if (isViolation) {
-      violationSummaryMap.put(rhs, lhs);
-    }
-
-    return isViolation;
   }
 
   Iterator<ResultSetChunk> executeQuery(
@@ -213,23 +151,24 @@ public class AlertRuleEvaluator {
   }
 
   private Optional<NotificationEvent> getNotificationEvent(
-      AlertTask alertTask, int dataCount, int violationCount, Operator operator)
+      AlertTask alertTask,
+      int dataCount,
+      int violationCount,
+      Operator operator,
+      List<Double> metricValues,
+      double rhs)
       throws IOException {
 
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
-    violationSummaryMap
-        .asMap()
-        .forEach(
-            (key, collection) -> {
-              violationSummaryList.add(
-                  ViolationSummary.newBuilder()
-                      .setLhs(new ArrayList<>(collection))
-                      .setRhs(key)
-                      .setDataCount(dataCount)
-                      .setViolationCount(violationCount)
-                      .setOperator(operator)
-                      .build());
-            });
+
+    violationSummaryList.add(
+        ViolationSummary.newBuilder()
+            .setLhs(new ArrayList<>(metricValues))
+            .setRhs(rhs)
+            .setDataCount(dataCount)
+            .setViolationCount(violationCount)
+            .setOperator(operator)
+            .build());
 
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
@@ -257,42 +196,5 @@ public class AlertRuleEvaluator {
 
     LOGGER.debug("Notification Event {}", notificationEvent);
     return Optional.of(notificationEvent);
-  }
-
-  private boolean evalOperator(
-      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator operator,
-      double lhs,
-      double rhs) {
-    switch (operator) {
-      case STATIC_THRESHOLD_OPERATOR_GT:
-        return lhs > rhs;
-      case STATIC_THRESHOLD_OPERATOR_LT:
-        return lhs < rhs;
-      case STATIC_THRESHOLD_OPERATOR_GTE:
-        return lhs >= rhs;
-      case STATIC_THRESHOLD_OPERATOR_LTE:
-        return lhs <= rhs;
-      default:
-        throw new UnsupportedOperationException(
-            "Unsupported threshold condition operator: " + operator);
-    }
-  }
-
-  private Operator staticThresholdOperatorToOperatorConvertor(
-      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator
-          operator) {
-    switch (operator) {
-      case STATIC_THRESHOLD_OPERATOR_GT:
-        return Operator.STATIC_THRESHOLD_OPERATOR_GT;
-      case STATIC_THRESHOLD_OPERATOR_LT:
-        return Operator.STATIC_THRESHOLD_OPERATOR_LT;
-      case STATIC_THRESHOLD_OPERATOR_GTE:
-        return Operator.STATIC_THRESHOLD_OPERATOR_GTE;
-      case STATIC_THRESHOLD_OPERATOR_LTE:
-        return Operator.STATIC_THRESHOLD_OPERATOR_LTE;
-      default:
-        throw new UnsupportedOperationException(
-            "Unsupported threshold condition operator: " + operator);
-    }
   }
 }
