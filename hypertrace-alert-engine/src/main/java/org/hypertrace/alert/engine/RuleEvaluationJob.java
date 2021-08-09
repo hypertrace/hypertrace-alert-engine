@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluator;
+import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
 import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;

@@ -16,7 +16,7 @@ import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
-import org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluator;
+import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
