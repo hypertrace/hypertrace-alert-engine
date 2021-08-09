@@ -23,7 +23,6 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggreg
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.RhsExpression;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperator;
-import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadata;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadataFilter;
