@@ -59,13 +59,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-public class HypertraceAlertEngineTest {
-  private static final Logger LOG = LoggerFactory.getLogger(HypertraceAlertEngineTest.class);
+public class HTAETest {
+  private static final Logger LOG = LoggerFactory.getLogger(HTAETest.class);
 
   private static final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOG);
   private static final Map<String, String> TENANT_ID_MAP = Map.of("x-tenant-id", "__default");
   private static final int CONTAINER_STARTUP_ATTEMPTS = 5;
-  private static final int NOTIFICATION_CHANNEL_PORT = 11503;
+  private static final int NOTIFICATION_CHANNEL_PORT = 11502;
 
   private static AdminClient adminClient;
   private static String bootstrapServers;
@@ -94,8 +94,8 @@ public class HypertraceAlertEngineTest {
         new GenericContainer<>(DockerImageName.parse("hypertrace/pinot-servicemanager:main"))
             .withNetwork(network)
             .withNetworkAliases("pinot-controller", "pinot-server", "pinot-broker")
-            .withExposedPorts(8098)
-            .withExposedPorts(9001)
+            .withExposedPorts(8099)
+            .withExposedPorts(9000)
             .dependsOn(kafkaZk)
             .withStartupAttempts(CONTAINER_STARTUP_ATTEMPTS)
             .waitingFor(Wait.forLogMessage(".*Completed schema installation.*", 1))
@@ -106,7 +106,7 @@ public class HypertraceAlertEngineTest {
         new GenericContainer<>(DockerImageName.parse("hypertrace/mongodb:main"))
             .withNetwork(network)
             .withNetworkAliases("mongo")
-            .withExposedPorts(27016)
+            .withExposedPorts(27017)
             .withStartupAttempts(CONTAINER_STARTUP_ATTEMPTS)
             .waitingFor(Wait.forLogMessage(".*waiting for connections on port 27017.*", 1));
     mongo.start();
@@ -163,19 +163,15 @@ public class HypertraceAlertEngineTest {
     LOG.info("Bootstrap Complete");
     long traceTimeStamp = System.currentTimeMillis();
     LOG.info("TraceTimeStamp for trace is {}", Instant.ofEpochMilli(traceTimeStamp));
-    assertTrue(generateData(traceTimeStamp)); // add data in pinot
+    assertTrue(generateData(traceTimeStamp));
     LOG.info("Generate Data Complete");
 
-    mockWebServer = new MockWebServer(); // for notificatoins
+    mockWebServer = new MockWebServer();
     mockWebServer.start(NOTIFICATION_CHANNEL_PORT);
     MockResponse mockedResponse =
         new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json");
     mockWebServer.enqueue(mockedResponse);
     withEnvironmentVariable("ATTRIBUTE_SERVICE_HOST_CONFIG", attributeService.getHost())
-        .and("SERVICE_ADMIN_PORT", String.valueOf(10010))
-        .and(
-            "NOTIFICATION_CHANNELS_PATH",
-            "build/resources/integrationTest/notification-channels2.json")
         .and("ATTRIBUTE_SERVICE_PORT_CONFIG", attributeService.getMappedPort(9012).toString())
         .and("QUERY_SERVICE_HOST_CONFIG", queryService.getHost())
         .and("QUERY_SERVICE_PORT_CONFIG", queryService.getMappedPort(8090).toString())
