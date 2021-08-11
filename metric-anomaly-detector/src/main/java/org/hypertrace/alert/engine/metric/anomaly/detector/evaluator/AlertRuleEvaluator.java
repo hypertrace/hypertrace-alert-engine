@@ -78,8 +78,7 @@ public class AlertRuleEvaluator {
       case STATIC_THRESHOLD_CONDITION:
         return staticRuleEvaluator.evaluateRule(metricAnomalyEventCondition, alertTask);
       case DYNAMIC_THRESHOLD_CONDITION:
-        return
-            baselineRuleEvaluator.evaluateRule(metricAnomalyEventCondition, alertTask);
+        return baselineRuleEvaluator.evaluateRule(metricAnomalyEventCondition, alertTask);
     }
 
     return Optional.empty();

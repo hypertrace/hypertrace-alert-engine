@@ -88,7 +88,9 @@ public class StaticRuleEvaluator {
     }
 
     return getNotificationEvent(
-        alertTask, dataCount, violationCount,
+        alertTask,
+        dataCount,
+        violationCount,
         staticThresholdOperatorToOperatorConvertor(staticThresholdCondition.getOperator()),
         metricValues,
         getConditionRhs(staticThresholdCondition));
@@ -128,7 +130,8 @@ public class StaticRuleEvaluator {
   }
 
   private static StaticThresholdOperator staticThresholdOperatorToOperatorConvertor(
-      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator operator) {
+      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator
+          operator) {
     switch (operator) {
       case STATIC_THRESHOLD_OPERATOR_GT:
         return StaticThresholdOperator.STATIC_THRESHOLD_OPERATOR_GT;
@@ -156,16 +159,16 @@ public class StaticRuleEvaluator {
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
 
     violationSummaryList.add(
-        ViolationSummary.newBuilder().setViolationSummary(
-            StaticRuleViolationSummary.newBuilder()
-                .setMetricValues(new ArrayList<>(metricValues))
-                .setStaticThreshold(staticThreshold)
-                .setDataCount(dataCount)
-                .setViolationCount(violationCount)
-                .setOperator(operator)
-                .build()
-        ).build()
-    );
+        ViolationSummary.newBuilder()
+            .setViolationSummary(
+                StaticRuleViolationSummary.newBuilder()
+                    .setMetricValues(new ArrayList<>(metricValues))
+                    .setStaticThreshold(staticThreshold)
+                    .setDataCount(dataCount)
+                    .setViolationCount(violationCount)
+                    .setOperator(operator)
+                    .build())
+            .build());
 
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()

@@ -101,7 +101,9 @@ public class BaselineRuleEvaluator {
     }
 
     return getNotificationEvent(
-        alertTask, dataCount, violationCount,
+        alertTask,
+        dataCount,
+        violationCount,
         metricValuesForEvaluation,
         baseline.getLowerBound().getDouble(),
         baseline.getUpperBound().getDouble());
@@ -141,16 +143,16 @@ public class BaselineRuleEvaluator {
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
 
     violationSummaryList.add(
-        ViolationSummary.newBuilder().setViolationSummary(
-            DynamicRuleViolationSummary.newBuilder()
-                .setMetricValues(new ArrayList<>(metricValues))
-                .setDataCount(dataCount)
-                .setViolationCount(violationCount)
-                .setBaselineLowerBound(baselineLowerBound)
-                .setBaselineUpperBound(baselineUpperBound)
-                .build()
-        ).build()
-    );
+        ViolationSummary.newBuilder()
+            .setViolationSummary(
+                DynamicRuleViolationSummary.newBuilder()
+                    .setMetricValues(new ArrayList<>(metricValues))
+                    .setDataCount(dataCount)
+                    .setViolationCount(violationCount)
+                    .setBaselineLowerBound(baselineLowerBound)
+                    .setBaselineUpperBound(baselineUpperBound)
+                    .build())
+            .build());
 
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
