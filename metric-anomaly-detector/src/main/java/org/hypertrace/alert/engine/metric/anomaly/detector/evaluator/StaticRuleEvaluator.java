@@ -1,11 +1,16 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
+import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
+import org.hypertrace.core.query.service.api.QueryRequest;
 import org.hypertrace.core.query.service.api.ResultSetChunk;
 import org.hypertrace.core.query.service.api.Row;
 import org.hypertrace.core.query.service.api.Value;
@@ -17,10 +22,32 @@ public class StaticRuleEvaluator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StaticRuleEvaluator.class);
 
-  static EvaluationResult evaluateForStaticThreshold(
-      Iterator<ResultSetChunk> iterator, ViolationCondition violationCondition) {
+  private final QueryRequestHandler queryRequestHandler;
+
+  public StaticRuleEvaluator(QueryRequestHandler queryRequestHandler) {
+    this.queryRequestHandler = queryRequestHandler;
+  }
+
+  EvaluationResult evaluateRule(
+      MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask) {
+
+    QueryRequest queryRequest =
+        queryRequestHandler.getQueryRequest(metricAnomalyEventCondition, alertTask);
+    LOGGER.debug("Query request {}", queryRequest);
+
+    Iterator<ResultSetChunk> iterator =
+        queryRequestHandler.executeQuery(
+            Map.of(TENANT_ID_KEY, alertTask.getTenantId()), queryRequest);
+
+    StaticThresholdCondition staticThresholdCondition =
+        metricAnomalyEventCondition
+            .getViolationConditionList()
+            .get(0)
+            .getStaticThresholdCondition();
+
     int dataCount = 0, violationCount = 0;
     List<Double> metricValues = new ArrayList<>();
+
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
       for (Row row : resultSetChunk.getRowList()) {
@@ -31,7 +58,7 @@ public class StaticRuleEvaluator {
         }
         dataCount++;
         LOGGER.debug("Metric data {}", value.getString());
-        if (compareThreshold(value, violationCondition)) {
+        if (compareThreshold(value, staticThresholdCondition)) {
           violationCount++;
         }
         metricValues.add(value.getDouble());
@@ -49,29 +76,27 @@ public class StaticRuleEvaluator {
         .violationCount(violationCount)
         .isViolation(isViolation(dataCount, violationCount))
         .operator(
-            staticThresholdOperatorToOperatorConvertor(
-                violationCondition.getStaticThresholdCondition().getOperator()))
-        .rhs(getConditionRhs(violationCondition))
+            staticThresholdOperatorToOperatorConvertor(staticThresholdCondition.getOperator()))
+        .rhs(getConditionRhs(staticThresholdCondition))
         .metricValues(metricValues)
         .build();
   }
 
-  static boolean compareThreshold(Value value, ViolationCondition violationCondition) {
-    StaticThresholdCondition thresholdCondition = violationCondition.getStaticThresholdCondition();
+  boolean compareThreshold(Value value, StaticThresholdCondition staticThresholdCondition) {
     double lhs = Double.parseDouble(value.getString());
-    double rhs = thresholdCondition.getValue();
-    return evalOperator(thresholdCondition.getOperator(), lhs, rhs);
+    double rhs = staticThresholdCondition.getValue();
+    return evalOperator(staticThresholdCondition.getOperator(), lhs, rhs);
   }
 
-  private static double getConditionRhs(ViolationCondition violationCondition) {
-    return violationCondition.getStaticThresholdCondition().getValue();
+  private double getConditionRhs(StaticThresholdCondition staticThresholdCondition) {
+    return staticThresholdCondition.getValue();
   }
 
-  private static boolean isViolation(int dataCount, int violationCount) {
+  private boolean isViolation(int dataCount, int violationCount) {
     return dataCount > 0 && (dataCount == violationCount);
   }
 
-  private static boolean evalOperator(
+  private boolean evalOperator(
       org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator operator,
       double lhs,
       double rhs) {
@@ -90,7 +115,7 @@ public class StaticRuleEvaluator {
     }
   }
 
-  private static Operator staticThresholdOperatorToOperatorConvertor(
+  private Operator staticThresholdOperatorToOperatorConvertor(
       org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator
           operator) {
     switch (operator) {
