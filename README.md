@@ -9,7 +9,7 @@ tasks. More features would be added as we progress along in time.
 - Get an alert whenever there is a sudden spike in errors/ increase in error rate for my service. 
 
 ## Design
-Currently, we support setting up the rules via a config or via deployment. However, in the UI, we will have a way to list the alert rules and notification configuration. If we closely look at the alerting service, we see that it is simply an anomaly condition from a baseline for a particular metric. So at a high level we need a **metric anomaly definition** (alert rule) which consists of metric selection and baseline calculation. Once we have designed our alert rule, we would need a **anomaly evaluation engine** over a metric (alert rule evaluation engine) and an **alert notification engine** (notification sender) to send the notification.
+Currently, we support setting up the rules via a config or via deployment. However, in the UI, we will have a way to list the alert rules and notification configuration. If we closely look at the alerting service, we see that it is simply an anomaly condition from a baseline for a particular metric. So to meet the requirements, we have a **metric anomaly definition** (alert rule) which consists of metric selection and baseline calculation steps. Then we have an **anomaly evaluation engine** which evaluates this rule over a metric (alert rule evaluation engine) and an **alert notification engine** (notification sender) to send the notifications for alerting.
 
 ### Alert rule description
 Below is a sample alert rule.
@@ -64,7 +64,7 @@ Various fields of the rule are:
 - eventConditionId: It refers to id of the event condition for which we want the alert
 - eventConditionType: It refers to the type of event condition for which we want the alert
 - channelId: It refers to the channel over which notifications would be sent (should have a corressponding notification config)
-- eventCondition: It specifies the exact event based on which alerts would be rolled out. It has two main parts:
+- eventCondition: It specifies the exact event, based on which alerts would be rolled out. It has two main parts:
 
   1. metricSelection
 
@@ -72,20 +72,14 @@ Various fields of the rule are:
     
   - Then we need to specify the metric aggretgation function which would be used to aggregate the data points over the specified time interval (granularity). This can be configured using *metricAggregationFunction* and *metricAggregationInterval* fields respectively.
 
-  - Next we need to select a filter to be applied on the respective SERVICE/API as there can be multiple services/apis. As an example the above rule uses the filter : "Select the service where service name is customer".
+  - Next we need to select a filter to be applied on the respective SERVICE/API as there can be multiple services/apis. As an example, the above rule uses the filter : "select the service where service name is customer".
 
   2. violationCondition/baseline
 
-      Baseline can be fixed or dynamic (based on past data points). Currently we support fixed baseline based on which anomaly would be decided. As an example the above rule uses the baseline : "Raise an anomaly when the selected metric value is greater than 5 for all the points in the 15s duration"
+      Baseline can be fixed or dynamic (based on past data points). Currently we support fixed baseline based on which anomaly would be decided. As an example, the above rule uses the baseline : "raise an anomaly when the selected metric value is greater than 5 for all the points in the 15s duration". (Currently the violation condition is violated when all the points in that interval violate the condition)
 
 ### Metric Anomaly Evaluation Engine
-At a time there can be multiple rules configured. So we need a mechanism to evaluate all the rules and at all the times for alert to be useful. We have an evaluation engine which in background, keeps on evaluating all the rules in a periodic fashion at every 1 minute interval. At a high level, for a given rule the evaluation will look like as:
-
-1. Fetch all the metric points of metric as per selection definition for current 1 min duration by firing query to the data store (pinot in our case). So, if granularity is 15s, there will be a maximum of 4 points will be received, and if it's 1 min, there will be 1 data point.
-
-2. Similarly, fetch all the metrics points for the required baseline.
-
-3. Evaluate all the current metric data points against the violation condition. If all points violated, raises an alert.
+At a time there can be multiple rules configured so we need a mechanism to evaluate all the rules and at all the times for alert to be useful/appropriate. For this we have an evaluation engine which in background, keeps on evaluating all the rules in a periodic fashion at every configured time interval (say every 1 minute). At a high level, for a given rule the evaluation engine will first fetch all the metric points of metric as per selection definition for configured time by firing query to the data store (pinot in our case). For example say if configured time is 1 minute, and granularity is 15s, there will be a maximum of 4 points received, and if it's 1 min, there will be 1 data point received. Similarly, the engine will fetch all the metrics points for the required baseline for all the rules and then evaluate all these points against the violation condition. For one alert rule,if all points violate, alert is raised and send via slack/email.
 
 
 ### Alert Notification Engine
@@ -93,3 +87,5 @@ Currently we support sending alert notification via slack.
 
 
 ## How to build
+
+To run the alerting service on docker or a k8 cluster, refer to the [docs](https://github.com/hypertrace/hypertrace). 
