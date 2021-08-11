@@ -8,7 +8,8 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticRuleViolationSummary;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOperator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
 import org.junit.jupiter.api.AfterEach;
@@ -52,11 +53,14 @@ class NotificationEventProcessorTest {
     List<ViolationSummary> violationSummaryList =
         List.of(
             ViolationSummary.newBuilder()
-                .setRhs(1324)
-                .setLhs(List.of(1d, 2d))
-                .setOperator(Operator.STATIC_THRESHOLD_OPERATOR_LT)
-                .setViolationCount(2)
-                .setDataCount(2)
+                .setViolationSummary(
+                    StaticRuleViolationSummary.newBuilder()
+                        .setStaticThreshold(1324)
+                        .setMetricValues(List.of(1d, 2d))
+                        .setOperator(StaticThresholdOperator.STATIC_THRESHOLD_OPERATOR_LT)
+                        .setViolationCount(2)
+                        .setDataCount(2)
+                        .build())
                 .build());
 
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
