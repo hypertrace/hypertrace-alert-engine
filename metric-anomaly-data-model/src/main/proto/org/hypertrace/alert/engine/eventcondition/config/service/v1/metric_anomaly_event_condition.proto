@@ -90,11 +90,7 @@ message StaticThresholdCondition {
 }
 
 message DynamicThresholdCondition {
-  //BaselineFunctionType baseline_function_type = 1;
-  string look_back_window = 2;  // iso duration string
-  //BoundingBoxFunctionType bounding_box_function_type = 3;
-  double lowerBound = 4;
-  double upperBound = 5;
+  string baseline_duration = 2;  // iso duration string
 }
 
 enum StaticThresholdOperator {
