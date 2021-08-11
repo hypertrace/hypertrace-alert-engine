@@ -14,7 +14,8 @@ Alerting is the entry point for most of the debugging workflows and all the mode
 - Get an alert whenever there is a sudden spike in errors/ increase in error rate for my service. 
 
 ## Design
-Currently, we support setting up the rules via a config or via deployment. However, in the UI, we will have a way to list the alert rules and notification configuration. If we closely look at the alerting service, we see that it is simply an anomaly condition from a baseline for a particular metric. So to meet the requirements, we have a **metric anomaly definition** (alert rule) which consists of metric selection and baseline calculation steps. Then we have an **anomaly evaluation engine** which evaluates this rule over a metric (alert rule evaluation engine) and an **alert notification engine** (notification sender) to send the notifications for alerting.
+Currently, we support setting up the rules via a config or via deployment. However, in the UI, we will have a way to list the alert rules and notification configuration. If we closely look at the alerting service, we see that it is simply an anomaly condition from a baseline for a particular metric. So to meet the requirements, we have a **metric anomaly definition** (alert rule) which consists of metric selection and baseline calculation steps. Then we have an **anomaly evaluation engine** which evaluates this rule over a metric (alert rule evaluation engine) and an **alert notification engine** (notification sender) to send the notifications for alerting. Overall architecture diagram now looks like:
+![hypertrace architecture diagram](https://ibb.co/rQvVJDP)
 
 ### Alert rule description
 Below is a sample alert rule.
@@ -88,7 +89,8 @@ At a time there can be multiple rules configured so we need a mechanism to evalu
 
 
 ### Alert Notification Engine
-Currently we support sending alert notification via slack.
+Currently, we support sending alert notification via slack.
+![sample notification](https://ibb.co/HFZdwTx)
 
 
 ## How to build
