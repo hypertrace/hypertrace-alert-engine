@@ -1,8 +1,13 @@
 # Alerting
 
 ## Introduction
-With Hypertrace we are moving in a direction where we promote it more like an Observability platform than just a distributed tracing tool similar to Jaeger or Zipkin. So when we talk about observability, alerting is one of the main components of it. As of now we provide support for the following 
-tasks. More features would be added as we progress along in time.
+Hypertrace is the modern Observability platform and when we talk about Observability, these are the four pillars of the Observability Engineering team’s charter:
+- Monitoring
+- Alerting/visualization
+- Distributed systems tracing infrastructure
+- Log aggregation/analytics
+
+Alerting is the entry point for most of the debugging workflows and all the modern DevOps teams are required to have a reactive mechanism in a place to quickly identify and mitigate the failures. 
 
 - Get an alert whenever there is a sudden spike/ sharp increase in latency of any operation/ API calls from or to my service.
 - Get an alert whenever there is a sudden spike in traffic/ increase in call rate to my service/ API. 
