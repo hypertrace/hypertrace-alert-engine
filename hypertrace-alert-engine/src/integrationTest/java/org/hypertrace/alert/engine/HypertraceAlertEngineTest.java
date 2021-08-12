@@ -240,7 +240,7 @@ public class HypertraceAlertEngineTest {
     // int x = 1;
     int retryCount = 0;
     // no notification sent
-    while (retryCount++ < 10) {
+    while (retryCount++ < 5) {
       Assertions.assertEquals(mockWebServer.getRequestCount(), 0);
       Thread.sleep(Duration.ofSeconds(20).toMillis());
     }
