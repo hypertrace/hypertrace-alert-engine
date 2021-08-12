@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.DynamicThresholdCondition;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.DynamicRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
@@ -28,7 +30,7 @@ class NotificationEventProcessorTest {
   }
 
   @Test
-  void testProcess() throws IOException, InterruptedException {
+  void testProcessForStaticThreshold() throws IOException {
     MockResponse mockedResponse =
         new MockResponse()
             .setResponseCode(200) // Sample
@@ -36,19 +38,6 @@ class NotificationEventProcessorTest {
 
     mockWebServer.enqueue(mockedResponse);
     // var httpUrl = mockWebServer.url("/hello/world").toString();
-
-    NotificationChannel notificationChannel =
-        NotificationChannel.builder()
-            .channelName("1")
-            .channelId("1")
-            .notificationChannelConfig(
-                List.of(
-                    WebFormatNotificationChannelConfig.builder()
-                        .channelConfigType(NotificationChannelsReader.CHANNEL_CONFIG_TYPE_WEBHOOK)
-                        .url("http://localhost:11502/hello/world")
-                        .webhookFormat(NotificationChannelsReader.WEBHOOK_FORMAT_SLACK)
-                        .build()))
-            .build();
 
     List<ViolationSummary> violationSummaryList =
         List.of(
@@ -63,6 +52,50 @@ class NotificationEventProcessorTest {
                         .build())
                 .build());
 
+    NotificationEvent notificationEvent = getNotificationEvent(violationSummaryList);
+
+    NotificationChannel notificationChannel = getNotificationChannel();
+    Assertions.assertEquals(0, mockWebServer.getRequestCount());
+    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
+    Assertions.assertEquals(1, mockWebServer.getRequestCount());
+    // verify body
+    // RecordedRequest request = mockWebServer.takeRequest();
+  }
+
+  @Test
+  void testProcessForDynamicThreshold() throws IOException {
+    MockResponse mockedResponse =
+        new MockResponse()
+            .setResponseCode(200) // Sample
+            .addHeader("Content-Type", "application/json");
+
+    mockWebServer.enqueue(mockedResponse);
+    // var httpUrl = mockWebServer.url("/hello/world").toString();
+
+    List<ViolationSummary> violationSummaryList =
+        List.of(
+            ViolationSummary.newBuilder()
+                .setViolationSummary(
+                    DynamicRuleViolationSummary.newBuilder()
+                        .setBaselineUpperBound(100.0)
+                        .setBaselineLowerBound(50.0)
+                        .setMetricValues(List.of(123.0, 30.0, 150.0))
+                        .setViolationCount(3)
+                        .setDataCount(3)
+                        .build())
+                .build());
+
+    NotificationEvent notificationEvent = getNotificationEvent(violationSummaryList);
+
+    NotificationChannel notificationChannel = getNotificationChannel();
+
+    Assertions.assertEquals(0, mockWebServer.getRequestCount());
+    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
+    Assertions.assertEquals(1, mockWebServer.getRequestCount());
+  }
+
+  private NotificationEvent getNotificationEvent(
+      List<ViolationSummary> violationSummaries) throws IOException {
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
             .setChannelId("1")
@@ -70,7 +103,7 @@ class NotificationEventProcessorTest {
             .setViolationTimestamp(System.currentTimeMillis())
             .setEventConditionType("grth")
             .setViolationSummaryList(List.of())
-            .setViolationSummaryList(violationSummaryList)
+            .setViolationSummaryList(violationSummaries)
             .build();
 
     EventRecord eventRecord =
@@ -80,19 +113,26 @@ class NotificationEventProcessorTest {
             .setEventRecordMetadata(Map.of())
             .build();
 
-    NotificationEvent notificationEvent =
-        NotificationEvent.newBuilder()
+    return NotificationEvent.newBuilder()
             .setEventRecord(eventRecord)
             .setNotificationEventMetadata(Map.of())
             .setTenantId("tenant-1")
             .setEventTimeMillis(System.currentTimeMillis())
             .build();
+  }
 
-    Assertions.assertEquals(0, mockWebServer.getRequestCount());
-    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
-    Assertions.assertEquals(1, mockWebServer.getRequestCount());
-    // verify body
-    // RecordedRequest request = mockWebServer.takeRequest();
+  private NotificationChannel getNotificationChannel() {
+    return NotificationChannel.builder()
+        .channelName("1")
+        .channelId("1")
+        .notificationChannelConfig(
+            List.of(
+                WebFormatNotificationChannelConfig.builder()
+                    .channelConfigType(NotificationChannelsReader.CHANNEL_CONFIG_TYPE_WEBHOOK)
+                    .url("http://localhost:11502/hello/world")
+                    .webhookFormat(NotificationChannelsReader.WEBHOOK_FORMAT_SLACK)
+                    .build()))
+        .build();
   }
 
   @AfterEach
