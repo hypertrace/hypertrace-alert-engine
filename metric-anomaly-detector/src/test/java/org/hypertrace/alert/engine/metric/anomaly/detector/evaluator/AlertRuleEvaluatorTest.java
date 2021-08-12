@@ -182,7 +182,7 @@ public class AlertRuleEvaluatorTest {
 
     QueryRequest expectedQueryRequest =
         getExpectedQuery(
-            alertTaskBuilder.getLastExecutionTime(), alertTaskBuilder.getCurrentExecutionTime());
+            windowStartTime, alertTaskBuilder.getCurrentExecutionTime());
 
     when(queryServiceClient.executeQuery(
             eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
