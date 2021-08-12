@@ -87,7 +87,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
 
   private static String getMessageStringForStaticRule(StaticRuleViolationSummary violationSummary) {
     return String.format(
-        "%d out of %d metric data points were %s than the threshold %f in last 1 minute.",
+        "%d out of %d metric data points were %s than the static threshold %f in last 1 minute.",
         violationSummary.getViolationCount(),
         violationSummary.getDataCount(),
         getStringFromOperator(violationSummary.getOperator()),
@@ -97,7 +97,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
   private static String getMessageStringForDynamicRule(
       DynamicRuleViolationSummary violationSummary) {
     return String.format(
-        "%d out of %d metric data points were outside the baseline bounds [%f, %f] in last 1 minute.",
+        "%d out of %d metric data points were outside the dynamic baseline bounds [%f, %f] in last 1 minute.",
         violationSummary.getViolationCount(),
         violationSummary.getDataCount(),
         violationSummary.getBaselineLowerBound(),
