@@ -2,7 +2,6 @@ package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -96,11 +95,11 @@ public class AlertRuleEvaluatorTest {
 
     AttributeServiceClient attributesServiceClient = mock(AttributeServiceClient.class);
     when(attributesServiceClient.findAttributes(
-        eq(Map.of("x-tenant-id", "__default")),
-        eq(
-            AttributeMetadataFilter.newBuilder()
-                .addScopeString(AttributeScope.SERVICE.name())
-                .build())))
+            eq(Map.of("x-tenant-id", "__default")),
+            eq(
+                AttributeMetadataFilter.newBuilder()
+                    .addScopeString(AttributeScope.SERVICE.name())
+                    .build())))
         .thenAnswer((Answer<Iterator<AttributeMetadata>>) invocation -> attributesList1.iterator());
 
     // create mock queryServiceClient
@@ -112,41 +111,42 @@ public class AlertRuleEvaluatorTest {
 
   @Test
   void testMetricAnomalyForStaticThreshold() throws IOException {
-    ViolationCondition violationCondition = ViolationCondition.newBuilder()
-        .setStaticThresholdCondition(
-            StaticThresholdCondition.newBuilder()
-                .setOperator(StaticThresholdOperator.STATIC_THRESHOLD_OPERATOR_GT)
-                .setMinimumViolationDuration("PT5M")
-                .setValue(15)
-                .setSeverity(Severity.SEVERITY_CRITICAL)
-                .build())
-        .build();
+    ViolationCondition violationCondition =
+        ViolationCondition.newBuilder()
+            .setStaticThresholdCondition(
+                StaticThresholdCondition.newBuilder()
+                    .setOperator(StaticThresholdOperator.STATIC_THRESHOLD_OPERATOR_GT)
+                    .setMinimumViolationDuration("PT5M")
+                    .setValue(15)
+                    .setSeverity(Severity.SEVERITY_CRITICAL)
+                    .build())
+            .build();
 
     long timeStamp = System.currentTimeMillis();
     AlertTask.Builder alertTaskBuilder = getTestAlertTask(violationCondition, timeStamp);
 
-    QueryRequest expectedQueryRequest = getExpectedQuery(
-        alertTaskBuilder.getLastExecutionTime(),
-        alertTaskBuilder.getCurrentExecutionTime());
+    QueryRequest expectedQueryRequest =
+        getExpectedQuery(
+            alertTaskBuilder.getLastExecutionTime(), alertTaskBuilder.getCurrentExecutionTime());
 
     when(queryServiceClient.executeQuery(
-        eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
+            eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
         .thenReturn(
             List.of(
-                getResultSetChunk(
-                    List.of(
-                        new StringJoiner(".")
-                            .add(AttributeScope.SERVICE.name())
-                            .add("startTime")
-                            .toString(),
-                        new StringJoiner(".")
-                            .add(AttributeScope.SERVICE.name())
-                            .add("duration")
-                            .toString()),
-                    new String[][]{
-                        { "60", "300" },
-                        { "120", "400" }
-                    }))
+                    getResultSetChunk(
+                        List.of(
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
+                                .add("startTime")
+                                .toString(),
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
+                                .add("duration")
+                                .toString()),
+                        new String[][] {
+                          {"60", "300"},
+                          {"120", "400"}
+                        }))
                 .iterator());
 
     Optional<NotificationEvent> notificationEventOptional =
@@ -167,12 +167,11 @@ public class AlertRuleEvaluatorTest {
 
   @Test
   void testMetricAnomalyForDynamicThreshold() throws IOException {
-    ViolationCondition violationCondition = ViolationCondition.newBuilder()
-        .setDynamicThresholdCondition(
-            DynamicThresholdCondition.newBuilder()
-                .setBaselineDuration("PT5M")
-                .build())
-        .build();
+    ViolationCondition violationCondition =
+        ViolationCondition.newBuilder()
+            .setDynamicThresholdCondition(
+                DynamicThresholdCondition.newBuilder().setBaselineDuration("PT5M").build())
+            .build();
 
     long timeStamp = System.currentTimeMillis();
 
@@ -181,38 +180,54 @@ public class AlertRuleEvaluatorTest {
     long windowStartTime =
         alertTaskBuilder.getCurrentExecutionTime() - Duration.ofMinutes(5).toMillis();
 
-    QueryRequest expectedQueryRequest = getExpectedQuery(
-        alertTaskBuilder.getLastExecutionTime(),
-        alertTaskBuilder.getCurrentExecutionTime());
+    QueryRequest expectedQueryRequest =
+        getExpectedQuery(
+            alertTaskBuilder.getLastExecutionTime(), alertTaskBuilder.getCurrentExecutionTime());
 
     when(queryServiceClient.executeQuery(
-        eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
+            eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
         .thenReturn(
             List.of(
-                getResultSetChunk(
-                    List.of(
-                        new StringJoiner(".")
-                            .add(AttributeScope.SERVICE.name())
-                            .add("startTime")
-                            .toString(),
-                        new StringJoiner(".")
-                            .add(AttributeScope.SERVICE.name())
-                            .add("duration")
-                            .toString()),
-                    new String[][]{
-                        {String.valueOf(windowStartTime + Duration.ofSeconds(60).toMillis()), "5",},
-                        {String.valueOf(windowStartTime + Duration.ofSeconds(90).toMillis()), "20"},
-                        {String.valueOf(windowStartTime + Duration.ofSeconds(100).toMillis()),
-                            "15"},
-                        {String.valueOf(windowStartTime + Duration.ofSeconds(150).toMillis()),
-                            "60"},
-                        {String.valueOf(windowStartTime + Duration.ofSeconds(160).toMillis()),
-                            "20"},
-                        {String.valueOf(windowStartTime + Duration.ofSeconds(172).toMillis()),
-                            "30"},
-                        {String.valueOf(windowStartTime + Duration.ofSeconds(298).toMillis()),
-                            "400"}
-                    }))
+                    getResultSetChunk(
+                        List.of(
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
+                                .add("startTime")
+                                .toString(),
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
+                                .add("duration")
+                                .toString()),
+                        new String[][] {
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(60).toMillis()),
+                            "5",
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(90).toMillis()),
+                            "20"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(100).toMillis()),
+                            "15"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(150).toMillis()),
+                            "60"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(160).toMillis()),
+                            "20"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(172).toMillis()),
+                            "30"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(298).toMillis()),
+                            "400"
+                          }
+                        }))
                 .iterator());
 
     Optional<NotificationEvent> notificationEventOptional =
@@ -299,34 +314,33 @@ public class AlertRuleEvaluatorTest {
             .build();
 
     // create mock queryRequest
-    return
-        QueryRequest.newBuilder()
-            .addSelection(
-                Expression.newBuilder()
-                    .setFunction(
-                        Function.newBuilder()
-                            .setFunctionName(FunctionType.SUM.name())
-                            .addArguments(
-                                Expression.newBuilder()
-                                    .setColumnIdentifier(
-                                        ColumnIdentifier.newBuilder()
-                                            .setColumnName(
-                                                new StringJoiner(".")
-                                                    .add(AttributeScope.SERVICE.name())
-                                                    .add("duration")
-                                                    .toString())
-                                            .build()))
-                            .build()))
-            .setFilter(queryServiceFilter)
-            .addGroupBy(
-                MetricQueryBuilder.createTimeColumnGroupByExpression(
-                    new StringJoiner(".")
-                        .add(AttributeScope.SERVICE.name())
-                        .add("startTime")
-                        .toString(),
-                    MetricQueryBuilder.isoDurationToSeconds("PT15s")))
-            .setLimit(QueryServiceClient.DEFAULT_QUERY_SERVICE_GROUP_BY_LIMIT)
-            .build();
+    return QueryRequest.newBuilder()
+        .addSelection(
+            Expression.newBuilder()
+                .setFunction(
+                    Function.newBuilder()
+                        .setFunctionName(FunctionType.SUM.name())
+                        .addArguments(
+                            Expression.newBuilder()
+                                .setColumnIdentifier(
+                                    ColumnIdentifier.newBuilder()
+                                        .setColumnName(
+                                            new StringJoiner(".")
+                                                .add(AttributeScope.SERVICE.name())
+                                                .add("duration")
+                                                .toString())
+                                        .build()))
+                        .build()))
+        .setFilter(queryServiceFilter)
+        .addGroupBy(
+            MetricQueryBuilder.createTimeColumnGroupByExpression(
+                new StringJoiner(".")
+                    .add(AttributeScope.SERVICE.name())
+                    .add("startTime")
+                    .toString(),
+                MetricQueryBuilder.isoDurationToSeconds("PT15s")))
+        .setLimit(QueryServiceClient.DEFAULT_QUERY_SERVICE_GROUP_BY_LIMIT)
+        .build();
   }
 
   public static ResultSetChunk getResultSetChunk(
