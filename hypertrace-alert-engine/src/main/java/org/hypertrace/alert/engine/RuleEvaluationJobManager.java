@@ -56,7 +56,8 @@ public class RuleEvaluationJobManager implements JobManager {
 
     LOGGER.info("Application Config {}, job Config {}", appConfig, jobConfig);
 
-    jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP + "." + jobConfig.getString(JOB_SUFFIX));
+    String jobGroup = JOB_GROUP + "." + jobConfig.getString(JOB_SUFFIX);
+    jobKey = JobKey.jobKey(JOB_NAME, jobGroup);
 
     JobDataMap jobDataMap = new JobDataMap();
 
@@ -80,7 +81,7 @@ public class RuleEvaluationJobManager implements JobManager {
             : CRON_EXPRESSION;
     jobTrigger =
         TriggerBuilder.newTrigger()
-            .withIdentity(JOB_TRIGGER_NAME, JOB_GROUP)
+            .withIdentity(JOB_TRIGGER_NAME, jobGroup)
             .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
             .startNow()
             .build();
