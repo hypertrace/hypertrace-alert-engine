@@ -4,7 +4,6 @@ import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyD
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -48,8 +47,8 @@ public class BaselineRuleEvaluator {
             .get(0)
             .getDynamicThresholdCondition();
 
-    Duration d = java.time.Duration.parse(dynamicThresholdCondition.getBaselineDuration());
-    long durationMillis = d.get(ChronoUnit.MILLIS);
+    Duration duration = java.time.Duration.parse(dynamicThresholdCondition.getBaselineDuration());
+    long durationMillis = duration.toMillis();
 
     // this query will fetch metric data, which will used for baseline calculation and evaluation
     QueryRequest queryRequest =
@@ -59,7 +58,7 @@ public class BaselineRuleEvaluator {
             alertTask.getCurrentExecutionTime() - durationMillis,
             alertTask.getCurrentExecutionTime());
 
-    LOGGER.debug("Query request {}", queryRequest);
+    LOGGER.debug("Rule id {}, Query request {}", alertTask.getEventConditionId(), queryRequest);
 
     Iterator<ResultSetChunk> iterator =
         queryRequestHandler.executeQuery(
@@ -71,7 +70,7 @@ public class BaselineRuleEvaluator {
     iterator.forEachRemaining(
         v -> {
           for (Row row : v.getRowList()) {
-            if (row.getColumnCount() > 2
+            if (row.getColumnCount() >= 2
                 && row.getColumn(1).getValueType()
                     == org.hypertrace.core.query.service.api.ValueType.STRING) {
               double value = Double.parseDouble(row.getColumn(1).getString());
@@ -84,8 +83,13 @@ public class BaselineRuleEvaluator {
           }
         });
 
+    LOGGER.debug("Rule id {}, Metric data for baseline {}, evaluation {}",
+        alertTask.getEventConditionId(), metricValuesForBaseline, metricValuesForEvaluation);
+
     Baseline baseline =
         getBaseline(metricValuesForBaseline.stream().mapToDouble(Double::doubleValue).toArray());
+
+    LOGGER.debug("Rule id {}, Baseline value {}", alertTask.getEventConditionId(), baseline);
 
     int dataCount = 0, violationCount = 0;
     for (Double metricValue : metricValuesForBaseline) {
@@ -95,6 +99,9 @@ public class BaselineRuleEvaluator {
         violationCount++;
       }
     }
+
+    LOGGER.debug("Rule id {}, DataCount {}, ViolationCount {}",
+        alertTask.getEventConditionId(), dataCount, violationCount);
 
     if (!StaticRuleEvaluator.isViolation(dataCount, violationCount)) {
       return Optional.empty();
@@ -114,10 +121,7 @@ public class BaselineRuleEvaluator {
     StandardDeviation standardDeviation = new StandardDeviation();
     double medianValue = median.evaluate(metricValueArray);
     double sd = standardDeviation.evaluate(metricValueArray);
-    double lowerBound = medianValue - (2 * sd);
-    if (lowerBound < 0) {
-      lowerBound = 0;
-    }
+    double lowerBound = Math.max(0, medianValue - (2 * sd));
     double upperBound = medianValue + (2 * sd);
     Baseline baseline =
         Baseline.newBuilder()
