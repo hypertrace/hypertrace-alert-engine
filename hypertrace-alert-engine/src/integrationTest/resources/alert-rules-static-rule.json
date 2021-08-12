@@ -1,8 +1,8 @@
 [
   {
-    "id": "notification_rule_1",
+    "id": "alert_rule_1",
     "ruleName": "high_avg_latency",
-    "description": "Alert for high avg latency of payment service",
+    "description": "Alert for high avg latency of customer service",
     "eventConditionId": "event_condition_1",
     "eventConditionType": "MetricAnomalyEventCondition",
     "channelId": "channel-id-1",
