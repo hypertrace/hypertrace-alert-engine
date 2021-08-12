@@ -68,8 +68,8 @@ public class BaselineRuleEvaluator {
     List<Double> metricValuesForEvaluation = new ArrayList<>();
 
     iterator.forEachRemaining(
-        v -> {
-          for (Row row : v.getRowList()) {
+        chunk -> {
+          for (Row row : chunk.getRowList()) {
             if (row.getColumnCount() >= 2
                 && row.getColumn(1).getValueType()
                     == org.hypertrace.core.query.service.api.ValueType.STRING) {
@@ -95,7 +95,7 @@ public class BaselineRuleEvaluator {
     LOGGER.debug("Rule id {}, Baseline value {}", alertTask.getEventConditionId(), baseline);
 
     int dataCount = 0, violationCount = 0;
-    for (Double metricValue : metricValuesForBaseline) {
+    for (Double metricValue : metricValuesForEvaluation) {
       dataCount++;
       if (metricValue < baseline.getLowerBound().getDouble()
           || metricValue > baseline.getUpperBound().getDouble()) {
