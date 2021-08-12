@@ -13,6 +13,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.typesafe.config.ConfigFactory;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.io.FileNotFoundException;
@@ -60,6 +61,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 public class HypertraceAlertEngineTest {
+
   private static final Logger LOG = LoggerFactory.getLogger(HypertraceAlertEngineTest.class);
 
   private static final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOG);
@@ -176,17 +178,18 @@ public class HypertraceAlertEngineTest {
     pinotServiceManager.stop();
     kafkaZk.stop();
     network.close();
-    IntegrationTestServerUtil.shutdownServices();
   }
 
   @Test
   public void testStaticThresholdNotificationSent() throws Exception {
+    LOG.info("Starting testStaticThresholdNotificationSent");
     MockWebServer mockWebServer = new MockWebServer();
     mockWebServer.start(NOTIFICATION_CHANNEL_PORT1);
     MockResponse mockedResponse =
         new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json");
     mockWebServer.enqueue(mockedResponse);
 
+    Assertions.assertEquals(0, mockWebServer.getRequestCount());
     withEnvironmentVariable("ATTRIBUTE_SERVICE_HOST_CONFIG", attributeService.getHost())
         .and("ATTRIBUTE_SERVICE_PORT_CONFIG", attributeService.getMappedPort(9012).toString())
         .and("QUERY_SERVICE_HOST_CONFIG", queryService.getHost())
@@ -198,10 +201,10 @@ public class HypertraceAlertEngineTest {
         .and("SERVICE_ADMIN_PORT", "10005")
         .and("JOB_SUFFIX", "job1")
         .execute(
-            () ->
-                IntegrationTestServerUtil.startServices(new String[] {"hypertrace-alert-engine"}));
-
-    Assertions.assertEquals(0, mockWebServer.getRequestCount());
+            () -> {
+              ConfigFactory.invalidateCaches();
+              IntegrationTestServerUtil.startServices(new String[] {"hypertrace-alert-engine"});
+            });
     // int x = 1;
     int retryCount = 0;
     while (!(mockWebServer.getRequestCount() == 1) && retryCount++ < 10) {
@@ -221,6 +224,7 @@ public class HypertraceAlertEngineTest {
 
   @Test
   public void testDynamicThresholdNotificationSent() throws Exception {
+    LOG.info("Starting testDynamicThresholdNotificationSent");
     MockWebServer mockWebServer = new MockWebServer();
     mockWebServer.start(NOTIFICATION_CHANNEL_PORT2);
     MockResponse mockedResponse =
@@ -238,8 +242,10 @@ public class HypertraceAlertEngineTest {
         .and("SERVICE_ADMIN_PORT", "10010")
         .and("JOB_SUFFIX", "job2")
         .execute(
-            () ->
-                IntegrationTestServerUtil.startServices(new String[] {"hypertrace-alert-engine"}));
+            () -> {
+              ConfigFactory.invalidateCaches();
+              IntegrationTestServerUtil.startServices(new String[] {"hypertrace-alert-engine"});
+            });
 
     Assertions.assertEquals(0, mockWebServer.getRequestCount());
     // int x = 1;
