@@ -42,21 +42,21 @@ public class RuleEvaluationJobManager implements JobManager {
   static final String ALERT_TASKS = "ALERT_TASKS";
   static final String ALERT_RULE_EVALUATOR = "ALERT_RULE_EVALUATOR";
   static final String NOTIFICATION_PROCESSOR = "NOTIFICATION_PROCESSOR";
+  static final String JOB_SUFFIX = "jobSuffix";
 
   private JobKey jobKey;
   private JobDetail jobDetail;
   private Trigger jobTrigger;
 
   public void initJob(Config appConfig) {
-
-    LOGGER.info("Application config {}", appConfig);
-
     Config jobConfig =
         appConfig.hasPath(JOB_CONFIG)
             ? appConfig.getConfig(JOB_CONFIG)
             : ConfigFactory.parseMap(Map.of());
 
-    jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP);
+    LOGGER.info("Application Config {}, job Config {}", appConfig, jobConfig);
+
+    jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP + "." + jobConfig.getString(JOB_SUFFIX));
 
     JobDataMap jobDataMap = new JobDataMap();
 
