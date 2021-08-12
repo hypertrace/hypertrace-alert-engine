@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.DynamicThresholdCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.DynamicRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
@@ -94,8 +93,8 @@ class NotificationEventProcessorTest {
     Assertions.assertEquals(1, mockWebServer.getRequestCount());
   }
 
-  private NotificationEvent getNotificationEvent(
-      List<ViolationSummary> violationSummaries) throws IOException {
+  private NotificationEvent getNotificationEvent(List<ViolationSummary> violationSummaries)
+      throws IOException {
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
             .setChannelId("1")
@@ -114,11 +113,11 @@ class NotificationEventProcessorTest {
             .build();
 
     return NotificationEvent.newBuilder()
-            .setEventRecord(eventRecord)
-            .setNotificationEventMetadata(Map.of())
-            .setTenantId("tenant-1")
-            .setEventTimeMillis(System.currentTimeMillis())
-            .build();
+        .setEventRecord(eventRecord)
+        .setNotificationEventMetadata(Map.of())
+        .setTenantId("tenant-1")
+        .setEventTimeMillis(System.currentTimeMillis())
+        .build();
   }
 
   private NotificationChannel getNotificationChannel() {
