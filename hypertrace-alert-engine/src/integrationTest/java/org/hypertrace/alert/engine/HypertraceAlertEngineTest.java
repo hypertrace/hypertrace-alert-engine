@@ -17,7 +17,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -30,7 +29,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ListConsumerGroupOffsetsResult;
@@ -194,7 +192,9 @@ public class HypertraceAlertEngineTest {
         .and("QUERY_SERVICE_HOST_CONFIG", queryService.getHost())
         .and("QUERY_SERVICE_PORT_CONFIG", queryService.getMappedPort(8090).toString())
         .and("ALERT_RULES_PATH", "build/resources/integrationTest/alert-rules-static-rule.json")
-        .and("NOTIFICATION_CHANNELS_PATH", "build/resources/integrationTest/notification-channels-1.json")
+        .and(
+            "NOTIFICATION_CHANNELS_PATH",
+            "build/resources/integrationTest/notification-channels-1.json")
         .and("SERVICE_ADMIN_PORT", "10005")
         .and("JOB_SUFFIX", "job1")
         .execute(
@@ -208,9 +208,12 @@ public class HypertraceAlertEngineTest {
       Thread.sleep(Duration.ofSeconds(20).toMillis());
     }
     Assertions.assertTrue(retryCount < 10);
-    String notificationBody1 = mockWebServer.takeRequest().getBody().readString(Charset.defaultCharset());
-    LOG.info("Static Threshold Test, No of retries {}, staticThreshold notification {}",
-        retryCount, notificationBody1);
+    String notificationBody1 =
+        mockWebServer.takeRequest().getBody().readString(Charset.defaultCharset());
+    LOG.info(
+        "Static Threshold Test, No of retries {}, staticThreshold notification {}",
+        retryCount,
+        notificationBody1);
 
     Assertions.assertTrue(notificationBody1.contains("static threshold"));
     mockWebServer.close();
@@ -229,7 +232,9 @@ public class HypertraceAlertEngineTest {
         .and("QUERY_SERVICE_HOST_CONFIG", queryService.getHost())
         .and("QUERY_SERVICE_PORT_CONFIG", queryService.getMappedPort(8090).toString())
         .and("ALERT_RULES_PATH", "build/resources/integrationTest/alert-rules-dynamic-rule.json")
-        .and("NOTIFICATION_CHANNELS_PATH", "build/resources/integrationTest/notification-channels-2.json")
+        .and(
+            "NOTIFICATION_CHANNELS_PATH",
+            "build/resources/integrationTest/notification-channels-2.json")
         .and("SERVICE_ADMIN_PORT", "10010")
         .and("JOB_SUFFIX", "job2")
         .execute(

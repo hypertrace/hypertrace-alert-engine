@@ -83,8 +83,11 @@ public class BaselineRuleEvaluator {
           }
         });
 
-    LOGGER.debug("Rule id {}, Metric data for baseline {}, evaluation {}",
-        alertTask.getEventConditionId(), metricValuesForBaseline, metricValuesForEvaluation);
+    LOGGER.debug(
+        "Rule id {}, Metric data for baseline {}, evaluation {}",
+        alertTask.getEventConditionId(),
+        metricValuesForBaseline,
+        metricValuesForEvaluation);
 
     Baseline baseline =
         getBaseline(metricValuesForBaseline.stream().mapToDouble(Double::doubleValue).toArray());
@@ -100,8 +103,11 @@ public class BaselineRuleEvaluator {
       }
     }
 
-    LOGGER.debug("Rule id {}, DataCount {}, ViolationCount {}",
-        alertTask.getEventConditionId(), dataCount, violationCount);
+    LOGGER.debug(
+        "Rule id {}, DataCount {}, ViolationCount {}",
+        alertTask.getEventConditionId(),
+        dataCount,
+        violationCount);
 
     if (!StaticRuleEvaluator.isViolation(dataCount, violationCount)) {
       return Optional.empty();
