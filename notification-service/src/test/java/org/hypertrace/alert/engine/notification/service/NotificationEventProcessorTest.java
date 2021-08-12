@@ -98,7 +98,7 @@ class NotificationEventProcessorTest {
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
             .setChannelId("1")
-            .setEventConditionId("5")
+            .setEventConditionId("high-service-latency")
             .setViolationTimestamp(System.currentTimeMillis())
             .setEventConditionType("grth")
             .setViolationSummaryList(List.of())
