@@ -13,6 +13,7 @@ import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RuleEvaluationJobManager implements JobManager {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(RuleEvaluationJobManager.class);
 
   static final String ALERT_TASKS = "ALERT_TASKS";
@@ -56,7 +58,11 @@ public class RuleEvaluationJobManager implements JobManager {
 
     LOGGER.info("Application Config {}, job Config {}", appConfig, jobConfig);
 
-    String jobGroup = JOB_GROUP + "." + jobConfig.getString(JOB_SUFFIX);
+    String jobGroup = new StringJoiner(".")
+        .add(JOB_GROUP)
+        .add(jobConfig.getString(JOB_SUFFIX))
+        .toString();
+
     jobKey = JobKey.jobKey(JOB_NAME, jobGroup);
 
     JobDataMap jobDataMap = new JobDataMap();
