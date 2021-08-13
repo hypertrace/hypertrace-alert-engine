@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.DynamicRuleViolationSummary;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
@@ -75,7 +75,7 @@ class NotificationEventProcessorTest {
         List.of(
             ViolationSummary.newBuilder()
                 .setViolationSummary(
-                    DynamicRuleViolationSummary.newBuilder()
+                    BaselineRuleViolationSummary.newBuilder()
                         .setBaselineUpperBound(100.0)
                         .setBaselineLowerBound(50.0)
                         .setMetricValues(List.of(123.0, 30.0, 150.0))

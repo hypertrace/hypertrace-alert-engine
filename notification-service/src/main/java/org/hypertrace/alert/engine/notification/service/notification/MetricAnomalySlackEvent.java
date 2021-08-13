@@ -7,7 +7,7 @@ import static org.hypertrace.alert.engine.notification.service.notification.Slac
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.DynamicRuleViolationSummary;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOperator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
@@ -79,7 +79,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
                     (StaticRuleViolationSummary) violationSummary.getViolationSummary());
               } else {
                 return getMessageStringForDynamicRule(
-                    (DynamicRuleViolationSummary) violationSummary.getViolationSummary());
+                    (BaselineRuleViolationSummary) violationSummary.getViolationSummary());
               }
             })
         .collect(Collectors.joining("\n"));
@@ -95,7 +95,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
   }
 
   private static String getMessageStringForDynamicRule(
-      DynamicRuleViolationSummary violationSummary) {
+      BaselineRuleViolationSummary violationSummary) {
     return String.format(
         "%d out of %d metric data points were outside the dynamic baseline bounds [%f, %f] in last 1 minute.",
         violationSummary.getViolationCount(),
