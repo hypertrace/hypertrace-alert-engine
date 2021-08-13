@@ -13,10 +13,11 @@ import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
-import org.hypertrace.alert.engine.metric.anomaly.detector.AlertRuleEvaluator;
+import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
@@ -37,26 +38,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RuleEvaluationJobManager implements JobManager {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(RuleEvaluationJobManager.class);
 
   static final String ALERT_TASKS = "ALERT_TASKS";
   static final String ALERT_RULE_EVALUATOR = "ALERT_RULE_EVALUATOR";
   static final String NOTIFICATION_PROCESSOR = "NOTIFICATION_PROCESSOR";
+  static final String JOB_SUFFIX = "jobSuffix";
 
   private JobKey jobKey;
   private JobDetail jobDetail;
   private Trigger jobTrigger;
 
   public void initJob(Config appConfig) {
-
-    LOGGER.info("Application config {}", appConfig);
-
     Config jobConfig =
         appConfig.hasPath(JOB_CONFIG)
             ? appConfig.getConfig(JOB_CONFIG)
             : ConfigFactory.parseMap(Map.of());
 
-    jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP);
+    LOGGER.info("Application Config {}, job Config {}", appConfig, jobConfig);
+
+    String jobGroup =
+        new StringJoiner(".").add(JOB_GROUP).add(jobConfig.getString(JOB_SUFFIX)).toString();
+
+    jobKey = JobKey.jobKey(JOB_NAME, jobGroup);
 
     JobDataMap jobDataMap = new JobDataMap();
 
@@ -80,7 +85,7 @@ public class RuleEvaluationJobManager implements JobManager {
             : CRON_EXPRESSION;
     jobTrigger =
         TriggerBuilder.newTrigger()
-            .withIdentity(JOB_TRIGGER_NAME, JOB_GROUP)
+            .withIdentity(JOB_TRIGGER_NAME, jobGroup)
             .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
             .startNow()
             .build();

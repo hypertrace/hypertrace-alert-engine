@@ -20,6 +20,7 @@ message Attribute {
   string key = 1;
   string scope = 2;
 }
+
 enum MetricAggregationFunction {
   METRIC_AGGREGATION_FUNCTION_TYPE_UNSPECIFIED = 0;
   METRIC_AGGREGATION_FUNCTION_TYPE_SUM = 1;
@@ -77,6 +78,7 @@ enum Severity {
 message ViolationCondition {
   oneof condition {
     StaticThresholdCondition static_threshold_condition = 2;
+    BaselineThresholdCondition baseline_threshold_condition = 3;
   }
 }
 
@@ -85,6 +87,10 @@ message StaticThresholdCondition {
   double value = 2;
   optional string minimum_violation_duration = 3; // iso duration string e.g PT1M
   Severity severity = 4;
+}
+
+message BaselineThresholdCondition {
+  string baseline_duration = 2;  // iso duration string
 }
 
 enum StaticThresholdOperator {

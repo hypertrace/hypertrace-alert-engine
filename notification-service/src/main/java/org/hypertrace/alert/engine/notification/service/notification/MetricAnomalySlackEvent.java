@@ -7,7 +7,9 @@ import static org.hypertrace.alert.engine.notification.service.notification.Slac
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.Operator;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticRuleViolationSummary;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOperator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.ActionBlock;
 import org.hypertrace.alert.engine.notification.transport.webhook.slack.Attachment;
@@ -71,19 +73,38 @@ public class MetricAnomalySlackEvent implements SlackMessage {
   private static String getViolationSummary(List<ViolationSummary> violationSummaryList) {
     return violationSummaryList.stream()
         .map(
-            metricValues ->
-                metricValues.getViolationCount()
-                    + " out of "
-                    + metricValues.getDataCount()
-                    + " metric data points were "
-                    + getStringFromOperator(metricValues.getOperator())
-                    + " than the threshold "
-                    + metricValues.getRhs()
-                    + " in last 1 minute.")
+            violationSummary -> {
+              if (violationSummary.getViolationSummary() instanceof StaticRuleViolationSummary) {
+                return getMessageStringForStaticRule(
+                    (StaticRuleViolationSummary) violationSummary.getViolationSummary());
+              } else {
+                return getMessageStringForDynamicRule(
+                    (BaselineRuleViolationSummary) violationSummary.getViolationSummary());
+              }
+            })
         .collect(Collectors.joining("\n"));
   }
 
-  private static String getStringFromOperator(Operator operator) {
+  private static String getMessageStringForStaticRule(StaticRuleViolationSummary violationSummary) {
+    return String.format(
+        "%d out of %d metric data points were %s than the static threshold %f in last 1 minute.",
+        violationSummary.getViolationCount(),
+        violationSummary.getDataCount(),
+        getStringFromOperator(violationSummary.getOperator()),
+        violationSummary.getStaticThreshold());
+  }
+
+  private static String getMessageStringForDynamicRule(
+      BaselineRuleViolationSummary violationSummary) {
+    return String.format(
+        "%d out of %d metric data points were outside the dynamic baseline bounds [%f, %f] in last 1 minute.",
+        violationSummary.getViolationCount(),
+        violationSummary.getDataCount(),
+        violationSummary.getBaselineLowerBound(),
+        violationSummary.getBaselineUpperBound());
+  }
+
+  private static String getStringFromOperator(StaticThresholdOperator operator) {
     switch (operator) {
       case STATIC_THRESHOLD_OPERATOR_GT:
         return "greater";

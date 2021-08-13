@@ -13,14 +13,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.typesafe.config.ConfigFactory;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -60,12 +61,14 @@ import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 public class HypertraceAlertEngineTest {
+
   private static final Logger LOG = LoggerFactory.getLogger(HypertraceAlertEngineTest.class);
 
   private static final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOG);
   private static final Map<String, String> TENANT_ID_MAP = Map.of("x-tenant-id", "__default");
   private static final int CONTAINER_STARTUP_ATTEMPTS = 5;
-  private static final int NOTIFICATION_CHANNEL_PORT = 11502;
+  private static final int NOTIFICATION_CHANNEL_PORT1 = 11502;
+  private static final int NOTIFICATION_CHANNEL_PORT2 = 11505;
 
   private static AdminClient adminClient;
   private static String bootstrapServers;
@@ -76,7 +79,6 @@ public class HypertraceAlertEngineTest {
   private static GenericContainer<?> queryService;
   private static KafkaContainer kafkaZk;
   private static GenericContainer<?> pinotServiceManager;
-  private static MockWebServer mockWebServer;
 
   @BeforeAll
   public static void setup() throws Exception {
@@ -165,24 +167,10 @@ public class HypertraceAlertEngineTest {
     LOG.info("TraceTimeStamp for trace is {}", Instant.ofEpochMilli(traceTimeStamp));
     assertTrue(generateData(traceTimeStamp));
     LOG.info("Generate Data Complete");
-
-    mockWebServer = new MockWebServer();
-    mockWebServer.start(NOTIFICATION_CHANNEL_PORT);
-    MockResponse mockedResponse =
-        new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json");
-    mockWebServer.enqueue(mockedResponse);
-    withEnvironmentVariable("ATTRIBUTE_SERVICE_HOST_CONFIG", attributeService.getHost())
-        .and("ATTRIBUTE_SERVICE_PORT_CONFIG", attributeService.getMappedPort(9012).toString())
-        .and("QUERY_SERVICE_HOST_CONFIG", queryService.getHost())
-        .and("QUERY_SERVICE_PORT_CONFIG", queryService.getMappedPort(8090).toString())
-        .execute(
-            () ->
-                IntegrationTestServerUtil.startServices(new String[] {"hypertrace-alert-engine"}));
-    Assertions.assertEquals(0, mockWebServer.getRequestCount());
   }
 
   @AfterAll
-  public static void shutdown() throws IOException {
+  public static void shutdown() {
     LOG.info("Initiating shutdown");
     attributeService.stop();
     queryService.stop();
@@ -190,18 +178,83 @@ public class HypertraceAlertEngineTest {
     pinotServiceManager.stop();
     kafkaZk.stop();
     network.close();
-    mockWebServer.close();
   }
 
   @Test
-  public void testNotificationSent() throws InterruptedException {
-    // int x = 1;
+  public void testStaticThresholdNotificationSent() throws Exception {
+    LOG.info("Starting testStaticThresholdNotificationSent");
+    MockWebServer mockWebServer = new MockWebServer();
+    mockWebServer.start(NOTIFICATION_CHANNEL_PORT1);
+    MockResponse mockedResponse =
+        new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json");
+    mockWebServer.enqueue(mockedResponse);
+
+    Assertions.assertEquals(0, mockWebServer.getRequestCount());
+    withEnvironmentVariable("ATTRIBUTE_SERVICE_HOST_CONFIG", attributeService.getHost())
+        .and("ATTRIBUTE_SERVICE_PORT_CONFIG", attributeService.getMappedPort(9012).toString())
+        .and("QUERY_SERVICE_HOST_CONFIG", queryService.getHost())
+        .and("QUERY_SERVICE_PORT_CONFIG", queryService.getMappedPort(8090).toString())
+        .and("ALERT_RULES_PATH", "build/resources/integrationTest/alert-rules-static-rule.json")
+        .and(
+            "NOTIFICATION_CHANNELS_PATH",
+            "build/resources/integrationTest/notification-channels-1.json")
+        .and("SERVICE_ADMIN_PORT", "10005")
+        .and("JOB_SUFFIX", "job1")
+        .execute(
+            () -> {
+              ConfigFactory.invalidateCaches();
+              IntegrationTestServerUtil.startServices(new String[] {"hypertrace-alert-engine"});
+            });
     int retryCount = 0;
     while (!(mockWebServer.getRequestCount() > 0) && retryCount++ < 10) {
       Thread.sleep(Duration.ofSeconds(20).toMillis());
     }
-    LOG.info("Test completed. No of retries {}", retryCount);
     Assertions.assertTrue(retryCount < 10);
+    String notificationBody1 =
+        mockWebServer.takeRequest().getBody().readString(Charset.defaultCharset());
+    LOG.info(
+        "Static Threshold Test, No of retries {}, staticThreshold notification {}",
+        retryCount,
+        notificationBody1);
+
+    Assertions.assertTrue(notificationBody1.contains("static threshold"));
+    mockWebServer.close();
+  }
+
+  @Test
+  public void testDynamicThresholdNotificationSent() throws Exception {
+    LOG.info("Starting testDynamicThresholdNotificationSent");
+    MockWebServer mockWebServer = new MockWebServer();
+    mockWebServer.start(NOTIFICATION_CHANNEL_PORT2);
+    MockResponse mockedResponse =
+        new MockResponse().setResponseCode(200).addHeader("Content-Type", "application/json");
+    mockWebServer.enqueue(mockedResponse);
+
+    withEnvironmentVariable("ATTRIBUTE_SERVICE_HOST_CONFIG", attributeService.getHost())
+        .and("ATTRIBUTE_SERVICE_PORT_CONFIG", attributeService.getMappedPort(9012).toString())
+        .and("QUERY_SERVICE_HOST_CONFIG", queryService.getHost())
+        .and("QUERY_SERVICE_PORT_CONFIG", queryService.getMappedPort(8090).toString())
+        .and("ALERT_RULES_PATH", "build/resources/integrationTest/alert-rules-dynamic-rule.json")
+        .and(
+            "NOTIFICATION_CHANNELS_PATH",
+            "build/resources/integrationTest/notification-channels-2.json")
+        .and("SERVICE_ADMIN_PORT", "10010")
+        .and("JOB_SUFFIX", "job2")
+        .execute(
+            () -> {
+              ConfigFactory.invalidateCaches();
+              IntegrationTestServerUtil.startServices(new String[] {"hypertrace-alert-engine"});
+            });
+
+    Assertions.assertEquals(0, mockWebServer.getRequestCount());
+    // int x = 1;
+    int retryCount = 0;
+    // no notification sent
+    while (retryCount++ < 5) {
+      Assertions.assertEquals(mockWebServer.getRequestCount(), 0);
+      Thread.sleep(Duration.ofSeconds(20).toMillis());
+    }
+    mockWebServer.close();
   }
 
   private static boolean bootstrapConfig() throws Exception {

@@ -1,0 +1,39 @@
+[
+  {
+    "id": "alert_rule_2",
+    "ruleName": "high_avg_latency_baseline",
+    "description": "Alert for high avg latency baseline of customer service",
+    "eventConditionId": "event_condition_2",
+    "eventConditionType": "MetricAnomalyEventCondition",
+    "channelId": "channel-id-1",
+    "eventCondition" :  {
+      "metricSelection": {
+        "metricAttribute": {
+          "key": "duration",
+          "scope": "SERVICE"
+        },
+        "metricAggregationFunction": "METRIC_AGGREGATION_FUNCTION_TYPE_AVG",
+        "metricAggregationInterval": "PT15S",
+        "filter": {
+          "leafFilter": {
+            "lhsExpression": {
+              "attribute": {
+                "key": "name",
+                "scope": "SERVICE"
+              }
+            },
+            "valueOperator": "VALUE_OPERATOR_EQ",
+            "rhsExpression": {
+              "stringValue": "customer"
+            }
+          }
+        }
+      },
+      "violationCondition": [{
+        "baselineThresholdCondition": {
+          "baselineDuration": "PT5M"
+        }
+      }]
+    }
+  }
+]
