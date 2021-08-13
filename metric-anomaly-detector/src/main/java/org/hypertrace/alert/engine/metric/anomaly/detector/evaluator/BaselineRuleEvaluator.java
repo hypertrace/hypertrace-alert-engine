@@ -55,7 +55,7 @@ public class BaselineRuleEvaluator {
         queryRequestHandler.getQueryRequest(
             metricAnomalyEventCondition,
             alertTask.getTenantId(),
-            alertTask.getCurrentExecutionTime() - durationMillis,
+            alertTask.getLastExecutionTime() - durationMillis,
             alertTask.getCurrentExecutionTime());
 
     LOGGER.debug("Rule id {}, Query request {}", alertTask.getEventConditionId(), queryRequest);
@@ -78,6 +78,8 @@ public class BaselineRuleEvaluator {
               if (Long.parseLong(row.getColumn(0).getString())
                   >= alertTask.getLastExecutionTime()) {
                 metricValuesForEvaluation.add(value);
+              } else {
+                metricValuesForBaseline.add(value);
               }
             }
           }

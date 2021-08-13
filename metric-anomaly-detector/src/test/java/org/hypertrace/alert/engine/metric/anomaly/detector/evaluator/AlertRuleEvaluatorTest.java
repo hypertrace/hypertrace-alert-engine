@@ -178,7 +178,7 @@ public class AlertRuleEvaluatorTest {
     AlertTask.Builder alertTaskBuilder = getTestAlertTask(violationCondition, timeStamp);
 
     long windowStartTime =
-        alertTaskBuilder.getCurrentExecutionTime() - Duration.ofMinutes(5).toMillis();
+        alertTaskBuilder.getLastExecutionTime() - Duration.ofMinutes(5).toMillis();
 
     QueryRequest expectedQueryRequest =
         getExpectedQuery(windowStartTime, alertTaskBuilder.getCurrentExecutionTime());
@@ -223,7 +223,7 @@ public class AlertRuleEvaluatorTest {
                             "30"
                           },
                           {
-                            String.valueOf(windowStartTime + Duration.ofSeconds(298).toMillis()),
+                            String.valueOf(windowStartTime + Duration.ofSeconds(320).toMillis()),
                             "400"
                           }
                         }))
