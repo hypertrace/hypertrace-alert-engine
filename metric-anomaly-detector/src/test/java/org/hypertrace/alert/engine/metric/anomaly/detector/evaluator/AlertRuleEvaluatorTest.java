@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.DynamicThresholdCondition;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.LeafFilter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.LhsExpression;
@@ -169,8 +169,8 @@ public class AlertRuleEvaluatorTest {
   void testMetricAnomalyForDynamicThreshold() throws IOException {
     ViolationCondition violationCondition =
         ViolationCondition.newBuilder()
-            .setDynamicThresholdCondition(
-                DynamicThresholdCondition.newBuilder().setBaselineDuration("PT5M").build())
+            .setBaselineThresholdCondition(
+                BaselineThresholdCondition.newBuilder().setBaselineDuration("PT5M").build())
             .build();
 
     long timeStamp = System.currentTimeMillis();

@@ -11,10 +11,10 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math.stat.descriptive.rank.Median;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.DynamicThresholdCondition;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.DynamicRuleViolationSummary;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
@@ -41,11 +41,11 @@ public class BaselineRuleEvaluator {
   Optional<NotificationEvent> evaluateRule(
       MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask)
       throws IOException {
-    DynamicThresholdCondition dynamicThresholdCondition =
+    BaselineThresholdCondition dynamicThresholdCondition =
         metricAnomalyEventCondition
             .getViolationConditionList()
             .get(0)
-            .getDynamicThresholdCondition();
+            .getBaselineThresholdCondition();
 
     Duration duration = java.time.Duration.parse(dynamicThresholdCondition.getBaselineDuration());
     long durationMillis = duration.toMillis();
@@ -155,7 +155,7 @@ public class BaselineRuleEvaluator {
     violationSummaryList.add(
         ViolationSummary.newBuilder()
             .setViolationSummary(
-                DynamicRuleViolationSummary.newBuilder()
+                BaselineRuleViolationSummary.newBuilder()
                     .setMetricValues(new ArrayList<>(metricValues))
                     .setDataCount(dataCount)
                     .setViolationCount(violationCount)
