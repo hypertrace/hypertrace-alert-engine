@@ -78,7 +78,7 @@ enum Severity {
 message ViolationCondition {
   oneof condition {
     StaticThresholdCondition static_threshold_condition = 2;
-    DynamicThresholdCondition dynamic_threshold_condition = 3;
+    BaselineThresholdCondition baseline_threshold_condition = 3;
   }
 }
 
@@ -89,7 +89,7 @@ message StaticThresholdCondition {
   Severity severity = 4;
 }
 
-message DynamicThresholdCondition {
+message BaselineThresholdCondition {
   string baseline_duration = 2;  // iso duration string
 }
 
