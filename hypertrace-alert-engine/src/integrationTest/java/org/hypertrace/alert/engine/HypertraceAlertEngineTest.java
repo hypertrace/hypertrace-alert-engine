@@ -205,9 +205,8 @@ public class HypertraceAlertEngineTest {
               ConfigFactory.invalidateCaches();
               IntegrationTestServerUtil.startServices(new String[] {"hypertrace-alert-engine"});
             });
-    // int x = 1;
     int retryCount = 0;
-    while (!(mockWebServer.getRequestCount() == 1) && retryCount++ < 10) {
+    while (!(mockWebServer.getRequestCount() > 0) && retryCount++ < 10) {
       Thread.sleep(Duration.ofSeconds(20).toMillis());
     }
     Assertions.assertTrue(retryCount < 10);
