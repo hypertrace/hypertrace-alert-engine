@@ -30,7 +30,7 @@
         }
       },
       "violationCondition": [{
-        "dynamicThresholdCondition": {
+        "baselineThresholdCondition": {
           "baselineDuration": "PT5M"
         }
       }]
