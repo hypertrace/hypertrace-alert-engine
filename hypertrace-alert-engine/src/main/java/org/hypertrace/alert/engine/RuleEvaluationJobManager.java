@@ -58,10 +58,8 @@ public class RuleEvaluationJobManager implements JobManager {
 
     LOGGER.info("Application Config {}, job Config {}", appConfig, jobConfig);
 
-    String jobGroup = new StringJoiner(".")
-        .add(JOB_GROUP)
-        .add(jobConfig.getString(JOB_SUFFIX))
-        .toString();
+    String jobGroup =
+        new StringJoiner(".").add(JOB_GROUP).add(jobConfig.getString(JOB_SUFFIX)).toString();
 
     jobKey = JobKey.jobKey(JOB_NAME, jobGroup);
 
