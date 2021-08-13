@@ -77,15 +77,12 @@ public class StaticRuleEvaluator {
       }
     }
 
-    if (isViolation(dataCount, violationCount)) {
+    if (!EvaluatorUtil.isViolation(dataCount, violationCount)) {
       LOGGER.debug("Rule violated. dataCount {}, violationCount {}", dataCount, violationCount);
-    } else {
-      LOGGER.debug("Rule normal. dataCount {} violationCount {}", dataCount, violationCount);
-    }
-
-    if (!isViolation(dataCount, violationCount)) {
       return Optional.empty();
     }
+
+    LOGGER.debug("Rule normal. dataCount {} violationCount {}", dataCount, violationCount);
 
     return getNotificationEvent(
         alertTask,
@@ -104,10 +101,6 @@ public class StaticRuleEvaluator {
 
   private double getConditionRhs(StaticThresholdCondition staticThresholdCondition) {
     return staticThresholdCondition.getValue();
-  }
-
-  static boolean isViolation(int dataCount, int violationCount) {
-    return dataCount > 0 && (dataCount == violationCount);
   }
 
   private boolean evalOperator(

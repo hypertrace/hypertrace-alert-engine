@@ -109,7 +109,7 @@ public class BaselineRuleEvaluator {
         dataCount,
         violationCount);
 
-    if (!StaticRuleEvaluator.isViolation(dataCount, violationCount)) {
+    if (!EvaluatorUtil.isViolation(dataCount, violationCount)) {
       return Optional.empty();
     }
 
