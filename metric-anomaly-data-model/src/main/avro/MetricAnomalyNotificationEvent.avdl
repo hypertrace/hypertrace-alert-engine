@@ -9,23 +9,25 @@ protocol MetricAnomalyNotificationEventProtocol {
   }
 
   record StaticRuleViolationSummary {
-    int dataCount;
-    int violationCount;
-    array<double> metricValues;
-    double staticThreshold;
+    int data_count;
+    int violation_count;
+    array<double> metric_values;
+    double static_threshold;
     StaticThresholdOperator operator;
+    string rule_duration;
   }
 
   record BaselineRuleViolationSummary {
-    int dataCount;
-    int violationCount;
-    array<double> metricValues;
-    double baselineLowerBound;
-    double baselineUpperBound;
+    int data_count;
+    int violation_count;
+    array<double> metric_values;
+    double baseline_lower_bound;
+    double baseline_upper_bound;
+    string rule_duration;
   }
 
   record ViolationSummary {
-    union { StaticRuleViolationSummary, BaselineRuleViolationSummary } violationSummary;
+    union { StaticRuleViolationSummary, BaselineRuleViolationSummary } violation_summary;
   }
 
   record MetricAnomalyNotificationEvent {
