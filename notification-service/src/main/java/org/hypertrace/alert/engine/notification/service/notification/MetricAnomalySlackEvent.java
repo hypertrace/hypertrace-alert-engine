@@ -4,7 +4,6 @@ import static org.hypertrace.alert.engine.notification.service.notification.Slac
 import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.addTimestamp;
 import static org.hypertrace.alert.engine.notification.service.notification.SlackMessage.getTitleBlock;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
