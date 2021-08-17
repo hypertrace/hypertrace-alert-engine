@@ -14,6 +14,7 @@ message MetricSelection {
   MetricAggregationFunction metric_aggregation_function = 2;
   string metric_aggregation_interval = 3; //iso duration string PT15S
   Filter filter = 4;
+  string duration = 5; // iso duration string
 }
 
 message Attribute {
@@ -85,7 +86,6 @@ message ViolationCondition {
 message StaticThresholdCondition {
   StaticThresholdOperator operator = 1;
   double value = 2;
-  optional string minimum_violation_duration = 3; // iso duration string e.g PT1M
   Severity severity = 4;
 }
 

@@ -7,6 +7,6 @@ protocol AlertTaskProtocol {
     string event_condition_id;
     string event_condition_type;
     bytes event_condition_value;
-    string channelId;
+    string channel_id;
   }
 }

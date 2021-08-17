@@ -97,7 +97,6 @@ class AlertTaskTest {
             .setStaticThresholdCondition(
                 StaticThresholdCondition.newBuilder()
                     .setOperator(StaticThresholdOperator.STATIC_THRESHOLD_OPERATOR_GT)
-                    .setMinimumViolationDuration("PT5M")
                     .setValue(15)
                     .setSeverity(Severity.SEVERITY_CRITICAL)
                     .build())

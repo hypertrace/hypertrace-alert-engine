@@ -90,7 +90,8 @@ public class StaticRuleEvaluator {
         violationCount,
         staticThresholdOperatorToOperatorConvertor(staticThresholdCondition.getOperator()),
         metricValues,
-        getConditionRhs(staticThresholdCondition));
+        getConditionRhs(staticThresholdCondition),
+        metricAnomalyEventCondition.getMetricSelection().getDuration());
   }
 
   boolean compareThreshold(Value value, StaticThresholdCondition staticThresholdCondition) {
@@ -146,7 +147,8 @@ public class StaticRuleEvaluator {
       int violationCount,
       StaticThresholdOperator operator,
       List<Double> metricValues,
-      double staticThreshold)
+      double staticThreshold,
+      String ruleDuration)
       throws IOException {
 
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
@@ -160,6 +162,7 @@ public class StaticRuleEvaluator {
                     .setDataCount(dataCount)
                     .setViolationCount(violationCount)
                     .setOperator(operator)
+                    .setRuleDuration(ruleDuration)
                     .build())
             .build());
 

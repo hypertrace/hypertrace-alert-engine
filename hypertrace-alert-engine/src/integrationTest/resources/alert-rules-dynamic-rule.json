@@ -27,7 +27,8 @@
               "stringValue": "customer"
             }
           }
-        }
+        },
+        "ruleDuration": "PT1M"
       },
       "violationCondition": [{
         "baselineThresholdCondition": {

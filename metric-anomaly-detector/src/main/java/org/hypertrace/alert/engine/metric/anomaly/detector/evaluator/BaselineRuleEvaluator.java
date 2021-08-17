@@ -121,7 +121,8 @@ public class BaselineRuleEvaluator {
         violationCount,
         metricValuesForEvaluation,
         baseline.getLowerBound().getDouble(),
-        baseline.getUpperBound().getDouble());
+        baseline.getUpperBound().getDouble(),
+        metricAnomalyEventCondition.getMetricSelection().getDuration());
   }
 
   private static Baseline getBaseline(double[] metricValueArray) {
@@ -149,7 +150,8 @@ public class BaselineRuleEvaluator {
       int violationCount,
       List<Double> metricValues,
       double baselineLowerBound,
-      double baselineUpperBound)
+      double baselineUpperBound,
+      String ruleDuration)
       throws IOException {
 
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
@@ -163,6 +165,7 @@ public class BaselineRuleEvaluator {
                     .setViolationCount(violationCount)
                     .setBaselineLowerBound(baselineLowerBound)
                     .setBaselineUpperBound(baselineUpperBound)
+                    .setRuleDuration(ruleDuration)
                     .build())
             .build());
 
