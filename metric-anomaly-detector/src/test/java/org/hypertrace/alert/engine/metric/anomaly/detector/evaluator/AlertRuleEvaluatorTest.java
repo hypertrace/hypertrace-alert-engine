@@ -260,6 +260,7 @@ public class AlertRuleEvaluatorTest {
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
                 Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
+            .setDuration("PT1M")
             .build();
 
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
