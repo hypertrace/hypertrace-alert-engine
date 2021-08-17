@@ -27,7 +27,8 @@
               "stringValue": "1234"
             }
           }
-        }
+        },
+        "ruleDuration": "PT5M"
       },
       "violationCondition": [{
         "staticThresholdCondition": {
