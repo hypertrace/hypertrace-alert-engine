@@ -9,9 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math.stat.descriptive.rank.Median;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
@@ -73,7 +75,17 @@ public class BaselineRuleEvaluator {
             if (row.getColumnCount() >= 2
                 && row.getColumn(1).getValueType()
                     == org.hypertrace.core.query.service.api.ValueType.STRING) {
-              double value = Double.parseDouble(row.getColumn(1).getString());
+              double value;
+              if (metricAnomalyEventCondition.getMetricSelection().getMetricAggregationFunction()
+                  == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
+                value =
+                    convertValue(
+                        alertTask.getLastExecutionTime(),
+                        alertTask.getCurrentExecutionTime(),
+                        row.getColumn(1));
+              } else {
+                value = Double.parseDouble(row.getColumn(1).getString());
+              }
               metricValuesForBaseline.add(value);
               if (Long.parseLong(row.getColumn(0).getString())
                   >= alertTask.getLastExecutionTime()) {
@@ -195,5 +207,11 @@ public class BaselineRuleEvaluator {
 
     LOGGER.debug("Notification Event {}", notificationEvent);
     return Optional.of(notificationEvent);
+  }
+
+  private double convertValue(
+      long startTime, long endTime, org.hypertrace.core.query.service.api.Value originalValue) {
+    double divisor = ((double) endTime - startTime) / TimeUnit.SECONDS.toMillis(60); // period
+    return originalValue.getDouble() / divisor;
   }
 }
