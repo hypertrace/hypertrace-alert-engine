@@ -75,16 +75,14 @@ public class BaselineRuleEvaluator {
             if (row.getColumnCount() >= 2
                 && row.getColumn(1).getValueType()
                     == org.hypertrace.core.query.service.api.ValueType.STRING) {
-              double value;
+              double value = Double.parseDouble(row.getColumn(1).getString());
               if (metricAnomalyEventCondition.getMetricSelection().getMetricAggregationFunction()
                   == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
                 value =
                     convertValue(
                         alertTask.getLastExecutionTime(),
                         alertTask.getCurrentExecutionTime(),
-                        row.getColumn(1));
-              } else {
-                value = Double.parseDouble(row.getColumn(1).getString());
+                        value);
               }
               metricValuesForBaseline.add(value);
               if (Long.parseLong(row.getColumn(0).getString())
@@ -209,9 +207,8 @@ public class BaselineRuleEvaluator {
     return Optional.of(notificationEvent);
   }
 
-  private double convertValue(
-      long startTime, long endTime, org.hypertrace.core.query.service.api.Value originalValue) {
+  private double convertValue(long startTime, long endTime, double originalValue) {
     double divisor = ((double) endTime - startTime) / TimeUnit.SECONDS.toMillis(60); // period
-    return originalValue.getDouble() / divisor;
+    return originalValue / divisor;
   }
 }
