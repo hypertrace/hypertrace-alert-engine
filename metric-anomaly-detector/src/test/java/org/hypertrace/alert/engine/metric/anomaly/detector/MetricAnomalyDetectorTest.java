@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.LeafFilter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.LhsExpression;
@@ -30,7 +31,7 @@ class MetricAnomalyDetectorTest {
 
   @Test
   @Disabled
-  void testRuleEvaluation() throws URISyntaxException, IOException {
+  void staticTestRuleEvaluation() throws URISyntaxException, IOException {
 
     LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
     RhsExpression rhsExpression = createRhsExpression("customer");
@@ -61,6 +62,76 @@ class MetricAnomalyDetectorTest {
                     .setValue(15)
                     .setSeverity(Severity.SEVERITY_CRITICAL)
                     .build())
+            .build());
+
+    AlertTask.Builder alertTaskBuilder = AlertTask.newBuilder();
+
+    alertTaskBuilder.setCurrentExecutionTime(System.currentTimeMillis());
+    alertTaskBuilder.setLastExecutionTime(
+        System.currentTimeMillis() - Duration.ofMinutes(1).toMillis());
+    alertTaskBuilder.setEventConditionId("event-condition-1");
+    alertTaskBuilder.setEventConditionType("MetricAnomalyEventCondition");
+    alertTaskBuilder.setTenantId("__default");
+    alertTaskBuilder.setEventConditionValue(
+        metricAnomalyEventConditionBuilder.build().toByteString().asReadOnlyByteBuffer());
+    alertTaskBuilder.setChannelId("channel1");
+
+    Config config =
+        ConfigFactory.parseURL(
+            Thread.currentThread()
+                .getContextClassLoader()
+                .getResource("application.conf")
+                .toURI()
+                .toURL());
+
+    NotificationEventProducer notificationEventProducer =
+        new NotificationEventProducer(
+            config.getConfig(MetricAnomalyDetectorService.KAFKA_QUEUE_CONFIG_KEY));
+    MetricAnomalyDetector metricAnomalyDetector =
+        new MetricAnomalyDetector(config, notificationEventProducer);
+
+    /**
+     * Query that's hitting pinot
+     *
+     * <p>Select
+     * dateTimeConvert(start_time_millis,'1:MILLISECONDS:EPOCH','1:MILLISECONDS:EPOCH','15:SECONDS'),
+     * SUM(duration_millis) FROM rawServiceView WHERE tenant_id = 'default' AND ( (
+     * start_time_millis >= ? AND start_time_millis < ? ) AND service_name = 'customer' ) GROUP BY
+     * dateTimeConvert(start_time_millis,'1:MILLISECONDS:EPOCH','1:MILLISECONDS:EPOCH','15:SECONDS')
+     * limit 10000
+     */
+    metricAnomalyDetector.process(alertTaskBuilder.build());
+  }
+
+  @Test
+  @Disabled
+  void dynamicTestRuleEvaluation() throws URISyntaxException, IOException {
+
+    LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
+    RhsExpression rhsExpression = createRhsExpression("customer");
+    LeafFilter leafFilter =
+        createLeafFilter(ValueOperator.VALUE_OPERATOR_EQ, lhsExpression, rhsExpression);
+
+    MetricSelection metricSelection =
+        MetricSelection.newBuilder()
+            .setMetricAggregationInterval("PT15s")
+            .setMetricAggregationFunction(
+                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE)
+            .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
+            .setMetricAttribute(
+                Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
+            .setDuration("PT1M")
+            .build();
+
+    MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
+        MetricAnomalyEventCondition.newBuilder();
+
+    metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
+
+    metricAnomalyEventConditionBuilder.addViolationCondition(
+        ViolationCondition.newBuilder()
+            .setBaselineThresholdCondition(
+                BaselineThresholdCondition.newBuilder().setBaselineDuration("PT5M").build())
             .build());
 
     AlertTask.Builder alertTaskBuilder = AlertTask.newBuilder();
