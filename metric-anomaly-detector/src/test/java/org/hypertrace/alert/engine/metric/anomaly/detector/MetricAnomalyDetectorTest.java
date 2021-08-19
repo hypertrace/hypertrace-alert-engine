@@ -45,6 +45,7 @@ class MetricAnomalyDetectorTest {
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
                 Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
+            .setDuration("PT1M")
             .build();
 
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
@@ -72,6 +73,7 @@ class MetricAnomalyDetectorTest {
     alertTaskBuilder.setTenantId("__default");
     alertTaskBuilder.setEventConditionValue(
         metricAnomalyEventConditionBuilder.build().toByteString().asReadOnlyByteBuffer());
+    alertTaskBuilder.setChannelId("channel1");
 
     Config config =
         ConfigFactory.parseURL(
