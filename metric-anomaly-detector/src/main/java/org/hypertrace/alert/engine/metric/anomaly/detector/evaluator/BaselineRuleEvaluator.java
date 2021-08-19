@@ -1,6 +1,7 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
 import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
+import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder.isoDurationToSeconds;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -82,7 +83,10 @@ public class BaselineRuleEvaluator {
                     convertValue(
                         alertTask.getLastExecutionTime(),
                         alertTask.getCurrentExecutionTime(),
-                        value);
+                        value,
+                        metricAnomalyEventCondition
+                            .getMetricSelection()
+                            .getMetricAggregationInterval());
               }
               metricValuesForBaseline.add(value);
               if (Long.parseLong(row.getColumn(0).getString())
@@ -207,8 +211,9 @@ public class BaselineRuleEvaluator {
     return Optional.of(notificationEvent);
   }
 
-  private double convertValue(long startTime, long endTime, double originalValue) {
-    double divisor = ((double) endTime - startTime) / TimeUnit.SECONDS.toMillis(60); // period
+  private double convertValue(long startTime, long endTime, double originalValue, String period) {
+    long periodInSec = isoDurationToSeconds(period);
+    double divisor = ((double) endTime - startTime) / TimeUnit.SECONDS.toMillis(periodInSec);
     return originalValue / divisor;
   }
 }
