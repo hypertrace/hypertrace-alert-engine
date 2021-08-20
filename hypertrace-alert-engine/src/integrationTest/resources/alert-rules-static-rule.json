@@ -27,9 +27,9 @@
               "stringValue": "customer"
             }
           }
-        },
-        "ruleDuration": "PT1M"
+        }
       },
+      "ruleDuration": "PT1M",
       "violationCondition": [{
         "staticThresholdCondition": {
           "operator": "STATIC_THRESHOLD_OPERATOR_GT",

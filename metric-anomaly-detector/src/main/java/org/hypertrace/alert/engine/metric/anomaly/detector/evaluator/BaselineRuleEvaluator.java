@@ -122,7 +122,7 @@ public class BaselineRuleEvaluator {
         metricValuesForEvaluation,
         baseline.getLowerBound().getDouble(),
         baseline.getUpperBound().getDouble(),
-        metricAnomalyEventCondition.getMetricSelection().getDuration());
+        metricAnomalyEventCondition.getRuleDuration());
   }
 
   private static Baseline getBaseline(double[] metricValueArray) {
