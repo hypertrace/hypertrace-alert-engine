@@ -73,8 +73,8 @@ public class QueryRequestHandler {
       long startTime,
       long endTime) {
     return queryServiceClient.executeQuery(
-        metricQueryBuilder.buildMetricQueryRequest(
-            metricSelection, startTime, endTime, tenantId),
-        requestHeaders, qsRequestTimeout);
+        metricQueryBuilder.buildMetricQueryRequest(metricSelection, startTime, endTime, tenantId),
+        requestHeaders,
+        qsRequestTimeout);
   }
 }

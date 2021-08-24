@@ -35,27 +35,29 @@ class MetricCacheTest {
   @Test
   void testMetricCache() {
     QueryRequestHandler queryRequestHandler = mock(QueryRequestHandler.class);
-    Iterator<ResultSetChunk> itr = List.of(
-        AlertRuleEvaluatorTest.getResultSetChunk(
-            List.of(
-                new StringJoiner(".")
-                    .add(AttributeScope.SERVICE.name())
-                    .add("startTime")
-                    .toString(),
-                new StringJoiner(".")
-                    .add(AttributeScope.SERVICE.name())
-                    .add("duration")
-                    .toString()),
-            new String[][] {
-                {String.valueOf(Duration.ofMinutes(1).toMillis()),  "100"},
-                {String.valueOf(Duration.ofMinutes(2).toMillis()), "100"},
-                {String.valueOf(Duration.ofMinutes(3).toMillis()), "100"},
-                {String.valueOf(Duration.ofMinutes(4).toMillis()), "100"},
-                {String.valueOf(Duration.ofMinutes(5).toMillis()), "100"},
-            }))
-        .iterator();
+    Iterator<ResultSetChunk> itr =
+        List.of(
+                AlertRuleEvaluatorTest.getResultSetChunk(
+                    List.of(
+                        new StringJoiner(".")
+                            .add(AttributeScope.SERVICE.name())
+                            .add("startTime")
+                            .toString(),
+                        new StringJoiner(".")
+                            .add(AttributeScope.SERVICE.name())
+                            .add("duration")
+                            .toString()),
+                    new String[][] {
+                      {String.valueOf(Duration.ofMinutes(1).toMillis()), "100"},
+                      {String.valueOf(Duration.ofMinutes(2).toMillis()), "100"},
+                      {String.valueOf(Duration.ofMinutes(3).toMillis()), "100"},
+                      {String.valueOf(Duration.ofMinutes(4).toMillis()), "100"},
+                      {String.valueOf(Duration.ofMinutes(5).toMillis()), "100"},
+                    }))
+            .iterator();
 
-    Mockito.when(queryRequestHandler.executeQuery(anyMap(), any(), anyString(), anyLong(), anyLong()))
+    Mockito.when(
+            queryRequestHandler.executeQuery(anyMap(), any(), anyString(), anyLong(), anyLong()))
         .thenReturn(itr);
 
     MetricCache metricCache = new MetricCache(queryRequestHandler);
@@ -77,26 +79,37 @@ class MetricCacheTest {
     String tenantId = "tenant1";
     long currentTime = Duration.ofMinutes(5).toMillis();
     // loads data from pinot
-    List<Pair<Long, Double>> list = metricCache.getMetricValues(
-        Map.of(), metricSelection, tenantId,
-        currentTime - Duration.ofMinutes(5).toMillis(), currentTime);
+    List<Pair<Long, Double>> list =
+        metricCache.getMetricValues(
+            Map.of(),
+            metricSelection,
+            tenantId,
+            currentTime - Duration.ofMinutes(5).toMillis(),
+            currentTime);
     Assertions.assertEquals(5, list.size());
     MetricTimeSeries metricTimeSeries = metricCache.getMetricTimeSeriesRecord(metricSelection);
     Assertions.assertEquals(5, metricTimeSeries.getDataList().size());
 
     // returns data from cache
-    list = metricCache.getMetricValues(
-        Map.of(), metricSelection, tenantId,
-        currentTime - Duration.ofMinutes(3).toMillis(), currentTime);
+    list =
+        metricCache.getMetricValues(
+            Map.of(),
+            metricSelection,
+            tenantId,
+            currentTime - Duration.ofMinutes(3).toMillis(),
+            currentTime);
     Assertions.assertEquals(4, list.size());
     metricTimeSeries = metricCache.getMetricTimeSeriesRecord(metricSelection);
     Assertions.assertEquals(5, metricTimeSeries.getDataList().size());
 
     // triggers trimming of data
-    list = metricCache.getMetricValues(
-        Map.of(), metricSelection, tenantId,
-        currentTime - Duration.ofMinutes(1).toMillis(),
-        currentTime + Duration.ofMinutes(2).toMillis());
+    list =
+        metricCache.getMetricValues(
+            Map.of(),
+            metricSelection,
+            tenantId,
+            currentTime - Duration.ofMinutes(1).toMillis(),
+            currentTime + Duration.ofMinutes(2).toMillis());
     Assertions.assertEquals(2, list.size()); // [4,7]
     metricTimeSeries = metricCache.getMetricTimeSeriesRecord(metricSelection);
     Assertions.assertEquals(4, metricTimeSeries.getDataList().size()); // [2, 5]

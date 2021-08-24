@@ -43,11 +43,13 @@ public class StaticRuleEvaluator {
     int dataCount = 0, violationCount = 0;
     List<Double> metricValues = new ArrayList<>();
 
-    List<Pair<Long, Double>> dataList = metricCache.getMetricValues(
-        Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
-        metricAnomalyEventCondition.getMetricSelection(),
-        alertTask.getTenantId(),
-        alertTask.getLastExecutionTime(), alertTask.getCurrentExecutionTime());
+    List<Pair<Long, Double>> dataList =
+        metricCache.getMetricValues(
+            Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
+            metricAnomalyEventCondition.getMetricSelection(),
+            alertTask.getTenantId(),
+            alertTask.getLastExecutionTime(),
+            alertTask.getCurrentExecutionTime());
 
     for (Pair<Long, Double> timeStampedValue : dataList) {
       metricValues.add(timeStampedValue.getValue());

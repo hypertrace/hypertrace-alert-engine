@@ -24,12 +24,12 @@ class MetricCache {
   private final Cache<MetricSelection, MetricTimeSeries> metricCache;
   private final QueryRequestHandler queryRequestHandler;
 
-  MetricCache(
-      QueryRequestHandler queryRequestHandler) {
+  MetricCache(QueryRequestHandler queryRequestHandler) {
     this.queryRequestHandler = queryRequestHandler;
-    this.metricCache = CacheBuilder.newBuilder()
-        .expireAfterAccess(Duration.ofMinutes(CACHE_EXPIRY_MINUTES))
-        .build();
+    this.metricCache =
+        CacheBuilder.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(CACHE_EXPIRY_MINUTES))
+            .build();
   }
 
   List<Pair<Long, Double>> getMetricValues(
@@ -45,19 +45,25 @@ class MetricCache {
     // if requested time range is earlier than existing
     // replace data
     if (null == metricTimeSeries || startTimeMillis < metricTimeSeries.getStartTimeMillis()) {
-      Iterator<ResultSetChunk> iterator = queryRequestHandler.executeQuery(
-          requestHeaders, metricSelection, tenantId, startTimeMillis, endTimeMillis);
+      Iterator<ResultSetChunk> iterator =
+          queryRequestHandler.executeQuery(
+              requestHeaders, metricSelection, tenantId, startTimeMillis, endTimeMillis);
       List<Pair<Long, Double>> dataList = consumeIterator(iterator);
-      metricCache.put(metricSelection, new MetricTimeSeries(
-          startTimeMillis, endTimeMillis, dataList, metricDurationMillis));
+      metricCache.put(
+          metricSelection,
+          new MetricTimeSeries(startTimeMillis, endTimeMillis, dataList, metricDurationMillis));
       return dataList;
     }
 
     // need to just get diff of the data
     if (endTimeMillis > metricTimeSeries.getEndTimeMillis()) {
-      Iterator<ResultSetChunk> iterator = queryRequestHandler.executeQuery(
-          requestHeaders, metricSelection, tenantId,
-          metricTimeSeries.getEndTimeMillis(), endTimeMillis);
+      Iterator<ResultSetChunk> iterator =
+          queryRequestHandler.executeQuery(
+              requestHeaders,
+              metricSelection,
+              tenantId,
+              metricTimeSeries.getEndTimeMillis(),
+              endTimeMillis);
       List<Pair<Long, Double>> dataList = consumeIterator(iterator);
       metricTimeSeries.getDataList().addAll(dataList);
       metricTimeSeries.setEndTimeMillis(endTimeMillis);
@@ -81,15 +87,17 @@ class MetricCache {
           throw new IllegalArgumentException(
               "Expecting value of type string, received valueType: " + value.getValueType());
         }
-        list.add(Pair.of(Long.parseLong(row.getColumn(0).getString()), Double.parseDouble(value.getString())));
+        list.add(
+            Pair.of(
+                Long.parseLong(row.getColumn(0).getString()),
+                Double.parseDouble(value.getString())));
       }
     }
     return list;
   }
 
   private List<Pair<Long, Double>> filterData(
-      List<Pair<Long, Double>> dataList,
-      long startTime, long endTime) {
+      List<Pair<Long, Double>> dataList, long startTime, long endTime) {
     return dataList.stream()
         .filter(v -> v.getKey() >= startTime && v.getKey() <= endTime)
         .collect(Collectors.toList());
@@ -116,8 +124,8 @@ class MetricCache {
         long maxRetentionPeriodMillis) {
       this.startTimeMillis = startTimeMillis;
       this.endTimeMillis = endTimeMillis;
-      this.maxRetentionPeriodMillis = Math
-          .max(maxRetentionPeriodMillis, this.maxRetentionPeriodMillis);
+      this.maxRetentionPeriodMillis =
+          Math.max(maxRetentionPeriodMillis, this.maxRetentionPeriodMillis);
       this.dataList = dataList;
     }
 

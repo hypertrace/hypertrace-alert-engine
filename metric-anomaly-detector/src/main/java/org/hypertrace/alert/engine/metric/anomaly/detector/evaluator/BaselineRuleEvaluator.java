@@ -48,12 +48,13 @@ public class BaselineRuleEvaluator {
     long durationMillis = duration.toMillis();
 
     // this query will fetch metric data, which will used for baseline calculation and evaluation
-    List<Pair<Long, Double>> dataList = metricCache.getMetricValues(
-        Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
-        metricAnomalyEventCondition.getMetricSelection(),
-        alertTask.getTenantId(),
-        alertTask.getLastExecutionTime() - durationMillis,
-        alertTask.getCurrentExecutionTime());
+    List<Pair<Long, Double>> dataList =
+        metricCache.getMetricValues(
+            Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
+            metricAnomalyEventCondition.getMetricSelection(),
+            alertTask.getTenantId(),
+            alertTask.getLastExecutionTime() - durationMillis,
+            alertTask.getCurrentExecutionTime());
 
     List<Double> metricValuesForBaseline = new ArrayList<>();
     List<Double> metricValuesForEvaluation = new ArrayList<>();
