@@ -3,7 +3,6 @@ package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +43,11 @@ public class BaselineRuleEvaluator {
             .get(0)
             .getBaselineThresholdCondition();
 
-    long baselineDurationMillis = java.time.Duration.parse(
-        dynamicThresholdCondition.getBaselineDuration()).toMillis();
-    long ruleEvaluationStartTime = alertTask.getCurrentExecutionTime() -
-        java.time.Duration.parse(metricAnomalyEventCondition.getRuleDuration()).toMillis();
+    long baselineDurationMillis =
+        java.time.Duration.parse(dynamicThresholdCondition.getBaselineDuration()).toMillis();
+    long ruleEvaluationStartTime =
+        alertTask.getCurrentExecutionTime()
+            - java.time.Duration.parse(metricAnomalyEventCondition.getRuleDuration()).toMillis();
 
     // this query will fetch metric data, which will used for baseline calculation and evaluation
     List<Pair<Long, Double>> dataList =
@@ -62,8 +62,7 @@ public class BaselineRuleEvaluator {
     List<Double> metricValuesForEvaluation = new ArrayList<>();
 
     for (Pair<Long, Double> timeStampedValue : dataList) {
-      if (timeStampedValue.getKey()
-          >= ruleEvaluationStartTime) {
+      if (timeStampedValue.getKey() >= ruleEvaluationStartTime) {
         metricValuesForEvaluation.add(timeStampedValue.getValue());
       } else {
         metricValuesForBaseline.add(timeStampedValue.getValue());
