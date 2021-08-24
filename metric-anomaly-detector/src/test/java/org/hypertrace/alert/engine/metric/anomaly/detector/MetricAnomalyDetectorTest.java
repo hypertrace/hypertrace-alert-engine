@@ -104,22 +104,21 @@ class MetricAnomalyDetectorTest {
   }
 
   @Test
-  @Disabled
   void dynamicTestRuleEvaluation() throws URISyntaxException, IOException {
 
     LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
-    RhsExpression rhsExpression = createRhsExpression("customer");
+    RhsExpression rhsExpression = createRhsExpression("frontend");
     LeafFilter leafFilter =
         createLeafFilter(ValueOperator.VALUE_OPERATOR_EQ, lhsExpression, rhsExpression);
 
     MetricSelection metricSelection =
         MetricSelection.newBuilder()
-            .setMetricAggregationInterval("PT15s")
+            .setMetricAggregationInterval("PT1M")
             .setMetricAggregationFunction(
                 MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE)
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
-                Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
+                Attribute.newBuilder().setKey("errorCount").setScope("SERVICE").build())
             .setDuration("PT1M")
             .build();
 
@@ -138,7 +137,7 @@ class MetricAnomalyDetectorTest {
 
     alertTaskBuilder.setCurrentExecutionTime(System.currentTimeMillis());
     alertTaskBuilder.setLastExecutionTime(
-        System.currentTimeMillis() - Duration.ofMinutes(1).toMillis());
+        System.currentTimeMillis() - Duration.ofMinutes(15).toMillis());
     alertTaskBuilder.setEventConditionId("event-condition-1");
     alertTaskBuilder.setEventConditionType("MetricAnomalyEventCondition");
     alertTaskBuilder.setTenantId("__default");
