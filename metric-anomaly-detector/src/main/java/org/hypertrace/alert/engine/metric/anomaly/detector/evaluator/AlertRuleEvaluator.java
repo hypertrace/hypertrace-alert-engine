@@ -26,8 +26,9 @@ public class AlertRuleEvaluator {
 
   public AlertRuleEvaluator(Config appConfig) {
     QueryRequestHandler queryRequestHandler = new QueryRequestHandler(appConfig);
-    staticRuleEvaluator = new StaticRuleEvaluator(queryRequestHandler);
-    baselineRuleEvaluator = new BaselineRuleEvaluator(queryRequestHandler);
+    MetricCache metricCache = new MetricCache(queryRequestHandler);
+    staticRuleEvaluator = new StaticRuleEvaluator(metricCache);
+    baselineRuleEvaluator = new BaselineRuleEvaluator(metricCache);
   }
 
   // used for testing with mock clients passed as parameters
@@ -35,8 +36,9 @@ public class AlertRuleEvaluator {
       Config appConfig, AttributeServiceClient asClient, QueryServiceClient queryServiceClient) {
     QueryRequestHandler queryRequestHandler =
         new QueryRequestHandler(appConfig, queryServiceClient, asClient);
-    staticRuleEvaluator = new StaticRuleEvaluator(queryRequestHandler);
-    baselineRuleEvaluator = new BaselineRuleEvaluator(queryRequestHandler);
+    MetricCache metricCache = new MetricCache(queryRequestHandler);
+    staticRuleEvaluator = new StaticRuleEvaluator(metricCache);
+    baselineRuleEvaluator = new BaselineRuleEvaluator(metricCache);
   }
 
   public Optional<NotificationEvent> process(AlertTask alertTask) throws IOException {
