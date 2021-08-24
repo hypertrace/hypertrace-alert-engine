@@ -6,6 +6,7 @@ import io.grpc.ManagedChannelBuilder;
 import java.util.Iterator;
 import java.util.Map;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
 import org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.client.config.AttributeServiceClientConfig;
@@ -63,5 +64,17 @@ public class QueryRequestHandler {
       long endTime) {
     return metricQueryBuilder.buildMetricQueryRequest(
         metricAnomalyEventCondition.getMetricSelection(), startTime, endTime, tenantId);
+  }
+
+  Iterator<ResultSetChunk> executeQuery(
+      Map<String, String> requestHeaders,
+      MetricSelection metricSelection,
+      String tenantId,
+      long startTime,
+      long endTime) {
+    return queryServiceClient.executeQuery(
+        metricQueryBuilder.buildMetricQueryRequest(
+            metricSelection, startTime, endTime, tenantId),
+        requestHeaders, qsRequestTimeout);
   }
 }
