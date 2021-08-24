@@ -104,6 +104,7 @@ class MetricAnomalyDetectorTest {
   }
 
   @Test
+  @Disabled
   void dynamicTestRuleEvaluation() throws URISyntaxException, IOException {
 
     LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
