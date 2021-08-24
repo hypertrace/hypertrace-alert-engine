@@ -44,8 +44,10 @@ public class BaselineRuleEvaluator {
             .get(0)
             .getBaselineThresholdCondition();
 
-    Duration duration = java.time.Duration.parse(dynamicThresholdCondition.getBaselineDuration());
-    long durationMillis = duration.toMillis();
+    long baselineDurationMillis = java.time.Duration.parse(
+        dynamicThresholdCondition.getBaselineDuration()).toMillis();
+    long ruleEvaluationStartTime = alertTask.getCurrentExecutionTime() -
+        java.time.Duration.parse(metricAnomalyEventCondition.getRuleDuration()).toMillis();
 
     // this query will fetch metric data, which will used for baseline calculation and evaluation
     List<Pair<Long, Double>> dataList =
@@ -53,14 +55,15 @@ public class BaselineRuleEvaluator {
             Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
             metricAnomalyEventCondition.getMetricSelection(),
             alertTask.getTenantId(),
-            alertTask.getLastExecutionTime() - durationMillis,
+            ruleEvaluationStartTime - baselineDurationMillis,
             alertTask.getCurrentExecutionTime());
 
     List<Double> metricValuesForBaseline = new ArrayList<>();
     List<Double> metricValuesForEvaluation = new ArrayList<>();
 
     for (Pair<Long, Double> timeStampedValue : dataList) {
-      if (timeStampedValue.getKey() >= alertTask.getLastExecutionTime()) {
+      if (timeStampedValue.getKey()
+          >= ruleEvaluationStartTime) {
         metricValuesForEvaluation.add(timeStampedValue.getValue());
       } else {
         metricValuesForBaseline.add(timeStampedValue.getValue());
