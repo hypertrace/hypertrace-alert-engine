@@ -4,10 +4,10 @@ import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyD
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
@@ -17,11 +17,6 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOperator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
-import org.hypertrace.core.query.service.api.QueryRequest;
-import org.hypertrace.core.query.service.api.ResultSetChunk;
-import org.hypertrace.core.query.service.api.Row;
-import org.hypertrace.core.query.service.api.Value;
-import org.hypertrace.core.query.service.api.ValueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,27 +24,15 @@ public class StaticRuleEvaluator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StaticRuleEvaluator.class);
 
-  private final QueryRequestHandler queryRequestHandler;
+  private final MetricCache metricCache;
 
-  public StaticRuleEvaluator(QueryRequestHandler queryRequestHandler) {
-    this.queryRequestHandler = queryRequestHandler;
+  public StaticRuleEvaluator(MetricCache metricCache) {
+    this.metricCache = metricCache;
   }
 
   Optional<NotificationEvent> evaluateRule(
       MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask)
       throws IOException {
-
-    QueryRequest queryRequest =
-        queryRequestHandler.getQueryRequest(
-            metricAnomalyEventCondition,
-            alertTask.getTenantId(),
-            alertTask.getLastExecutionTime(),
-            alertTask.getCurrentExecutionTime());
-    LOGGER.debug("Query request {}", queryRequest);
-
-    Iterator<ResultSetChunk> iterator =
-        queryRequestHandler.executeQuery(
-            Map.of(TENANT_ID_KEY, alertTask.getTenantId()), queryRequest);
 
     StaticThresholdCondition staticThresholdCondition =
         metricAnomalyEventCondition
@@ -60,20 +43,17 @@ public class StaticRuleEvaluator {
     int dataCount = 0, violationCount = 0;
     List<Double> metricValues = new ArrayList<>();
 
-    while (iterator.hasNext()) {
-      ResultSetChunk resultSetChunk = iterator.next();
-      for (Row row : resultSetChunk.getRowList()) {
-        Value value = row.getColumn(1);
-        if (value.getValueType() != ValueType.STRING) {
-          throw new IllegalArgumentException(
-              "Expecting value of type string, received valueType: " + value.getValueType());
-        }
-        dataCount++;
-        LOGGER.debug("Metric data {}", value.getString());
-        if (compareThreshold(value, staticThresholdCondition)) {
-          violationCount++;
-        }
-        metricValues.add(value.getDouble());
+    List<Pair<Long, Double>> dataList = metricCache.getMetricValues(
+        Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
+        metricAnomalyEventCondition.getMetricSelection(),
+        alertTask.getTenantId(),
+        alertTask.getLastExecutionTime(), alertTask.getCurrentExecutionTime());
+
+    for (Pair<Long, Double> timeStampedValue : dataList) {
+      metricValues.add(timeStampedValue.getValue());
+      dataCount++;
+      if (compareThreshold(timeStampedValue.getValue(), staticThresholdCondition)) {
+        violationCount++;
       }
     }
 
@@ -94,8 +74,7 @@ public class StaticRuleEvaluator {
         metricAnomalyEventCondition.getRuleDuration());
   }
 
-  boolean compareThreshold(Value value, StaticThresholdCondition staticThresholdCondition) {
-    double lhs = Double.parseDouble(value.getString());
+  boolean compareThreshold(double lhs, StaticThresholdCondition staticThresholdCondition) {
     double rhs = staticThresholdCondition.getValue();
     return evalOperator(staticThresholdCondition.getOperator(), lhs, rhs);
   }
