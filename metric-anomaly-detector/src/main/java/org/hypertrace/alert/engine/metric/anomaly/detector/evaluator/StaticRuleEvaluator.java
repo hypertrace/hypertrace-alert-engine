@@ -31,7 +31,8 @@ public class StaticRuleEvaluator {
   }
 
   Optional<NotificationEvent> evaluateRule(
-      MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask)
+      MetricAnomalyEventCondition metricAnomalyEventCondition,
+      AlertTask alertTask)
       throws IOException {
 
     StaticThresholdCondition staticThresholdCondition =
@@ -48,7 +49,7 @@ public class StaticRuleEvaluator {
             Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
             metricAnomalyEventCondition.getMetricSelection(),
             alertTask.getTenantId(),
-            alertTask.getLastExecutionTime(),
+            alertTask.getCurrentExecutionTime() - java.time.Duration.parse(metricAnomalyEventCondition.getRuleDuration()).toMillis(),
             alertTask.getCurrentExecutionTime());
 
     for (Pair<Long, Double> timeStampedValue : dataList) {
