@@ -51,7 +51,7 @@ class MetricCache {
       Iterator<ResultSetChunk> iterator =
           queryRequestHandler.executeQuery(
               requestHeaders, metricSelection, tenantId, startTimeMillis, endTimeMillis);
-      List<Pair<Long, Double>> dataList = consumeIterator(iterator);
+      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator);
       metricCache.put(
           metricSelection,
           new MetricTimeSeries(startTimeMillis, endTimeMillis, dataList, metricDurationMillis));
@@ -67,7 +67,7 @@ class MetricCache {
               tenantId,
               metricTimeSeries.getEndTimeMillis(),
               endTimeMillis);
-      List<Pair<Long, Double>> dataList = consumeIterator(iterator);
+      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator);
       metricTimeSeries.getDataList().addAll(dataList);
       metricTimeSeries.setEndTimeMillis(endTimeMillis);
       metricTimeSeries.setMaxRetentionPeriodMillis(
@@ -80,7 +80,7 @@ class MetricCache {
     return filterData(metricTimeSeries.getDataList(), startTimeMillis, endTimeMillis);
   }
 
-  private List<Pair<Long, Double>> consumeIterator(Iterator<ResultSetChunk> iterator) {
+  private List<Pair<Long, Double>> convertToTimeSeries(Iterator<ResultSetChunk> iterator) {
     List<Pair<Long, Double>> list = new ArrayList<>();
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
