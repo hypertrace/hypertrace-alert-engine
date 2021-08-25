@@ -53,20 +53,6 @@ public class QueryRequestHandler {
   }
 
   Iterator<ResultSetChunk> executeQuery(
-      Map<String, String> requestHeaders, QueryRequest aggQueryRequest) {
-    return queryServiceClient.executeQuery(aggQueryRequest, requestHeaders, qsRequestTimeout);
-  }
-
-  QueryRequest getQueryRequest(
-      MetricAnomalyEventCondition metricAnomalyEventCondition,
-      String tenantId,
-      long startTime,
-      long endTime) {
-    return metricQueryBuilder.buildMetricQueryRequest(
-        metricAnomalyEventCondition.getMetricSelection(), startTime, endTime, tenantId);
-  }
-
-  Iterator<ResultSetChunk> executeQuery(
       Map<String, String> requestHeaders,
       MetricSelection metricSelection,
       String tenantId,
