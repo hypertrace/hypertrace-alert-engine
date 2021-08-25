@@ -91,7 +91,7 @@ public class StaticRuleEvaluator {
         staticThresholdOperatorToOperatorConvertor(staticThresholdCondition.getOperator()),
         metricValues,
         getConditionRhs(staticThresholdCondition),
-        metricAnomalyEventCondition.getMetricSelection().getDuration());
+        metricAnomalyEventCondition.getRuleDuration());
   }
 
   boolean compareThreshold(Value value, StaticThresholdCondition staticThresholdCondition) {

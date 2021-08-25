@@ -92,6 +92,7 @@ class AlertTaskTest {
                     .build())
             .build());
 
+    builder.setRuleDuration("PT5M");
     builder.addViolationCondition(
         ViolationCondition.newBuilder()
             .setStaticThresholdCondition(

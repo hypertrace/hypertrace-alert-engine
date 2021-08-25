@@ -358,13 +358,13 @@ public class AlertRuleEvaluatorTest {
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
                 Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
-            .setDuration("PT1M")
             .build();
 
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
         MetricAnomalyEventCondition.newBuilder();
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
     metricAnomalyEventConditionBuilder.addViolationCondition(violationCondition);
+    metricAnomalyEventConditionBuilder.setRuleDuration("PT1M");
 
     AlertTask.Builder alertTaskBuilder = AlertTask.newBuilder();
     alertTaskBuilder.setCurrentExecutionTime(timeStamp);
