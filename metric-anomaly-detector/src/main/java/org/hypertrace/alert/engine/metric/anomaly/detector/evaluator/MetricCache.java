@@ -32,6 +32,9 @@ class MetricCache {
             .build();
   }
 
+  /**
+   * Return a list of pair of <timestamp, metric value>
+   */
   List<Pair<Long, Double>> getMetricValues(
       Map<String, String> requestHeaders,
       MetricSelection metricSelection,
