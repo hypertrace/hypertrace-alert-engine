@@ -46,7 +46,6 @@ class MetricAnomalyDetectorTest {
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
                 Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
-            .setDuration("PT1M")
             .build();
 
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
@@ -54,6 +53,7 @@ class MetricAnomalyDetectorTest {
 
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
 
+    metricAnomalyEventConditionBuilder.setRuleDuration("PT1M");
     metricAnomalyEventConditionBuilder.addViolationCondition(
         ViolationCondition.newBuilder()
             .setStaticThresholdCondition(
@@ -120,12 +120,12 @@ class MetricAnomalyDetectorTest {
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
                 Attribute.newBuilder().setKey("errorCount").setScope("SERVICE").build())
-            .setDuration("PT1M")
             .build();
 
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
         MetricAnomalyEventCondition.newBuilder();
 
+    metricAnomalyEventConditionBuilder.setRuleDuration("PT1M");
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
 
     metricAnomalyEventConditionBuilder.addViolationCondition(
