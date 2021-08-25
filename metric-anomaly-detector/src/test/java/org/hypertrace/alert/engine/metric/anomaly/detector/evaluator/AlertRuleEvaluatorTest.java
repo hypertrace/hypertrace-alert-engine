@@ -61,12 +61,13 @@ import org.mockito.stubbing.Answer;
 public class AlertRuleEvaluatorTest {
 
   private static QueryServiceClient queryServiceClient;
-  private static AlertRuleEvaluator alertRuleEvaluator;
+  private static AttributeServiceClient attributesServiceClient;
+  private static Config config;
 
   @BeforeAll
   static void setup() throws URISyntaxException, MalformedURLException {
     // create mock config
-    Config config =
+    config =
         ConfigFactory.parseURL(
             Thread.currentThread()
                 .getContextClassLoader()
@@ -93,7 +94,7 @@ public class AlertRuleEvaluatorTest {
                         .toString())
                 .build());
 
-    AttributeServiceClient attributesServiceClient = mock(AttributeServiceClient.class);
+    attributesServiceClient = mock(AttributeServiceClient.class);
     when(attributesServiceClient.findAttributes(
             eq(Map.of("x-tenant-id", "__default")),
             eq(
@@ -104,9 +105,6 @@ public class AlertRuleEvaluatorTest {
 
     // create mock queryServiceClient
     queryServiceClient = Mockito.mock(QueryServiceClient.class);
-
-    alertRuleEvaluator =
-        new AlertRuleEvaluator(config, attributesServiceClient, queryServiceClient);
   }
 
   @Test
@@ -147,6 +145,9 @@ public class AlertRuleEvaluatorTest {
                           {"120", "400"}
                         }))
                 .iterator());
+
+    AlertRuleEvaluator alertRuleEvaluator =
+        new AlertRuleEvaluator(config, attributesServiceClient, queryServiceClient);
 
     Optional<NotificationEvent> notificationEventOptional =
         alertRuleEvaluator.process(alertTaskBuilder.build());
@@ -227,6 +228,9 @@ public class AlertRuleEvaluatorTest {
                           }
                         }))
                 .iterator());
+
+    AlertRuleEvaluator alertRuleEvaluator =
+        new AlertRuleEvaluator(config, attributesServiceClient, queryServiceClient);
 
     Optional<NotificationEvent> notificationEventOptional =
         alertRuleEvaluator.process(alertTaskBuilder.build());
