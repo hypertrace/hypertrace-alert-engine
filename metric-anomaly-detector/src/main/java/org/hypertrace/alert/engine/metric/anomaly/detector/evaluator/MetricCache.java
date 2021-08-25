@@ -33,8 +33,7 @@ class MetricCache {
   }
 
   /**
-   * Return a list of pair of <timestamp, metric value>
-   * <br>
+   * Return a list of pair of <timestamp, metric value> <br>
    * Note: Performance optimisation could be achieved by using a variable type container for metric
    * value, thus avoiding cast of integer values to double
    */
