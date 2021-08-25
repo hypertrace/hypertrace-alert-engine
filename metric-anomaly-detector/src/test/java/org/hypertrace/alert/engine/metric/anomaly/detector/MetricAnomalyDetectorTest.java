@@ -50,9 +50,7 @@ class MetricAnomalyDetectorTest {
 
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
         MetricAnomalyEventCondition.newBuilder();
-
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
-
     metricAnomalyEventConditionBuilder.setRuleDuration("PT1M");
     metricAnomalyEventConditionBuilder.addViolationCondition(
         ViolationCondition.newBuilder()
@@ -65,7 +63,6 @@ class MetricAnomalyDetectorTest {
             .build());
 
     AlertTask.Builder alertTaskBuilder = AlertTask.newBuilder();
-
     alertTaskBuilder.setCurrentExecutionTime(System.currentTimeMillis());
     alertTaskBuilder.setLastExecutionTime(
         System.currentTimeMillis() - Duration.ofMinutes(1).toMillis());
@@ -124,10 +121,8 @@ class MetricAnomalyDetectorTest {
 
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
         MetricAnomalyEventCondition.newBuilder();
-
     metricAnomalyEventConditionBuilder.setRuleDuration("PT1M");
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
-
     metricAnomalyEventConditionBuilder.addViolationCondition(
         ViolationCondition.newBuilder()
             .setBaselineThresholdCondition(
@@ -135,7 +130,6 @@ class MetricAnomalyDetectorTest {
             .build());
 
     AlertTask.Builder alertTaskBuilder = AlertTask.newBuilder();
-
     alertTaskBuilder.setCurrentExecutionTime(System.currentTimeMillis());
     alertTaskBuilder.setLastExecutionTime(
         System.currentTimeMillis() - Duration.ofMinutes(15).toMillis());
