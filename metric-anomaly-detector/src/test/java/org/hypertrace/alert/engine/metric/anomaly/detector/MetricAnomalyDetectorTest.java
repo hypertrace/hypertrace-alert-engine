@@ -31,7 +31,7 @@ class MetricAnomalyDetectorTest {
 
   @Test
   @Disabled
-  void staticTestRuleEvaluation() throws URISyntaxException, IOException {
+  void testStaticRuleEvaluation() throws URISyntaxException, IOException {
 
     LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
     RhsExpression rhsExpression = createRhsExpression("customer");
@@ -105,7 +105,7 @@ class MetricAnomalyDetectorTest {
 
   @Test
   @Disabled
-  void dynamicTestRuleEvaluation() throws URISyntaxException, IOException {
+  void testDynamicRuleEvaluation() throws URISyntaxException, IOException {
 
     LhsExpression lhsExpression = createLhsExpression("name", "SERVICE");
     RhsExpression rhsExpression = createRhsExpression("frontend");

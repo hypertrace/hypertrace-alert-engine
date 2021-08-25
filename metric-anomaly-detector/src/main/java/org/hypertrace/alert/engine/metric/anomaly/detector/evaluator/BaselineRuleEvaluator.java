@@ -80,7 +80,7 @@ public class BaselineRuleEvaluator {
               if (metricAnomalyEventCondition.getMetricSelection().getMetricAggregationFunction()
                   == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
                 value =
-                    convertValue(
+                    convertValueToAvgrateValue(
                         alertTask.getLastExecutionTime(),
                         alertTask.getCurrentExecutionTime(),
                         value,
@@ -211,7 +211,8 @@ public class BaselineRuleEvaluator {
     return Optional.of(notificationEvent);
   }
 
-  private double convertValue(long startTime, long endTime, double originalValue, String period) {
+  private double convertValueToAvgrateValue(
+      long startTime, long endTime, double originalValue, String period) {
     long periodInSec = isoDurationToSeconds(period);
     double divisor = ((double) endTime - startTime) / TimeUnit.SECONDS.toMillis(periodInSec);
     return originalValue / divisor;
