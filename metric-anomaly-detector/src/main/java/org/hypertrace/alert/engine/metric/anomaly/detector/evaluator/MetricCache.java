@@ -100,19 +100,24 @@ class MetricCache {
           throw new IllegalArgumentException(
               "Expecting value of type string, received valueType: " + value.getValueType());
         }
-
-        double doubleValue = Double.parseDouble(value.getString());
-        if (metricSelection.getMetricAggregationFunction()
-            == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
-          doubleValue =
-              getAvgrateValue(
-                  alertGapMillis, doubleValue, metricSelection.getMetricAggregationInterval());
-        }
-
-        list.add(Pair.of(Long.parseLong(row.getColumn(0).getString()), doubleValue));
+        list.add(
+            Pair.of(
+                Long.parseLong(row.getColumn(0).getString()),
+                getDoubleValue(value, alertGapMillis, metricSelection)));
       }
     }
     return list;
+  }
+
+  private double getDoubleValue(Value value, long alertGapMillis, MetricSelection metricSelection) {
+    double doubleValue = Double.parseDouble(value.getString());
+    if (metricSelection.getMetricAggregationFunction()
+        == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
+      doubleValue =
+          getAvgrateValue(
+              alertGapMillis, doubleValue, metricSelection.getMetricAggregationInterval());
+    }
+    return doubleValue;
   }
 
   private double getAvgrateValue(
