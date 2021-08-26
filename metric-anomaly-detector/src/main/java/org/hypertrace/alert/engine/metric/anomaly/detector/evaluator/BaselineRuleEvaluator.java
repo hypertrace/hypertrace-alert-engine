@@ -1,20 +1,16 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
 import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
-import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder.isoDurationToSeconds;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math.stat.descriptive.rank.Median;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
@@ -22,9 +18,6 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
-import org.hypertrace.core.query.service.api.QueryRequest;
-import org.hypertrace.core.query.service.api.ResultSetChunk;
-import org.hypertrace.core.query.service.api.Row;
 import org.hypertrace.gateway.service.v1.baseline.Baseline;
 import org.hypertrace.gateway.service.v1.common.Value;
 import org.hypertrace.gateway.service.v1.common.ValueType;
@@ -35,10 +28,10 @@ public class BaselineRuleEvaluator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BaselineRuleEvaluator.class);
 
-  private final QueryRequestHandler queryRequestHandler;
+  private final MetricCache metricCache;
 
-  public BaselineRuleEvaluator(QueryRequestHandler queryRequestHandler) {
-    this.queryRequestHandler = queryRequestHandler;
+  public BaselineRuleEvaluator(MetricCache metricCache) {
+    this.metricCache = metricCache;
   }
 
   Optional<NotificationEvent> evaluateRule(
@@ -50,54 +43,32 @@ public class BaselineRuleEvaluator {
             .get(0)
             .getBaselineThresholdCondition();
 
-    Duration duration = java.time.Duration.parse(dynamicThresholdCondition.getBaselineDuration());
-    long durationMillis = duration.toMillis();
+    long baselineDurationMillis =
+        java.time.Duration.parse(dynamicThresholdCondition.getBaselineDuration()).toMillis();
+    long ruleEvaluationStartTime =
+        alertTask.getCurrentExecutionTime()
+            - java.time.Duration.parse(metricAnomalyEventCondition.getRuleDuration()).toMillis();
 
     // this query will fetch metric data, which will used for baseline calculation and evaluation
-    QueryRequest queryRequest =
-        queryRequestHandler.getQueryRequest(
-            metricAnomalyEventCondition,
+    List<Pair<Long, Double>> dataList =
+        metricCache.getMetricValues(
+            Map.of(TENANT_ID_KEY, alertTask.getTenantId()),
+            metricAnomalyEventCondition.getMetricSelection(),
             alertTask.getTenantId(),
-            alertTask.getLastExecutionTime() - durationMillis,
-            alertTask.getCurrentExecutionTime());
-
-    LOGGER.debug("Rule id {}, Query request {}", alertTask.getEventConditionId(), queryRequest);
-
-    Iterator<ResultSetChunk> iterator =
-        queryRequestHandler.executeQuery(
-            Map.of(TENANT_ID_KEY, alertTask.getTenantId()), queryRequest);
+            ruleEvaluationStartTime - baselineDurationMillis,
+            alertTask.getCurrentExecutionTime(),
+            alertTask.getCurrentExecutionTime() - alertTask.getLastExecutionTime());
 
     List<Double> metricValuesForBaseline = new ArrayList<>();
     List<Double> metricValuesForEvaluation = new ArrayList<>();
 
-    iterator.forEachRemaining(
-        chunk -> {
-          for (Row row : chunk.getRowList()) {
-            if (row.getColumnCount() >= 2
-                && row.getColumn(1).getValueType()
-                    == org.hypertrace.core.query.service.api.ValueType.STRING) {
-              double value = Double.parseDouble(row.getColumn(1).getString());
-              if (metricAnomalyEventCondition.getMetricSelection().getMetricAggregationFunction()
-                  == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
-                value =
-                    convertValueToAvgrateValue(
-                        alertTask.getLastExecutionTime(),
-                        alertTask.getCurrentExecutionTime(),
-                        value,
-                        metricAnomalyEventCondition
-                            .getMetricSelection()
-                            .getMetricAggregationInterval());
-              }
-              metricValuesForBaseline.add(value);
-              if (Long.parseLong(row.getColumn(0).getString())
-                  >= alertTask.getLastExecutionTime()) {
-                metricValuesForEvaluation.add(value);
-              } else {
-                metricValuesForBaseline.add(value);
-              }
-            }
-          }
-        });
+    for (Pair<Long, Double> timeStampedValue : dataList) {
+      if (timeStampedValue.getKey() >= ruleEvaluationStartTime) {
+        metricValuesForEvaluation.add(timeStampedValue.getValue());
+      } else {
+        metricValuesForBaseline.add(timeStampedValue.getValue());
+      }
+    }
 
     LOGGER.debug(
         "Rule id {}, Metric data for baseline {}, evaluation {}",
@@ -209,12 +180,5 @@ public class BaselineRuleEvaluator {
 
     LOGGER.debug("Notification Event {}", notificationEvent);
     return Optional.of(notificationEvent);
-  }
-
-  private double convertValueToAvgrateValue(
-      long startTime, long endTime, double originalValue, String period) {
-    long periodInSec = isoDurationToSeconds(period);
-    double divisor = ((double) endTime - startTime) / TimeUnit.SECONDS.toMillis(periodInSec);
-    return originalValue / divisor;
   }
 }
