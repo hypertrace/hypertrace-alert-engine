@@ -45,8 +45,8 @@ class MetricCache {
       long startTimeMillis,
       long endTimeMillis) {
     long metricDurationMillis = endTimeMillis - startTimeMillis;
-
-    MetricTimeSeries metricTimeSeries = metricCache.getIfPresent(metricSelection);
+    Pair<String, MetricSelection> cacheKey = Pair.of(tenantId, metricSelection);
+    MetricTimeSeries metricTimeSeries = metricCache.getIfPresent(cacheKey);
     // no record for this metric selection
     // if requested time range is earlier than existing
     // replace data
@@ -56,7 +56,7 @@ class MetricCache {
               requestHeaders, metricSelection, tenantId, startTimeMillis, endTimeMillis);
       List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator);
       metricCache.put(
-          Pair.of(tenantId, metricSelection),
+          cacheKey,
           new MetricTimeSeries(startTimeMillis, endTimeMillis, dataList, metricDurationMillis));
       return dataList;
     }
