@@ -88,7 +88,8 @@ class MetricCacheTest {
             currentTime,
             currentTime - Duration.ofMinutes(10).toMillis());
     Assertions.assertEquals(5, list.size());
-    MetricTimeSeries metricTimeSeries = metricCache.getMetricTimeSeriesRecord(metricSelection);
+    MetricTimeSeries metricTimeSeries =
+        metricCache.getMetricTimeSeriesRecord(tenantId, metricSelection);
     Assertions.assertEquals(5, metricTimeSeries.getDataList().size());
 
     // returns data from cache
@@ -101,7 +102,7 @@ class MetricCacheTest {
             currentTime,
             currentTime - Duration.ofMinutes(10).toMillis());
     Assertions.assertEquals(4, list.size());
-    metricTimeSeries = metricCache.getMetricTimeSeriesRecord(metricSelection);
+    metricTimeSeries = metricCache.getMetricTimeSeriesRecord(tenantId, metricSelection);
     Assertions.assertEquals(5, metricTimeSeries.getDataList().size());
 
     // triggers trimming of data
@@ -114,7 +115,7 @@ class MetricCacheTest {
             currentTime + Duration.ofMinutes(2).toMillis(),
             currentTime - Duration.ofMinutes(10).toMillis());
     Assertions.assertEquals(2, list.size()); // [4,7]
-    metricTimeSeries = metricCache.getMetricTimeSeriesRecord(metricSelection);
+    metricTimeSeries = metricCache.getMetricTimeSeriesRecord(tenantId, metricSelection);
     Assertions.assertEquals(4, metricTimeSeries.getDataList().size()); // [2, 5]
   }
 }
