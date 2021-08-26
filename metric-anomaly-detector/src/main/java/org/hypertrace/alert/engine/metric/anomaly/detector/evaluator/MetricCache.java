@@ -21,7 +21,8 @@ class MetricCache {
 
   private static final int CACHE_EXPIRY_MINUTES = 5;
 
-  private final Cache<MetricSelection, MetricTimeSeries> metricCache;
+  // cache key <tenantId, metricSelection>
+  private final Cache<Pair<String, MetricSelection>, MetricTimeSeries> metricCache;
   private final QueryRequestHandler queryRequestHandler;
 
   MetricCache(QueryRequestHandler queryRequestHandler) {
@@ -44,8 +45,8 @@ class MetricCache {
       long startTimeMillis,
       long endTimeMillis) {
     long metricDurationMillis = endTimeMillis - startTimeMillis;
-
-    MetricTimeSeries metricTimeSeries = metricCache.getIfPresent(metricSelection);
+    Pair<String, MetricSelection> cacheKey = Pair.of(tenantId, metricSelection);
+    MetricTimeSeries metricTimeSeries = metricCache.getIfPresent(cacheKey);
     // no record for this metric selection
     // if requested time range is earlier than existing
     // replace data
@@ -55,7 +56,7 @@ class MetricCache {
               requestHeaders, metricSelection, tenantId, startTimeMillis, endTimeMillis);
       List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator);
       metricCache.put(
-          metricSelection,
+          cacheKey,
           new MetricTimeSeries(startTimeMillis, endTimeMillis, dataList, metricDurationMillis));
       return dataList;
     }
@@ -108,8 +109,8 @@ class MetricCache {
         .collect(Collectors.toList());
   }
 
-  MetricTimeSeries getMetricTimeSeriesRecord(MetricSelection metricSelection) {
-    return metricCache.getIfPresent(metricSelection);
+  MetricTimeSeries getMetricTimeSeriesRecord(String tenantId, MetricSelection metricSelection) {
+    return metricCache.getIfPresent(Pair.of(tenantId, metricSelection));
   }
 
   @Getter
