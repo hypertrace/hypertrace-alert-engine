@@ -87,7 +87,8 @@ class MetricCacheTest {
             currentTime - Duration.ofMinutes(5).toMillis(),
             currentTime);
     Assertions.assertEquals(5, list.size());
-    MetricTimeSeries metricTimeSeries = metricCache.getMetricTimeSeriesRecord(tenantId, metricSelection);
+    MetricTimeSeries metricTimeSeries =
+        metricCache.getMetricTimeSeriesRecord(tenantId, metricSelection);
     Assertions.assertEquals(5, metricTimeSeries.getDataList().size());
 
     // returns data from cache
