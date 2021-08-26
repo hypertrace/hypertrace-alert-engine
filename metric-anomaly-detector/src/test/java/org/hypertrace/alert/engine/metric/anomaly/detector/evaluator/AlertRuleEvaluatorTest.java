@@ -240,6 +240,9 @@ public class AlertRuleEvaluatorTest {
                         }))
                 .iterator());
 
+    AlertRuleEvaluator alertRuleEvaluator =
+        new AlertRuleEvaluator(config, attributesServiceClient, queryServiceClient);
+
     Optional<NotificationEvent> notificationEventOptional =
         alertRuleEvaluator.process(alertTaskBuilder.build());
     Assertions.assertTrue(notificationEventOptional.isPresent());

@@ -1,5 +1,7 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
+import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder.isoDurationToSeconds;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.time.Duration;
@@ -7,10 +9,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
 import org.hypertrace.core.query.service.api.ResultSetChunk;
 import org.hypertrace.core.query.service.api.Row;
@@ -42,7 +46,8 @@ class MetricCache {
       MetricSelection metricSelection,
       String tenantId,
       long startTimeMillis,
-      long endTimeMillis) {
+      long endTimeMillis,
+      long alertGapMillis) {
     long metricDurationMillis = endTimeMillis - startTimeMillis;
 
     MetricTimeSeries metricTimeSeries = metricCache.getIfPresent(metricSelection);
@@ -53,7 +58,8 @@ class MetricCache {
       Iterator<ResultSetChunk> iterator =
           queryRequestHandler.executeQuery(
               requestHeaders, metricSelection, tenantId, startTimeMillis, endTimeMillis);
-      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator);
+      List<Pair<Long, Double>> dataList =
+          convertToTimeSeries(iterator, alertGapMillis, metricSelection);
       metricCache.put(
           metricSelection,
           new MetricTimeSeries(startTimeMillis, endTimeMillis, dataList, metricDurationMillis));
@@ -69,7 +75,8 @@ class MetricCache {
               tenantId,
               metricTimeSeries.getEndTimeMillis(),
               endTimeMillis);
-      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator);
+      List<Pair<Long, Double>> dataList =
+          convertToTimeSeries(iterator, alertGapMillis, metricSelection);
       metricTimeSeries.getDataList().addAll(dataList);
       metricTimeSeries.setEndTimeMillis(endTimeMillis);
       metricTimeSeries.setMaxRetentionPeriodMillis(
@@ -82,7 +89,8 @@ class MetricCache {
     return filterData(metricTimeSeries.getDataList(), startTimeMillis, endTimeMillis);
   }
 
-  private List<Pair<Long, Double>> convertToTimeSeries(Iterator<ResultSetChunk> iterator) {
+  private List<Pair<Long, Double>> convertToTimeSeries(
+      Iterator<ResultSetChunk> iterator, long alertGapMillis, MetricSelection metricSelection) {
     List<Pair<Long, Double>> list = new ArrayList<>();
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
@@ -92,13 +100,26 @@ class MetricCache {
           throw new IllegalArgumentException(
               "Expecting value of type string, received valueType: " + value.getValueType());
         }
-        list.add(
-            Pair.of(
-                Long.parseLong(row.getColumn(0).getString()),
-                Double.parseDouble(value.getString())));
+
+        double doubleValue = Double.parseDouble(value.getString());
+        if (metricSelection.getMetricAggregationFunction()
+            == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
+          doubleValue =
+              getAvgrateValue(
+                  alertGapMillis, doubleValue, metricSelection.getMetricAggregationInterval());
+        }
+
+        list.add(Pair.of(Long.parseLong(row.getColumn(0).getString()), doubleValue));
       }
     }
     return list;
+  }
+
+  private double getAvgrateValue(
+      long alertGapMillis, double originalValue, String metricAggregationIntervalPeriod) {
+    long periodInSec = isoDurationToSeconds(metricAggregationIntervalPeriod);
+    double divisor = (double) alertGapMillis / TimeUnit.SECONDS.toMillis(periodInSec);
+    return originalValue / divisor;
   }
 
   private List<Pair<Long, Double>> filterData(
