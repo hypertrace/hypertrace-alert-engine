@@ -26,6 +26,8 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperato
 import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.MetricCache.MetricTimeSeries;
 import org.hypertrace.core.attribute.service.v1.AttributeScope;
 import org.hypertrace.core.query.service.api.ResultSetChunk;
+import org.hypertrace.core.query.service.api.Value;
+import org.hypertrace.core.query.service.api.ValueType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -114,5 +116,44 @@ class MetricCacheTest {
     Assertions.assertEquals(2, list.size()); // [4,7]
     metricTimeSeries = metricCache.getMetricTimeSeriesRecord(tenantId, metricSelection);
     Assertions.assertEquals(4, metricTimeSeries.getDataList().size()); // [2, 5]
+  }
+
+  @Test
+  void testGetDoubleValue() {
+
+    LhsExpression lhsExpression = createLhsExpression("name", AttributeScope.SERVICE.name());
+    RhsExpression rhsExpression = createRhsExpression("customer");
+    LeafFilter leafFilter =
+        createLeafFilter(ValueOperator.VALUE_OPERATOR_EQ, lhsExpression, rhsExpression);
+    MetricSelection metricSelection =
+        MetricSelection.newBuilder()
+            .setMetricAggregationInterval("PT15s")
+            .setMetricAggregationFunction(
+                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM)
+            .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
+            .setMetricAttribute(
+                Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
+            .build();
+
+    Value value = Value.newBuilder().setValueType(ValueType.STRING).setString("1").build();
+
+    Assertions.assertEquals((double) 1, MetricCache.getDoubleValue(value, metricSelection));
+
+    lhsExpression = createLhsExpression("name", AttributeScope.SERVICE.name());
+    rhsExpression = createRhsExpression("customer");
+    leafFilter = createLeafFilter(ValueOperator.VALUE_OPERATOR_EQ, lhsExpression, rhsExpression);
+    metricSelection =
+        MetricSelection.newBuilder()
+            .setMetricAggregationInterval("PT15s")
+            .setMetricAggregationFunction(
+                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE)
+            .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
+            .setMetricAttribute(
+                Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
+            .build();
+
+    value = Value.newBuilder().setValueType(ValueType.STRING).setString("1").build();
+
+    Assertions.assertEquals((double) 1 / 15, MetricCache.getDoubleValue(value, metricSelection));
   }
 }

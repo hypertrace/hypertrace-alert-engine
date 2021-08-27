@@ -107,7 +107,7 @@ class MetricCache {
     return list;
   }
 
-  private double getDoubleValue(Value value, MetricSelection metricSelection) {
+  static double getDoubleValue(Value value, MetricSelection metricSelection) {
     double doubleValue = Double.parseDouble(value.getString());
     if (metricSelection.getMetricAggregationFunction()
         == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
@@ -116,7 +116,8 @@ class MetricCache {
     return doubleValue;
   }
 
-  private double getAvgrateValue(double originalValue, String metricAggregationIntervalPeriod) {
+  private static double getAvgrateValue(
+      double originalValue, String metricAggregationIntervalPeriod) {
     long periodInSec = isoDurationToSeconds(metricAggregationIntervalPeriod);
     long oneSecInMillis = TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS);
     // avg rate hard coded for 1s
