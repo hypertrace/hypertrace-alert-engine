@@ -47,8 +47,7 @@ class MetricCache {
       MetricSelection metricSelection,
       String tenantId,
       long startTimeMillis,
-      long endTimeMillis,
-      long alertGapMillis) {
+      long endTimeMillis) {
     long metricDurationMillis = endTimeMillis - startTimeMillis;
     Pair<String, MetricSelection> cacheKey = Pair.of(tenantId, metricSelection);
     MetricTimeSeries metricTimeSeries = metricCache.getIfPresent(cacheKey);
@@ -59,8 +58,7 @@ class MetricCache {
       Iterator<ResultSetChunk> iterator =
           queryRequestHandler.executeQuery(
               requestHeaders, metricSelection, tenantId, startTimeMillis, endTimeMillis);
-      List<Pair<Long, Double>> dataList =
-          convertToTimeSeries(iterator, alertGapMillis, metricSelection);
+      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator, metricSelection);
       metricCache.put(
           cacheKey,
           new MetricTimeSeries(startTimeMillis, endTimeMillis, dataList, metricDurationMillis));
@@ -76,8 +74,7 @@ class MetricCache {
               tenantId,
               metricTimeSeries.getEndTimeMillis(),
               endTimeMillis);
-      List<Pair<Long, Double>> dataList =
-          convertToTimeSeries(iterator, alertGapMillis, metricSelection);
+      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator, metricSelection);
       metricTimeSeries.getDataList().addAll(dataList);
       metricTimeSeries.setEndTimeMillis(endTimeMillis);
       metricTimeSeries.setMaxRetentionPeriodMillis(
@@ -91,7 +88,7 @@ class MetricCache {
   }
 
   private List<Pair<Long, Double>> convertToTimeSeries(
-      Iterator<ResultSetChunk> iterator, long alertGapMillis, MetricSelection metricSelection) {
+      Iterator<ResultSetChunk> iterator, MetricSelection metricSelection) {
     List<Pair<Long, Double>> list = new ArrayList<>();
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
@@ -104,27 +101,26 @@ class MetricCache {
         list.add(
             Pair.of(
                 Long.parseLong(row.getColumn(0).getString()),
-                getDoubleValue(value, alertGapMillis, metricSelection)));
+                getDoubleValue(value, metricSelection)));
       }
     }
     return list;
   }
 
-  private double getDoubleValue(Value value, long alertGapMillis, MetricSelection metricSelection) {
+  private double getDoubleValue(Value value, MetricSelection metricSelection) {
     double doubleValue = Double.parseDouble(value.getString());
     if (metricSelection.getMetricAggregationFunction()
         == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
-      doubleValue =
-          getAvgrateValue(
-              alertGapMillis, doubleValue, metricSelection.getMetricAggregationInterval());
+      doubleValue = getAvgrateValue(doubleValue, metricSelection.getMetricAggregationInterval());
     }
     return doubleValue;
   }
 
-  private double getAvgrateValue(
-      long alertGapMillis, double originalValue, String metricAggregationIntervalPeriod) {
+  private double getAvgrateValue(double originalValue, String metricAggregationIntervalPeriod) {
     long periodInSec = isoDurationToSeconds(metricAggregationIntervalPeriod);
-    double divisor = (double) alertGapMillis / TimeUnit.SECONDS.toMillis(periodInSec);
+    long oneSecInMillis = TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS);
+    // avg rate hard coded for 1s
+    double divisor = (double) TimeUnit.SECONDS.toMillis(periodInSec) / oneSecInMillis;
     return originalValue / divisor;
   }
 

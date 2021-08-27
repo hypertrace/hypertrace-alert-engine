@@ -85,8 +85,7 @@ class MetricCacheTest {
             metricSelection,
             tenantId,
             currentTime - Duration.ofMinutes(5).toMillis(),
-            currentTime,
-            currentTime - Duration.ofMinutes(10).toMillis());
+            currentTime);
     Assertions.assertEquals(5, list.size());
     MetricTimeSeries metricTimeSeries =
         metricCache.getMetricTimeSeriesRecord(tenantId, metricSelection);
@@ -99,8 +98,7 @@ class MetricCacheTest {
             metricSelection,
             tenantId,
             currentTime - Duration.ofMinutes(3).toMillis(),
-            currentTime,
-            currentTime - Duration.ofMinutes(10).toMillis());
+            currentTime);
     Assertions.assertEquals(4, list.size());
     metricTimeSeries = metricCache.getMetricTimeSeriesRecord(tenantId, metricSelection);
     Assertions.assertEquals(5, metricTimeSeries.getDataList().size());
@@ -112,8 +110,7 @@ class MetricCacheTest {
             metricSelection,
             tenantId,
             currentTime - Duration.ofMinutes(1).toMillis(),
-            currentTime + Duration.ofMinutes(2).toMillis(),
-            currentTime - Duration.ofMinutes(10).toMillis());
+            currentTime + Duration.ofMinutes(2).toMillis());
     Assertions.assertEquals(2, list.size()); // [4,7]
     metricTimeSeries = metricCache.getMetricTimeSeriesRecord(tenantId, metricSelection);
     Assertions.assertEquals(4, metricTimeSeries.getDataList().size()); // [2, 5]

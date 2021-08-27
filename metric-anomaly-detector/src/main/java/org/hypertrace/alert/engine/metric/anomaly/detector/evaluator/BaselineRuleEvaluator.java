@@ -56,8 +56,7 @@ public class BaselineRuleEvaluator {
             metricAnomalyEventCondition.getMetricSelection(),
             alertTask.getTenantId(),
             ruleEvaluationStartTime - baselineDurationMillis,
-            alertTask.getCurrentExecutionTime(),
-            alertTask.getCurrentExecutionTime() - alertTask.getLastExecutionTime());
+            alertTask.getCurrentExecutionTime());
 
     List<Double> metricValuesForBaseline = new ArrayList<>();
     List<Double> metricValuesForEvaluation = new ArrayList<>();

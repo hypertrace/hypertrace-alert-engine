@@ -51,8 +51,7 @@ public class StaticRuleEvaluator {
             alertTask.getCurrentExecutionTime()
                 - java.time.Duration.parse(metricAnomalyEventCondition.getRuleDuration())
                     .toMillis(),
-            alertTask.getCurrentExecutionTime(),
-            alertTask.getCurrentExecutionTime() - alertTask.getLastExecutionTime());
+            alertTask.getCurrentExecutionTime());
 
     for (Pair<Long, Double> timeStampedValue : dataList) {
       metricValues.add(timeStampedValue.getValue());
