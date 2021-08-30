@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,11 +19,14 @@ import org.hypertrace.core.query.service.api.ResultSetChunk;
 import org.hypertrace.core.query.service.api.Row;
 import org.hypertrace.core.query.service.api.Value;
 import org.hypertrace.core.query.service.api.ValueType;
+import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 
 class MetricCache {
 
   private static final int CACHE_EXPIRY_MINUTES = 5;
-
+  private static final ConcurrentMap<String, AtomicInteger> cacheSizeGauge =
+      new ConcurrentHashMap<>();
+  private static final String CACHE_SIZE_GAUGE = "hypertrace.metric.anomaly.detector.cache.size";
   // cache key <tenantId, metricSelection>
   private final Cache<Pair<String, MetricSelection>, MetricTimeSeries> metricCache;
   private final QueryRequestHandler queryRequestHandler;
@@ -44,6 +50,7 @@ class MetricCache {
       String tenantId,
       long startTimeMillis,
       long endTimeMillis) {
+    recordCacheSize(tenantId);
     long metricDurationMillis = endTimeMillis - startTimeMillis;
     Pair<String, MetricSelection> cacheKey = Pair.of(tenantId, metricSelection);
     MetricTimeSeries metricTimeSeries = metricCache.getIfPresent(cacheKey);
@@ -111,6 +118,17 @@ class MetricCache {
 
   MetricTimeSeries getMetricTimeSeriesRecord(String tenantId, MetricSelection metricSelection) {
     return metricCache.getIfPresent(Pair.of(tenantId, metricSelection));
+  }
+
+  private void recordCacheSize(String tenantId) {
+    AtomicInteger emptyCacheSize = new AtomicInteger(0);
+    cacheSizeGauge
+        .computeIfAbsent(
+            tenantId,
+            k ->
+                PlatformMetricsRegistry.registerGauge(
+                    CACHE_SIZE_GAUGE, Map.of("tenantId", k), emptyCacheSize))
+        .set(Math.toIntExact(metricCache.size()));
   }
 
   @Getter
