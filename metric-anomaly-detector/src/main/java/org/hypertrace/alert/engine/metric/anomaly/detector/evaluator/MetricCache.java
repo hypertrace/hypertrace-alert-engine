@@ -1,5 +1,7 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
+import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder.isoDurationToSeconds;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.time.Duration;
@@ -7,10 +9,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
 import org.hypertrace.core.query.service.api.ResultSetChunk;
 import org.hypertrace.core.query.service.api.Row;
@@ -54,7 +58,7 @@ class MetricCache {
       Iterator<ResultSetChunk> iterator =
           queryRequestHandler.executeQuery(
               requestHeaders, metricSelection, tenantId, startTimeMillis, endTimeMillis);
-      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator);
+      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator, metricSelection);
       metricCache.put(
           cacheKey,
           new MetricTimeSeries(startTimeMillis, endTimeMillis, dataList, metricDurationMillis));
@@ -70,7 +74,7 @@ class MetricCache {
               tenantId,
               metricTimeSeries.getEndTimeMillis(),
               endTimeMillis);
-      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator);
+      List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator, metricSelection);
       metricTimeSeries.getDataList().addAll(dataList);
       metricTimeSeries.setEndTimeMillis(endTimeMillis);
       metricTimeSeries.setMaxRetentionPeriodMillis(
@@ -83,7 +87,8 @@ class MetricCache {
     return filterData(metricTimeSeries.getDataList(), startTimeMillis, endTimeMillis);
   }
 
-  private List<Pair<Long, Double>> convertToTimeSeries(Iterator<ResultSetChunk> iterator) {
+  private List<Pair<Long, Double>> convertToTimeSeries(
+      Iterator<ResultSetChunk> iterator, MetricSelection metricSelection) {
     List<Pair<Long, Double>> list = new ArrayList<>();
     while (iterator.hasNext()) {
       ResultSetChunk resultSetChunk = iterator.next();
@@ -96,10 +101,28 @@ class MetricCache {
         list.add(
             Pair.of(
                 Long.parseLong(row.getColumn(0).getString()),
-                Double.parseDouble(value.getString())));
+                getDoubleValue(value, metricSelection)));
       }
     }
     return list;
+  }
+
+  static double getDoubleValue(Value value, MetricSelection metricSelection) {
+    double doubleValue = Double.parseDouble(value.getString());
+    if (metricSelection.getMetricAggregationFunction()
+        == MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE) {
+      doubleValue = getAvgrateValue(doubleValue, metricSelection.getMetricAggregationInterval());
+    }
+    return doubleValue;
+  }
+
+  private static double getAvgrateValue(
+      double originalValue, String metricAggregationIntervalPeriod) {
+    long periodInSec = isoDurationToSeconds(metricAggregationIntervalPeriod);
+    long oneSecInMillis = TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS);
+    // avg rate hard coded for 1s
+    double divisor = (double) TimeUnit.SECONDS.toMillis(periodInSec) / oneSecInMillis;
+    return originalValue / divisor;
   }
 
   private List<Pair<Long, Double>> filterData(
