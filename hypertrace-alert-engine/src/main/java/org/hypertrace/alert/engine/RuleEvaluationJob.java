@@ -27,7 +27,7 @@ public class RuleEvaluationJob implements Job {
   private static final Logger LOGGER = LoggerFactory.getLogger(RuleEvaluationJob.class);
   private static final ConcurrentMap<String, Counter> alertProcessingErrorCounter =
       new ConcurrentHashMap<>();
-  private static final String ALERT_PROCESS_ERROR_COUNTER = "alerttask.processing.error";
+  private static final String ALERT_PROCESS_ERROR_COUNTER = "hypertrace.alert.engine.alert.task.processing.error";
 
   public void execute(JobExecutionContext jobExecutionContext) {
     JobDetail jobDetail = jobExecutionContext.getJobDetail();
