@@ -1,16 +1,21 @@
 package org.hypertrace.alert.engine;
 
 import com.typesafe.config.Config;
+import io.micrometer.core.instrument.Counter;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
 import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;
+import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -20,6 +25,9 @@ import org.slf4j.LoggerFactory;
 
 public class RuleEvaluationJob implements Job {
   private static final Logger LOGGER = LoggerFactory.getLogger(RuleEvaluationJob.class);
+  private static final ConcurrentMap<String, Counter> alertProcessingErrorCounter =
+      new ConcurrentHashMap<>();
+  private static final String ALERT_PROCESS_ERROR_COUNTER = "alerttask.processing.error";
 
   public void execute(JobExecutionContext jobExecutionContext) {
     JobDetail jobDetail = jobExecutionContext.getJobDetail();
@@ -50,6 +58,13 @@ public class RuleEvaluationJob implements Job {
             alertRuleEvaluator.process(alertTaskBuilder.build());
         notificationEventOptional.ifPresent(notificationEventProcessor::process);
       } catch (IOException e) {
+        alertProcessingErrorCounter
+            .computeIfAbsent(
+                alertTaskBuilder.getTenantId(),
+                k ->
+                    PlatformMetricsRegistry.registerCounter(
+                        ALERT_PROCESS_ERROR_COUNTER, Map.of("tenantId", k)))
+            .increment();
         LOGGER.error("Exception processing alertTask {}", alertTaskBuilder, e);
       }
     }
