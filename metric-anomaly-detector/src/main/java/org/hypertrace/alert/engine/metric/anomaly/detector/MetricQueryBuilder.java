@@ -262,6 +262,7 @@ public class MetricQueryBuilder {
   static String convertToQueryRequestFunctionName(
       MetricAggregationFunction metricAggregationFunction) {
     switch (metricAggregationFunction) {
+      case METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE:
       case METRIC_AGGREGATION_FUNCTION_TYPE_SUM:
         return FunctionType.SUM.name();
       case METRIC_AGGREGATION_FUNCTION_TYPE_AVG:

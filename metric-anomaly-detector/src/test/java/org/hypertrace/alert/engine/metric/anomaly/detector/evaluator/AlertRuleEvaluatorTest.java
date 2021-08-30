@@ -120,11 +120,17 @@ public class AlertRuleEvaluatorTest {
             .build();
 
     long timeStamp = System.currentTimeMillis();
-    AlertTask.Builder alertTaskBuilder = getTestAlertTask(violationCondition, timeStamp);
+    AlertTask.Builder alertTaskBuilder =
+        getTestAlertTask(
+            violationCondition,
+            timeStamp,
+            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM);
 
     QueryRequest expectedQueryRequest =
         getExpectedQuery(
-            alertTaskBuilder.getLastExecutionTime(), alertTaskBuilder.getCurrentExecutionTime());
+            alertTaskBuilder.getLastExecutionTime(),
+            alertTaskBuilder.getCurrentExecutionTime(),
+            FunctionType.SUM.name());
 
     when(queryServiceClient.executeQuery(
             eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
@@ -175,13 +181,106 @@ public class AlertRuleEvaluatorTest {
 
     long timeStamp = System.currentTimeMillis();
 
-    AlertTask.Builder alertTaskBuilder = getTestAlertTask(violationCondition, timeStamp);
+    AlertTask.Builder alertTaskBuilder =
+        getTestAlertTask(
+            violationCondition,
+            timeStamp,
+            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM);
 
     long windowStartTime =
         alertTaskBuilder.getLastExecutionTime() - Duration.ofMinutes(5).toMillis();
 
     QueryRequest expectedQueryRequest =
-        getExpectedQuery(windowStartTime, alertTaskBuilder.getCurrentExecutionTime());
+        getExpectedQuery(
+            windowStartTime, alertTaskBuilder.getCurrentExecutionTime(), FunctionType.SUM.name());
+
+    when(queryServiceClient.executeQuery(
+            eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
+        .thenReturn(
+            List.of(
+                    getResultSetChunk(
+                        List.of(
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
+                                .add("startTime")
+                                .toString(),
+                            new StringJoiner(".")
+                                .add(AttributeScope.SERVICE.name())
+                                .add("duration")
+                                .toString()),
+                        new String[][] {
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(60).toMillis()),
+                            "5",
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(90).toMillis()),
+                            "20"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(100).toMillis()),
+                            "15"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(150).toMillis()),
+                            "60"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(160).toMillis()),
+                            "20"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(172).toMillis()),
+                            "30"
+                          },
+                          {
+                            String.valueOf(windowStartTime + Duration.ofSeconds(320).toMillis()),
+                            "400"
+                          }
+                        }))
+                .iterator());
+
+    AlertRuleEvaluator alertRuleEvaluator =
+        new AlertRuleEvaluator(config, attributesServiceClient, queryServiceClient);
+
+    Optional<NotificationEvent> notificationEventOptional =
+        alertRuleEvaluator.process(alertTaskBuilder.build());
+    Assertions.assertTrue(notificationEventOptional.isPresent());
+
+    NotificationEvent notificationEvent = notificationEventOptional.get();
+    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
+        MetricAnomalyNotificationEvent.fromByteBuffer(
+            notificationEvent.getEventRecord().getEventValue());
+
+    assertEquals("channel1", metricAnomalyNotificationEvent.getChannelId());
+    assertEquals("event-condition-1", metricAnomalyNotificationEvent.getEventConditionId());
+    assertEquals(
+        "MetricAnomalyEventCondition", metricAnomalyNotificationEvent.getEventConditionType());
+    assertEquals(timeStamp, metricAnomalyNotificationEvent.getViolationTimestamp());
+  }
+
+  @Test
+  void testMetricAnomalyForDynamicThresholdForAVGRATE() throws IOException {
+    ViolationCondition violationCondition =
+        ViolationCondition.newBuilder()
+            .setBaselineThresholdCondition(
+                BaselineThresholdCondition.newBuilder().setBaselineDuration("PT5M").build())
+            .build();
+
+    long timeStamp = System.currentTimeMillis();
+
+    AlertTask.Builder alertTaskBuilder =
+        getTestAlertTask(
+            violationCondition,
+            timeStamp,
+            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE);
+
+    long windowStartTime =
+        alertTaskBuilder.getLastExecutionTime() - Duration.ofMinutes(5).toMillis();
+
+    QueryRequest expectedQueryRequest =
+        getExpectedQuery(
+            windowStartTime, alertTaskBuilder.getCurrentExecutionTime(), FunctionType.SUM.name());
 
     when(queryServiceClient.executeQuery(
             eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
@@ -249,7 +348,10 @@ public class AlertRuleEvaluatorTest {
   }
 
   private AlertTask.Builder getTestAlertTask(
-      ViolationCondition violationCondition, long timeStamp) {
+      ViolationCondition violationCondition,
+      long timeStamp,
+      org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction
+          metricAggregationFunction) {
     // create mock alertTask
     LhsExpression lhsExpression = createLhsExpression("name", AttributeScope.SERVICE.name());
     RhsExpression rhsExpression = createRhsExpression("customer");
@@ -259,8 +361,7 @@ public class AlertRuleEvaluatorTest {
     MetricSelection metricSelection =
         MetricSelection.newBuilder()
             .setMetricAggregationInterval("PT15s")
-            .setMetricAggregationFunction(
-                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM)
+            .setMetricAggregationFunction(metricAggregationFunction)
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
                 Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
@@ -285,7 +386,7 @@ public class AlertRuleEvaluatorTest {
     return alertTaskBuilder;
   }
 
-  private QueryRequest getExpectedQuery(long startTime, long endTime) {
+  private QueryRequest getExpectedQuery(long startTime, long endTime, String functionName) {
     LhsExpression lhsExpression = createLhsExpression("name", AttributeScope.SERVICE.name());
     RhsExpression rhsExpression = createRhsExpression("customer");
     LeafFilter leafFilter =
@@ -322,7 +423,7 @@ public class AlertRuleEvaluatorTest {
             Expression.newBuilder()
                 .setFunction(
                     Function.newBuilder()
-                        .setFunctionName(FunctionType.SUM.name())
+                        .setFunctionName(functionName)
                         .addArguments(
                             Expression.newBuilder()
                                 .setColumnIdentifier(
