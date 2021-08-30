@@ -2,13 +2,16 @@ package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.micrometer.core.instrument.Timer;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -27,6 +30,8 @@ class MetricCache {
   private static final ConcurrentMap<String, AtomicInteger> cacheSizeGauge =
       new ConcurrentHashMap<>();
   private static final String CACHE_SIZE_GAUGE = "hypertrace.metric.anomaly.detector.cache.size";
+  private static final ConcurrentMap<String, Timer> longQueryTimer = new ConcurrentHashMap<>();
+  private static final String LONG_QUERY_TIMER = "hypertrace.metric.anomaly.detector.query.time";
   // cache key <tenantId, metricSelection>
   private final Cache<Pair<String, MetricSelection>, MetricTimeSeries> metricCache;
   private final QueryRequestHandler queryRequestHandler;
@@ -58,9 +63,16 @@ class MetricCache {
     // if requested time range is earlier than existing
     // replace data
     if (null == metricTimeSeries || startTimeMillis < metricTimeSeries.getStartTimeMillis()) {
+      Instant startTime = Instant.now();
       Iterator<ResultSetChunk> iterator =
           queryRequestHandler.executeQuery(
               requestHeaders, metricSelection, tenantId, startTimeMillis, endTimeMillis);
+
+      // record time if longer query is fired
+      if (metricTimeSeries != null && startTimeMillis < metricTimeSeries.getStartTimeMillis()) {
+        recordQueryTime(startTime, tenantId);
+      }
+
       List<Pair<Long, Double>> dataList = convertToTimeSeries(iterator);
       metricCache.put(
           cacheKey,
@@ -129,6 +141,14 @@ class MetricCache {
                 PlatformMetricsRegistry.registerGauge(
                     CACHE_SIZE_GAUGE, Map.of("tenantId", k), emptyCacheSize))
         .set(Math.toIntExact(metricCache.size()));
+  }
+
+  private void recordQueryTime(Instant startTime, String tenantId) {
+    longQueryTimer
+        .computeIfAbsent(
+            tenantId,
+            k -> PlatformMetricsRegistry.registerTimer(LONG_QUERY_TIMER, Map.of("tenantId", k)))
+        .record(Duration.between(startTime, Instant.now()).toMillis(), TimeUnit.MILLISECONDS);
   }
 
   @Getter
