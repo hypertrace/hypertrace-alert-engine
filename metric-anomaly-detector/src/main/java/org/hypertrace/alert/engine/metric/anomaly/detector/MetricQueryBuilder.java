@@ -268,11 +268,11 @@ public class MetricQueryBuilder {
       case METRIC_AGGREGATION_FUNCTION_TYPE_AVG:
         return FunctionType.AVG.name();
       case METRIC_AGGREGATION_FUNCTION_TYPE_P50:
-        return FunctionType.PERCENTILE.name() + "50";
+        return computePercentileFunctionName(FunctionType.PERCENTILE.name(), 50);
       case METRIC_AGGREGATION_FUNCTION_TYPE_P95:
-        return FunctionType.PERCENTILE.name() + "95";
+        return computePercentileFunctionName(FunctionType.PERCENTILE.name(), 95);
       case METRIC_AGGREGATION_FUNCTION_TYPE_P99:
-        return FunctionType.PERCENTILE.name() + "99";
+        return computePercentileFunctionName(FunctionType.PERCENTILE.name(), 99);
       default:
         throw new IllegalStateException(
             "Exception converting metricAggregationFunction: " + metricAggregationFunction);
@@ -319,5 +319,9 @@ public class MetricQueryBuilder {
               tenantId,
               attributeScope));
     }
+  }
+
+  private static String computePercentileFunctionName(String functionName, int percentile) {
+    return functionName + String.valueOf(percentile);
   }
 }
