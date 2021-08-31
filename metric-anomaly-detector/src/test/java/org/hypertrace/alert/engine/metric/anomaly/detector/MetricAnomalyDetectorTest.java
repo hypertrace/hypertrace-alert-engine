@@ -42,7 +42,7 @@ class MetricAnomalyDetectorTest {
         MetricSelection.newBuilder()
             .setMetricAggregationInterval("PT15s")
             .setMetricAggregationFunction(
-                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM)
+                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P50)
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
                 Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
@@ -51,7 +51,7 @@ class MetricAnomalyDetectorTest {
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
         MetricAnomalyEventCondition.newBuilder();
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
-    metricAnomalyEventConditionBuilder.setRuleDuration("PT1M");
+    metricAnomalyEventConditionBuilder.setRuleDuration("PT100M");
     metricAnomalyEventConditionBuilder.addViolationCondition(
         ViolationCondition.newBuilder()
             .setStaticThresholdCondition(
@@ -65,7 +65,7 @@ class MetricAnomalyDetectorTest {
     AlertTask.Builder alertTaskBuilder = AlertTask.newBuilder();
     alertTaskBuilder.setCurrentExecutionTime(System.currentTimeMillis());
     alertTaskBuilder.setLastExecutionTime(
-        System.currentTimeMillis() - Duration.ofMinutes(1).toMillis());
+        System.currentTimeMillis() - Duration.ofMinutes(100).toMillis());
     alertTaskBuilder.setEventConditionId("event-condition-1");
     alertTaskBuilder.setEventConditionType("MetricAnomalyEventCondition");
     alertTaskBuilder.setTenantId("__default");
