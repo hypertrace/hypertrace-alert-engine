@@ -124,13 +124,13 @@ public class AlertRuleEvaluatorTest {
         getTestAlertTask(
             violationCondition,
             timeStamp,
-            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM);
+            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P99);
 
     QueryRequest expectedQueryRequest =
         getExpectedQuery(
             alertTaskBuilder.getLastExecutionTime(),
             alertTaskBuilder.getCurrentExecutionTime(),
-            FunctionType.SUM.name());
+            FunctionType.PERCENTILE.name() + "99");
 
     when(queryServiceClient.executeQuery(
             eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
@@ -185,14 +185,16 @@ public class AlertRuleEvaluatorTest {
         getTestAlertTask(
             violationCondition,
             timeStamp,
-            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM);
+            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P95);
 
     long windowStartTime =
         alertTaskBuilder.getLastExecutionTime() - Duration.ofMinutes(5).toMillis();
 
     QueryRequest expectedQueryRequest =
         getExpectedQuery(
-            windowStartTime, alertTaskBuilder.getCurrentExecutionTime(), FunctionType.SUM.name());
+            windowStartTime,
+            alertTaskBuilder.getCurrentExecutionTime(),
+            FunctionType.PERCENTILE.name() + "95");
 
     when(queryServiceClient.executeQuery(
             eq(expectedQueryRequest), eq(Map.of("x-tenant-id", "__default")), eq(10000)))
