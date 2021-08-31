@@ -2,11 +2,17 @@ package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
 import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
 
+import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
@@ -17,13 +23,16 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOperator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
+import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StaticRuleEvaluator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StaticRuleEvaluator.class);
-
+  private static final ConcurrentMap<String, Timer> staticRuleTimer = new ConcurrentHashMap<>();
+  private static final String STATIC_RULE_TIMER =
+      "hypertrace.metric.anomaly.detector.static.rule.latency";
   private final MetricCache metricCache;
 
   public StaticRuleEvaluator(MetricCache metricCache) {
@@ -33,7 +42,7 @@ public class StaticRuleEvaluator {
   Optional<NotificationEvent> evaluateRule(
       MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask)
       throws IOException {
-
+    Instant startTime = Instant.now();
     StaticThresholdCondition staticThresholdCondition =
         metricAnomalyEventCondition
             .getViolationConditionList()
@@ -60,6 +69,12 @@ public class StaticRuleEvaluator {
         violationCount++;
       }
     }
+
+    staticRuleTimer
+        .computeIfAbsent(
+            alertTask.getTenantId(),
+            k -> PlatformMetricsRegistry.registerTimer(STATIC_RULE_TIMER, Map.of("tenantId", k)))
+        .record(Duration.between(startTime, Instant.now()).toMillis(), TimeUnit.MILLISECONDS);
 
     if (!EvaluatorUtil.isViolation(dataCount, violationCount)) {
       LOGGER.debug("Rule violated. dataCount {}, violationCount {}", dataCount, violationCount);
