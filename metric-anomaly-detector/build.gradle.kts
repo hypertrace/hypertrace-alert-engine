@@ -16,8 +16,8 @@ tasks.test {
 }
 
 dependencies {
-    implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.23")
-    implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
+    implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.28")
+    implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.28")
     implementation("org.apache.commons:commons-lang3:3.10")
     implementation("org.apache.commons:commons-math:2.2")
 
@@ -26,7 +26,7 @@ dependencies {
     implementation("org.hypertrace.core.query.service:query-service-client:0.5.2")
     implementation("org.hypertrace.core.attribute.service:attribute-service-client:0.9.3")
     implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.3.4")
-    implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
+    implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.28")
     implementation("com.typesafe:config:1.4.1")
     implementation("org.hypertrace.gateway.service:gateway-service-api:0.1.59")
     implementation("org.apache.kafka:kafka-clients:2.6.0")

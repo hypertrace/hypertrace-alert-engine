@@ -44,6 +44,7 @@ class MetricCache {
     this.metricCache =
         CacheBuilder.newBuilder()
             .expireAfterAccess(Duration.ofMinutes(CACHE_EXPIRY_MINUTES))
+            .recordStats()
             .build();
   }
 
@@ -58,7 +59,7 @@ class MetricCache {
       String tenantId,
       long startTimeMillis,
       long endTimeMillis) {
-    recordCacheSize(tenantId);
+    PlatformMetricsRegistry.registerCache("metricCache", metricCache, Map.of("tenantId", tenantId));
     long metricDurationMillis = endTimeMillis - startTimeMillis;
     Pair<String, MetricSelection> cacheKey = Pair.of(tenantId, metricSelection);
     MetricTimeSeries metricTimeSeries = metricCache.getIfPresent(cacheKey);
@@ -152,17 +153,6 @@ class MetricCache {
 
   MetricTimeSeries getMetricTimeSeriesRecord(String tenantId, MetricSelection metricSelection) {
     return metricCache.getIfPresent(Pair.of(tenantId, metricSelection));
-  }
-
-  private void recordCacheSize(String tenantId) {
-    AtomicInteger emptyCacheSize = new AtomicInteger(0);
-    cacheSizeGauge
-        .computeIfAbsent(
-            tenantId,
-            k ->
-                PlatformMetricsRegistry.registerGauge(
-                    CACHE_SIZE_GAUGE, Map.of("tenantId", k), emptyCacheSize))
-        .set(Math.toIntExact(metricCache.size()));
   }
 
   private void recordQueryTime(Instant startTime, String tenantId) {
