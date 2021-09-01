@@ -17,10 +17,8 @@ import org.slf4j.LoggerFactory;
 public class AlertRuleEvaluator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AlertRuleEvaluator.class);
-  static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
-
   private static final String METRIC_ANOMALY_EVENT_CONDITION = "MetricAnomalyEventCondition";
-
+  static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
   private final StaticRuleEvaluator staticRuleEvaluator;
   private final BaselineRuleEvaluator baselineRuleEvaluator;
 

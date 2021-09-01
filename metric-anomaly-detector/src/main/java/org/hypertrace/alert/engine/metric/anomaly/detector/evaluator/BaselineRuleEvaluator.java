@@ -2,11 +2,17 @@ package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
 import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
 
+import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math.stat.descriptive.rank.Median;
@@ -18,6 +24,7 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
+import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.hypertrace.gateway.service.v1.baseline.Baseline;
 import org.hypertrace.gateway.service.v1.common.Value;
 import org.hypertrace.gateway.service.v1.common.ValueType;
@@ -27,7 +34,9 @@ import org.slf4j.LoggerFactory;
 public class BaselineRuleEvaluator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BaselineRuleEvaluator.class);
-
+  private static final ConcurrentMap<String, Timer> baselineRuleTimer = new ConcurrentHashMap<>();
+  private static final String BASELINE_RULE_TIMER =
+      "hypertrace.metric.anomaly.detector.baseline.rule.latency";
   private final MetricCache metricCache;
 
   public BaselineRuleEvaluator(MetricCache metricCache) {
@@ -37,6 +46,7 @@ public class BaselineRuleEvaluator {
   Optional<NotificationEvent> evaluateRule(
       MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask)
       throws IOException {
+    Instant startTime = Instant.now();
     BaselineThresholdCondition dynamicThresholdCondition =
         metricAnomalyEventCondition
             .getViolationConditionList()
@@ -88,6 +98,12 @@ public class BaselineRuleEvaluator {
         violationCount++;
       }
     }
+
+    baselineRuleTimer
+        .computeIfAbsent(
+            alertTask.getTenantId(),
+            k -> PlatformMetricsRegistry.registerTimer(BASELINE_RULE_TIMER, Map.of("tenantId", k)))
+        .record(Duration.between(startTime, Instant.now()).toMillis(), TimeUnit.MILLISECONDS);
 
     LOGGER.debug(
         "Rule id {}, DataCount {}, ViolationCount {}",
