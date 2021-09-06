@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
@@ -55,12 +56,12 @@ class AlertTaskTest {
                 "delayInMinutes", "1",
                 "executionWindowInMinutes", 1,
                 "tenant_id", "__default"));
-    AlertTask.Builder alertTaskBuilder =
+    Optional<AlertTask.Builder> alertTaskBuilder =
         new AlertTaskConverter(jobConfig).toAlertTaskBuilder(documents.get(0));
-    assertEquals("MetricAnomalyEventCondition", alertTaskBuilder.getEventConditionType());
-    assertEquals("channel-1", alertTaskBuilder.getChannelId());
+    assertEquals("MetricAnomalyEventCondition", alertTaskBuilder.get().getEventConditionType());
+    assertEquals("channel-1", alertTaskBuilder.get().getChannelId());
     MetricAnomalyEventCondition actual =
-        MetricAnomalyEventCondition.parseFrom(alertTaskBuilder.getEventConditionValue());
+        MetricAnomalyEventCondition.parseFrom(alertTaskBuilder.get().getEventConditionValue());
     assertEquals(prepareMetricAnomalyEventCondition(), actual);
   }
 
