@@ -53,8 +53,7 @@ public class AlertTaskConverter {
   public Optional<AlertTask.Builder> toAlertTaskBuilder(Document document) throws IOException {
     JsonNode rule = OBJECT_MAPPER.readTree(document.toJson());
 
-    boolean isValid = validateRule(rule);
-    if (!isValid) {
+    if (!validateRule(rule)) {
       LOGGER.info("Invalid AlertTask : {}", rule);
       return Optional.empty();
     }
@@ -90,7 +89,10 @@ public class AlertTaskConverter {
     isValid = isValid && checkMinuteMultiple(ruleDuration);
 
     // baseline duration should be in minutes
-    JsonNode violationCondition = rule.get(EVENT_CONDITION).get(VIOLATION_CONDITION).get(0);
+    JsonNode violationCondition =
+        rule.get(EVENT_CONDITION)
+            .get(VIOLATION_CONDITION)
+            .get(0); // todo handle multiple violation conditions
     if (violationCondition.get(BASELINE_THRESHOLD_CONDITION) != null) {
       String baselineDuration =
           violationCondition.get(BASELINE_THRESHOLD_CONDITION).get(BASELINE_DURATION).textValue();
