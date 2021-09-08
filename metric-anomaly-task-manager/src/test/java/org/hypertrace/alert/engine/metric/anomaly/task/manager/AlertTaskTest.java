@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
+import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.LeafFilter;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.LhsExpression;
@@ -21,9 +22,6 @@ import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggreg
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.RhsExpression;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Severity;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperator;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
@@ -37,9 +35,8 @@ import org.junit.jupiter.api.Test;
 class AlertTaskTest {
 
   @Test
-  void testAlertTask() throws Exception {
-    URL url = Thread.currentThread().getContextClassLoader().getResource("rules.json");
-
+  void testValidAlertTask() throws Exception {
+    URL url = Thread.currentThread().getContextClassLoader().getResource("valid_alert_rule.json");
     File file = Paths.get(url.toURI()).toFile();
     String absolutePath = file.getAbsolutePath();
 
@@ -96,12 +93,8 @@ class AlertTaskTest {
     builder.setRuleDuration("PT5M");
     builder.addViolationCondition(
         ViolationCondition.newBuilder()
-            .setStaticThresholdCondition(
-                StaticThresholdCondition.newBuilder()
-                    .setOperator(StaticThresholdOperator.STATIC_THRESHOLD_OPERATOR_GT)
-                    .setValue(15)
-                    .setSeverity(Severity.SEVERITY_CRITICAL)
-                    .build())
+            .setBaselineThresholdCondition(
+                BaselineThresholdCondition.newBuilder().setBaselineDuration("PT5M").build())
             .build());
     return builder.build();
   }
