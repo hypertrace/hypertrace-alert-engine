@@ -1,0 +1,40 @@
+[
+  {
+    "id": "notification_rule_1",
+    "ruleName": "high_avg_latency",
+    "description": "Alert for high avg latency of payment service",
+    "eventConditionId": "event_condition_1",
+    "eventConditionType": "MetricAnomalyEventCondition",
+    "channelId": "channel-1",
+    "eventCondition" :  {
+      "metricSelection": {
+        "metricAttribute": {
+          "key": "duration",
+          "scope": "SERVICE"
+        },
+        "metricAggregationFunction": "METRIC_AGGREGATION_FUNCTION_TYPE_AVG",
+        "metricAggregationInterval": "PT20S",
+        "filter": {
+          "leafFilter": {
+            "lhsExpression": {
+              "attribute": {
+                "key": "id",
+                "scope": "SERVICE"
+              }
+            },
+            "valueOperator": "VALUE_OPERATOR_EQ",
+            "rhsExpression": {
+              "stringValue": "1234"
+            }
+          }
+        }
+      },
+      "ruleDuration": "PT5M",
+      "violationCondition": [{
+        "baselineThresholdCondition": {
+          "baselineDuration": "PT5M"
+        }
+      }]
+    }
+  }
+]

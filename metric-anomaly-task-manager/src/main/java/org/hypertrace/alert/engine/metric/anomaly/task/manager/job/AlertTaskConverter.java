@@ -15,11 +15,15 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.Optional;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.core.documentstore.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AlertTaskConverter {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AlertTaskConverter.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Parser JSON_PARSER = JsonFormat.parser().ignoringUnknownFields();
 
@@ -30,7 +34,12 @@ public class AlertTaskConverter {
   static final String EXECUTION_WINDOW_IN_MINUTES_CONFIG = "executionWindowInMinutes";
   static final String TENANT_ID_CONFIG = "tenant_id";
   static final String CHANNEL_ID = "channelId";
-
+  static final String RULE_DURATION = "ruleDuration";
+  static final String VIOLATION_CONDITION = "violationCondition";
+  static final String BASELINE_THRESHOLD_CONDITION = "baselineThresholdCondition";
+  static final String BASELINE_DURATION = "baselineDuration";
+  static final String METRIC_SELECTION = "metricSelection";
+  static final String METRIC_AGGREGATION_INTERVAL = "metricAggregationInterval";
   static final String DEFAULT_TENANT_ID = "__default";
   static final int DEFAULT_DELAY_IN_MINUTES = 1;
   static final int DEFAULT_EXECUTION_WINDOW_IN_MINUTES = 1;
@@ -41,8 +50,15 @@ public class AlertTaskConverter {
     this.jobConfig = jobConfig;
   }
 
-  public AlertTask.Builder toAlertTaskBuilder(Document document) throws IOException {
+  public Optional<AlertTask.Builder> toAlertTaskBuilder(Document document) throws IOException {
     JsonNode rule = OBJECT_MAPPER.readTree(document.toJson());
+
+    if (!validateRule(rule)) {
+      LOGGER.info(
+          "The aggregation interval should be one of 15/30/60s. Baseline and rule duration should be in minutes. Skipping Invalid alerting rule from evaluation as {} is not meeting the criteria",
+          rule);
+      return Optional.empty();
+    }
 
     AlertTask.Builder builder = AlertTask.newBuilder();
 
@@ -63,7 +79,54 @@ public class AlertTaskConverter {
     builder.setEventConditionType(rule.get(EVENT_CONDITION_TYPE).textValue());
     builder.setEventConditionValue(eventConditionValueAsBytes);
     builder.setChannelId(rule.get(CHANNEL_ID).asText());
-    return builder;
+
+    return Optional.of(builder);
+  }
+
+  private static boolean validateRule(JsonNode rule) {
+    boolean isValid = true;
+
+    // rule duration should be in minutes
+    String ruleDuration = rule.get(EVENT_CONDITION).get(RULE_DURATION).textValue();
+    isValid = isValid && checkMinuteMultiple(ruleDuration);
+
+    // baseline duration should be in minutes
+    JsonNode violationCondition =
+        rule.get(EVENT_CONDITION)
+            .get(VIOLATION_CONDITION)
+            .get(0); // todo handle multiple violation conditions
+    if (violationCondition.get(BASELINE_THRESHOLD_CONDITION) != null) {
+      String baselineDuration =
+          violationCondition.get(BASELINE_THRESHOLD_CONDITION).get(BASELINE_DURATION).textValue();
+      isValid = isValid && checkMinuteMultiple(baselineDuration);
+    }
+
+    // aggregation interval should be one of 15s/30s/60s
+    String aggregationInterval =
+        rule.get(EVENT_CONDITION)
+            .get(METRIC_SELECTION)
+            .get(METRIC_AGGREGATION_INTERVAL)
+            .textValue();
+    isValid = isValid && validateAggregationInterval(aggregationInterval);
+
+    return isValid;
+  }
+
+  private static boolean checkMinuteMultiple(String duration) {
+    long durationInSec = isoDurationToSeconds(duration);
+    return durationInSec % 60 == 0;
+  }
+
+  private static long isoDurationToSeconds(String duration) {
+    Duration d = java.time.Duration.parse(duration);
+    return d.get(ChronoUnit.SECONDS);
+  }
+
+  private static boolean validateAggregationInterval(String aggregationInterval) {
+    long aggregationIntervalInSec = isoDurationToSeconds(aggregationInterval);
+    return aggregationIntervalInSec == 15
+        || aggregationIntervalInSec == 30
+        || aggregationIntervalInSec == 60;
   }
 
   private static ByteBuffer getEventConditionBytes(String conditionType, JsonNode jsonNode)

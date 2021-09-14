@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
@@ -60,8 +61,9 @@ public class MetricAnomalyAlertTaskJob implements Job {
       documents.forEach(
           document -> {
             try {
-              AlertTask.Builder alertTaskBuilder = alertTaskConverter.toAlertTaskBuilder(document);
-              alertTasks.add(alertTaskBuilder);
+              Optional<AlertTask.Builder> alertTaskBuilder =
+                  alertTaskConverter.toAlertTaskBuilder(document);
+              alertTaskBuilder.ifPresent(alertTasks::add);
             } catch (Exception e) {
               LOGGER.error(
                   "Failed to convert alert task for document:{} with exception:{}",
