@@ -54,7 +54,9 @@ public class AlertTaskConverter {
     JsonNode rule = OBJECT_MAPPER.readTree(document.toJson());
 
     if (!validateRule(rule)) {
-      LOGGER.info("Invalid AlertTask : {}", rule);
+      LOGGER.info(
+          "The aggregation interval should be one of 15/30/60s. Baseline and rule duration should be in minutes. Skipping Invalid alerting rule from evaluation as {} is not meeting the criteria",
+          rule);
       return Optional.empty();
     }
 
