@@ -1,6 +1,7 @@
 package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 
 import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
+import static org.hypertrace.gateway.service.baseline.lib.BaselineCalculator.getBaseline;
 
 import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
@@ -13,9 +14,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
-import org.apache.commons.math.stat.descriptive.rank.Median;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
 import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
@@ -86,7 +86,10 @@ public class BaselineRuleEvaluator {
         metricValuesForEvaluation);
 
     Baseline baseline =
-        getBaseline(metricValuesForBaseline.stream().mapToDouble(Double::doubleValue).toArray());
+        getBaseline(
+            metricValuesForBaseline.stream()
+                .map(x -> Value.newBuilder().setValueType(ValueType.DOUBLE).setDouble(x).build())
+                .collect(Collectors.toList()));
 
     LOGGER.debug("Rule id {}, Baseline value {}", alertTask.getEventConditionId(), baseline);
 
@@ -123,25 +126,6 @@ public class BaselineRuleEvaluator {
         baseline.getLowerBound().getDouble(),
         baseline.getUpperBound().getDouble(),
         metricAnomalyEventCondition.getRuleDuration());
-  }
-
-  private static Baseline getBaseline(double[] metricValueArray) {
-    Median median = new Median();
-    StandardDeviation standardDeviation = new StandardDeviation();
-    double medianValue = median.evaluate(metricValueArray);
-    double sd = standardDeviation.evaluate(metricValueArray);
-    double lowerBound = Math.max(0, medianValue - (2 * sd));
-    double upperBound = medianValue + (2 * sd);
-    Baseline baseline =
-        Baseline.newBuilder()
-            .setLowerBound(
-                Value.newBuilder().setValueType(ValueType.DOUBLE).setDouble(lowerBound).build())
-            .setUpperBound(
-                Value.newBuilder().setValueType(ValueType.DOUBLE).setDouble(upperBound).build())
-            .setValue(
-                Value.newBuilder().setValueType(ValueType.DOUBLE).setDouble(medianValue).build())
-            .build();
-    return baseline;
   }
 
   private Optional<NotificationEvent> getNotificationEvent(
