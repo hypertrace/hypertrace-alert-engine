@@ -124,8 +124,7 @@ public class AlertRuleEvaluatorTest {
         getTestAlertTask(
             violationCondition,
             timeStamp,
-            // todo fix this MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P99);
-            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM);
+            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P99);
 
     QueryRequest expectedQueryRequest =
         getExpectedQuery(
@@ -186,8 +185,7 @@ public class AlertRuleEvaluatorTest {
         getTestAlertTask(
             violationCondition,
             timeStamp,
-            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE);
-    // todo fix this MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P95);
+            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P95);
 
     long windowStartTime =
         alertTaskBuilder.getLastExecutionTime() - Duration.ofMinutes(5).toMillis();

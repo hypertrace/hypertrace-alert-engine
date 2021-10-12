@@ -42,8 +42,7 @@ class MetricAnomalyDetectorTest {
         MetricSelection.newBuilder()
             .setMetricAggregationInterval("PT15s")
             .setMetricAggregationFunction(
-                // todo fix this MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P50)
-                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE)
+                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P50)
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
                 Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
