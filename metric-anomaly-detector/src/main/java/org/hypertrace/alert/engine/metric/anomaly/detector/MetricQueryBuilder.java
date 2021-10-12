@@ -13,16 +13,16 @@ import java.util.StringJoiner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.CompositeFilter;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.LeafFilter;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.LhsExpression;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.LogicalOperator;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.RhsExpression;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperator;
+import org.hypertrace.alerting.config.service.v1.Attribute;
+import org.hypertrace.alerting.config.service.v1.CompositeFilter;
+import org.hypertrace.alerting.config.service.v1.Filter;
+import org.hypertrace.alerting.config.service.v1.LeafFilter;
+import org.hypertrace.alerting.config.service.v1.LhsExpression;
+import org.hypertrace.alerting.config.service.v1.LogicalOperator;
+import org.hypertrace.alerting.config.service.v1.MetricAggregationFunction;
+import org.hypertrace.alerting.config.service.v1.MetricSelection;
+import org.hypertrace.alerting.config.service.v1.RhsExpression;
+import org.hypertrace.alerting.config.service.v1.ValueOperator;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadata;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadataFilter;
@@ -267,12 +267,14 @@ public class MetricQueryBuilder {
         return FunctionType.SUM.name();
       case METRIC_AGGREGATION_FUNCTION_TYPE_AVG:
         return FunctionType.AVG.name();
-      case METRIC_AGGREGATION_FUNCTION_TYPE_P50:
-        return computePercentileFunctionName(FunctionType.PERCENTILE.name(), 50);
-      case METRIC_AGGREGATION_FUNCTION_TYPE_P95:
-        return computePercentileFunctionName(FunctionType.PERCENTILE.name(), 95);
-      case METRIC_AGGREGATION_FUNCTION_TYPE_P99:
-        return computePercentileFunctionName(FunctionType.PERCENTILE.name(), 99);
+        /**
+         * todo raise a pr case METRIC_AGGREGATION_FUNCTION_TYPE_P50: return
+         * computePercentileFunctionName(FunctionType.PERCENTILE.name(), 50); case
+         * METRIC_AGGREGATION_FUNCTION_TYPE_P95: return
+         * computePercentileFunctionName(FunctionType.PERCENTILE.name(), 95); case
+         * METRIC_AGGREGATION_FUNCTION_TYPE_P99: return
+         * computePercentileFunctionName(FunctionType.PERCENTILE.name(), 99);
+         */
       default:
         throw new IllegalStateException(
             "Exception converting metricAggregationFunction: " + metricAggregationFunction);
