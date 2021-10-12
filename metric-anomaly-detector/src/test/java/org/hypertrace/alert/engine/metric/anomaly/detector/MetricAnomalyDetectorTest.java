@@ -9,21 +9,21 @@ import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.LeafFilter;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.LhsExpression;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.RhsExpression;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Severity;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperator;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
+import org.hypertrace.alerting.config.service.v1.Attribute;
+import org.hypertrace.alerting.config.service.v1.BaselineThresholdCondition;
+import org.hypertrace.alerting.config.service.v1.Filter;
+import org.hypertrace.alerting.config.service.v1.LeafFilter;
+import org.hypertrace.alerting.config.service.v1.LhsExpression;
+import org.hypertrace.alerting.config.service.v1.MetricAggregationFunction;
+import org.hypertrace.alerting.config.service.v1.MetricAnomalyEventCondition;
+import org.hypertrace.alerting.config.service.v1.MetricSelection;
+import org.hypertrace.alerting.config.service.v1.RhsExpression;
+import org.hypertrace.alerting.config.service.v1.Severity;
+import org.hypertrace.alerting.config.service.v1.StaticThresholdCondition;
+import org.hypertrace.alerting.config.service.v1.StaticThresholdOperator;
+import org.hypertrace.alerting.config.service.v1.ValueOperator;
+import org.hypertrace.alerting.config.service.v1.ViolationCondition;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +42,8 @@ class MetricAnomalyDetectorTest {
         MetricSelection.newBuilder()
             .setMetricAggregationInterval("PT15s")
             .setMetricAggregationFunction(
-                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P50)
+                // todo fix this MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P50)
+                MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE)
             .setFilter(Filter.newBuilder().setLeafFilter(leafFilter).build())
             .setMetricAttribute(
                 Attribute.newBuilder().setKey("duration").setScope("SERVICE").build())
@@ -51,7 +52,7 @@ class MetricAnomalyDetectorTest {
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
         MetricAnomalyEventCondition.newBuilder();
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
-    metricAnomalyEventConditionBuilder.setRuleDuration("PT100M");
+    metricAnomalyEventConditionBuilder.setEvaluationWindowDuration("PT100M");
     metricAnomalyEventConditionBuilder.addViolationCondition(
         ViolationCondition.newBuilder()
             .setStaticThresholdCondition(
@@ -121,7 +122,7 @@ class MetricAnomalyDetectorTest {
 
     MetricAnomalyEventCondition.Builder metricAnomalyEventConditionBuilder =
         MetricAnomalyEventCondition.newBuilder();
-    metricAnomalyEventConditionBuilder.setRuleDuration("PT1M");
+    metricAnomalyEventConditionBuilder.setEvaluationWindowDuration("PT1M");
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
     metricAnomalyEventConditionBuilder.addViolationCondition(
         ViolationCondition.newBuilder()

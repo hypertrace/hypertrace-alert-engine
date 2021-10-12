@@ -17,24 +17,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Attribute;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Filter;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.LeafFilter;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.LhsExpression;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricSelection;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.RhsExpression;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.Severity;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.ValueOperator;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.ViolationCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder;
+import org.hypertrace.alerting.config.service.v1.Attribute;
+import org.hypertrace.alerting.config.service.v1.BaselineThresholdCondition;
+import org.hypertrace.alerting.config.service.v1.Filter;
+import org.hypertrace.alerting.config.service.v1.LeafFilter;
+import org.hypertrace.alerting.config.service.v1.LhsExpression;
+import org.hypertrace.alerting.config.service.v1.MetricAggregationFunction;
+import org.hypertrace.alerting.config.service.v1.MetricAnomalyEventCondition;
+import org.hypertrace.alerting.config.service.v1.MetricSelection;
+import org.hypertrace.alerting.config.service.v1.RhsExpression;
+import org.hypertrace.alerting.config.service.v1.Severity;
+import org.hypertrace.alerting.config.service.v1.StaticThresholdCondition;
+import org.hypertrace.alerting.config.service.v1.StaticThresholdOperator;
+import org.hypertrace.alerting.config.service.v1.ValueOperator;
+import org.hypertrace.alerting.config.service.v1.ViolationCondition;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadata;
 import org.hypertrace.core.attribute.service.v1.AttributeMetadataFilter;
@@ -124,7 +124,8 @@ public class AlertRuleEvaluatorTest {
         getTestAlertTask(
             violationCondition,
             timeStamp,
-            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P99);
+            // todo fix this MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P99);
+            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_SUM);
 
     QueryRequest expectedQueryRequest =
         getExpectedQuery(
@@ -185,7 +186,8 @@ public class AlertRuleEvaluatorTest {
         getTestAlertTask(
             violationCondition,
             timeStamp,
-            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P95);
+            MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_AVGRATE);
+    // todo fix this MetricAggregationFunction.METRIC_AGGREGATION_FUNCTION_TYPE_P95);
 
     long windowStartTime =
         alertTaskBuilder.getLastExecutionTime() - Duration.ofMinutes(5).toMillis();
@@ -352,8 +354,7 @@ public class AlertRuleEvaluatorTest {
   private AlertTask.Builder getTestAlertTask(
       ViolationCondition violationCondition,
       long timeStamp,
-      org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAggregationFunction
-          metricAggregationFunction) {
+      MetricAggregationFunction metricAggregationFunction) {
     // create mock alertTask
     LhsExpression lhsExpression = createLhsExpression("name", AttributeScope.SERVICE.name());
     RhsExpression rhsExpression = createRhsExpression("customer");
@@ -373,7 +374,7 @@ public class AlertRuleEvaluatorTest {
         MetricAnomalyEventCondition.newBuilder();
     metricAnomalyEventConditionBuilder.setMetricSelection(metricSelection);
     metricAnomalyEventConditionBuilder.addViolationCondition(violationCondition);
-    metricAnomalyEventConditionBuilder.setRuleDuration("PT1M");
+    metricAnomalyEventConditionBuilder.setEvaluationWindowDuration("PT1M");
 
     AlertTask.Builder alertTaskBuilder = AlertTask.newBuilder();
     alertTaskBuilder.setCurrentExecutionTime(timeStamp);
