@@ -29,7 +29,7 @@
           }
         }
       },
-      "ruleDuration": "PT1M",
+      "evaluationWindowDuration": "PT1M",
       "violationCondition": [{
         "baselineThresholdCondition": {
           "baselineDuration": "PT5M"
