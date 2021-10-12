@@ -178,6 +178,7 @@ public class HypertraceAlertEngineTest {
     pinotServiceManager.stop();
     kafkaZk.stop();
     network.close();
+    IntegrationTestServerUtil.shutdownServices();
   }
 
   @Test
