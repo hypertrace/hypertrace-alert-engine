@@ -16,8 +16,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Optional;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
+import org.hypertrace.alerting.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.core.documentstore.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,9 @@ public class AlertTaskConverter {
 
     if (!validateRule(rule)) {
       LOGGER.info(
-          "The aggregation interval should be one of 15/30/60s. Baseline and rule duration should be in minutes. Skipping Invalid alerting rule from evaluation as {} is not meeting the criteria",
+          "The aggregation interval should be one of 15/30/60s. "
+              + "Baseline and rule duration should be in minutes."
+              + " Skipping Invalid alerting rule from evaluation as {} is not meeting the criteria",
           rule);
       return Optional.empty();
     }
