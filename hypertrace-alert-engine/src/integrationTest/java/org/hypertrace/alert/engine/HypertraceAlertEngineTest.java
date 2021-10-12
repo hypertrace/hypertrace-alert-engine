@@ -258,11 +258,6 @@ public class HypertraceAlertEngineTest {
     mockWebServer.close();
   }
 
-  @AfterEach
-  public void shutdownService() {
-    IntegrationTestServerUtil.shutdownServices();
-  }
-
   private static boolean bootstrapConfig() throws Exception {
     GenericContainer<?> bootstrapper =
         new GenericContainer<>(DockerImageName.parse("hypertrace/config-bootstrapper:main"))
