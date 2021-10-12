@@ -208,7 +208,7 @@ public class HypertraceAlertEngineTest {
             });
     int retryCount = 0;
     while (!(mockWebServer.getRequestCount() > 0) && retryCount++ < 10) {
-      Thread.sleep(Duration.ofSeconds(30).toMillis());
+      Thread.sleep(Duration.ofSeconds(20).toMillis());
     }
     Assertions.assertTrue(retryCount < 10);
     String notificationBody1 =
@@ -253,7 +253,7 @@ public class HypertraceAlertEngineTest {
     // no notification sent
     while (retryCount++ < 5) {
       Assertions.assertEquals(mockWebServer.getRequestCount(), 0);
-      Thread.sleep(Duration.ofSeconds(30).toMillis());
+      Thread.sleep(Duration.ofSeconds(20).toMillis());
     }
     mockWebServer.close();
   }
