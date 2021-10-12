@@ -48,7 +48,7 @@ class NotificationEventProcessorTest {
                         .setOperator(StaticThresholdOperator.STATIC_THRESHOLD_OPERATOR_LT)
                         .setViolationCount(2)
                         .setDataCount(2)
-                        .setRuleDuration("PT5M")
+                        .setEvaluationWindowDuration("PT5M")
                         .build())
                 .build());
 
@@ -82,7 +82,7 @@ class NotificationEventProcessorTest {
                         .setMetricValues(List.of(123.0, 30.0, 150.0))
                         .setViolationCount(3)
                         .setDataCount(3)
-                        .setRuleDuration("PT5M")
+                        .setEvaluationWindowDuration("PT5M")
                         .build())
                 .build());
 

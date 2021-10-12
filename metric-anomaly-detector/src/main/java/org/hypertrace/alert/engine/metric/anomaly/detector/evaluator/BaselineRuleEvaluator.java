@@ -136,7 +136,7 @@ public class BaselineRuleEvaluator {
       List<Double> metricValues,
       double baselineLowerBound,
       double baselineUpperBound,
-      String ruleDuration)
+      String evaluationWindowDuration)
       throws IOException {
 
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
@@ -150,7 +150,7 @@ public class BaselineRuleEvaluator {
                     .setViolationCount(violationCount)
                     .setBaselineLowerBound(baselineLowerBound)
                     .setBaselineUpperBound(baselineUpperBound)
-                    .setRuleDuration(ruleDuration)
+                    .setEvaluationWindowDuration(evaluationWindowDuration)
                     .build())
             .build());
 

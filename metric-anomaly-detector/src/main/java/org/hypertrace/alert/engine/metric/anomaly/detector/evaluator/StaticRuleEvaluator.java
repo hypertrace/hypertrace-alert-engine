@@ -146,7 +146,7 @@ public class StaticRuleEvaluator {
       StaticThresholdOperator operator,
       List<Double> metricValues,
       double staticThreshold,
-      String ruleDuration)
+      String evaluationWindowDuration)
       throws IOException {
 
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
@@ -160,7 +160,7 @@ public class StaticRuleEvaluator {
                     .setDataCount(dataCount)
                     .setViolationCount(violationCount)
                     .setOperator(operator)
-                    .setRuleDuration(ruleDuration)
+                    .setEvaluationWindowDuration(evaluationWindowDuration)
                     .build())
             .build());
 

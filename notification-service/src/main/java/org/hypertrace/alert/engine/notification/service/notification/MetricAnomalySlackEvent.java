@@ -92,7 +92,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
         violationSummary.getDataCount(),
         getStringFromOperator(violationSummary.getOperator()),
         violationSummary.getStaticThreshold(),
-        violationSummary.getRuleDuration());
+        violationSummary.getEvaluationWindowDuration());
   }
 
   private static String getMessageStringForDynamicRule(
@@ -103,7 +103,7 @@ public class MetricAnomalySlackEvent implements SlackMessage {
         violationSummary.getDataCount(),
         violationSummary.getBaselineLowerBound(),
         violationSummary.getBaselineUpperBound(),
-        violationSummary.getRuleDuration());
+        violationSummary.getEvaluationWindowDuration());
   }
 
   private static String getStringFromOperator(StaticThresholdOperator operator) {
