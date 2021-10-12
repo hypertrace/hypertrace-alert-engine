@@ -19,6 +19,10 @@ dependencies {
     implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
     implementation("org.apache.kafka:kafka-clients:2.6.0")
     implementation("org.hypertrace.core.documentstore:document-store:0.5.7")
+    implementation("org.hypertrace.config.service:config-service-api:0.1.11")
+    implementation("org.hypertrace.config.service:alerting-config-service-api:0.1.11")
+    implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.5.2")
+    implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.5.2")
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")
