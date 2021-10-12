@@ -48,6 +48,7 @@ import org.hypertrace.core.serviceframework.IntegrationTestServerUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,6 +224,7 @@ public class HypertraceAlertEngineTest {
   }
 
   @Test
+  @Disabled
   public void testDynamicThresholdNotificationSent() throws Exception {
     LOG.info("Starting testDynamicThresholdNotificationSent");
     MockWebServer mockWebServer = new MockWebServer();
