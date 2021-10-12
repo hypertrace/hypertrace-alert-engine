@@ -34,7 +34,7 @@ public class AlertTaskConverter {
   static final String EXECUTION_WINDOW_IN_MINUTES_CONFIG = "executionWindowInMinutes";
   static final String TENANT_ID_CONFIG = "tenant_id";
   static final String CHANNEL_ID = "channelId";
-  static final String RULE_DURATION = "ruleDuration";
+  static final String EVALUATION_WINDOW_DURATION = "evaluationWindowDuration";
   static final String VIOLATION_CONDITION = "violationCondition";
   static final String BASELINE_THRESHOLD_CONDITION = "baselineThresholdCondition";
   static final String BASELINE_DURATION = "baselineDuration";
@@ -89,7 +89,7 @@ public class AlertTaskConverter {
     boolean isValid = true;
 
     // rule duration should be in minutes
-    String ruleDuration = rule.get(EVENT_CONDITION).get(RULE_DURATION).textValue();
+    String ruleDuration = rule.get(EVENT_CONDITION).get(EVALUATION_WINDOW_DURATION).textValue();
     isValid = isValid && checkMinuteMultiple(ruleDuration);
 
     // baseline duration should be in minutes
