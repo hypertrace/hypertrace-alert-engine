@@ -16,8 +16,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Optional;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
+import org.hypertrace.alerting.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.core.documentstore.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class AlertTaskConverter {
   static final String EXECUTION_WINDOW_IN_MINUTES_CONFIG = "executionWindowInMinutes";
   static final String TENANT_ID_CONFIG = "tenant_id";
   static final String CHANNEL_ID = "channelId";
-  static final String RULE_DURATION = "ruleDuration";
+  static final String EVALUATION_WINDOW_DURATION = "evaluationWindowDuration";
   static final String VIOLATION_CONDITION = "violationCondition";
   static final String BASELINE_THRESHOLD_CONDITION = "baselineThresholdCondition";
   static final String BASELINE_DURATION = "baselineDuration";
@@ -55,7 +55,9 @@ public class AlertTaskConverter {
 
     if (!validateRule(rule)) {
       LOGGER.info(
-          "The aggregation interval should be one of 15/30/60s. Baseline and rule duration should be in minutes. Skipping Invalid alerting rule from evaluation as {} is not meeting the criteria",
+          "The aggregation interval should be one of 15/30/60s. "
+              + "Baseline and rule duration should be in minutes."
+              + " Skipping Invalid alerting rule from evaluation as {} is not meeting the criteria",
           rule);
       return Optional.empty();
     }
@@ -87,7 +89,7 @@ public class AlertTaskConverter {
     boolean isValid = true;
 
     // rule duration should be in minutes
-    String ruleDuration = rule.get(EVENT_CONDITION).get(RULE_DURATION).textValue();
+    String ruleDuration = rule.get(EVENT_CONDITION).get(EVALUATION_WINDOW_DURATION).textValue();
     isValid = isValid && checkMinuteMultiple(ruleDuration);
 
     // baseline duration should be in minutes

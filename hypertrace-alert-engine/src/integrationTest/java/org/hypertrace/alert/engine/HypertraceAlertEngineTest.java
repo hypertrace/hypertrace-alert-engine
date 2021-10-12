@@ -46,6 +46,7 @@ import org.hypertrace.core.datamodel.StructuredTrace;
 import org.hypertrace.core.kafkastreams.framework.serdes.AvroSerde;
 import org.hypertrace.core.serviceframework.IntegrationTestServerUtil;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -255,6 +256,11 @@ public class HypertraceAlertEngineTest {
       Thread.sleep(Duration.ofSeconds(20).toMillis());
     }
     mockWebServer.close();
+  }
+
+  @AfterEach
+  public void stopService() {
+    IntegrationTestServerUtil.shutdownServices();
   }
 
   private static boolean bootstrapConfig() throws Exception {

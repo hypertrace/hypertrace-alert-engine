@@ -14,7 +14,7 @@ protocol MetricAnomalyNotificationEventProtocol {
     array<double> metric_values;
     double static_threshold;
     StaticThresholdOperator operator;
-    string rule_duration;
+    string evaluation_window_duration;
   }
 
   record BaselineRuleViolationSummary {
@@ -23,7 +23,7 @@ protocol MetricAnomalyNotificationEventProtocol {
     array<double> metric_values;
     double baseline_lower_bound;
     double baseline_upper_bound;
-    string rule_duration;
+    string evaluation_window_duration;
   }
 
   record ViolationSummary {

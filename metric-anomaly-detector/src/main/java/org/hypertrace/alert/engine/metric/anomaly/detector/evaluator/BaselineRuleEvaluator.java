@@ -16,14 +16,14 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.BaselineThresholdCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
+import org.hypertrace.alerting.config.service.v1.BaselineThresholdCondition;
+import org.hypertrace.alerting.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.hypertrace.gateway.service.v1.baseline.Baseline;
 import org.hypertrace.gateway.service.v1.common.Value;
@@ -57,7 +57,8 @@ public class BaselineRuleEvaluator {
         java.time.Duration.parse(dynamicThresholdCondition.getBaselineDuration()).toMillis();
     long ruleEvaluationStartTime =
         alertTask.getCurrentExecutionTime()
-            - java.time.Duration.parse(metricAnomalyEventCondition.getRuleDuration()).toMillis();
+            - java.time.Duration.parse(metricAnomalyEventCondition.getEvaluationWindowDuration())
+                .toMillis();
 
     // this query will fetch metric data, which will used for baseline calculation and evaluation
     List<Pair<Long, Double>> dataList =
@@ -125,7 +126,7 @@ public class BaselineRuleEvaluator {
         metricValuesForEvaluation,
         baseline.getLowerBound().getDouble(),
         baseline.getUpperBound().getDouble(),
-        metricAnomalyEventCondition.getRuleDuration());
+        metricAnomalyEventCondition.getEvaluationWindowDuration());
   }
 
   private Optional<NotificationEvent> getNotificationEvent(
@@ -135,7 +136,7 @@ public class BaselineRuleEvaluator {
       List<Double> metricValues,
       double baselineLowerBound,
       double baselineUpperBound,
-      String ruleDuration)
+      String evaluationWindowDuration)
       throws IOException {
 
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
@@ -149,7 +150,7 @@ public class BaselineRuleEvaluator {
                     .setViolationCount(violationCount)
                     .setBaselineLowerBound(baselineLowerBound)
                     .setBaselineUpperBound(baselineUpperBound)
-                    .setRuleDuration(ruleDuration)
+                    .setEvaluationWindowDuration(evaluationWindowDuration)
                     .build())
             .build());
 

@@ -14,8 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.MetricAnomalyEventCondition;
-import org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdCondition;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
@@ -23,6 +21,8 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOperator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
+import org.hypertrace.alerting.config.service.v1.MetricAnomalyEventCondition;
+import org.hypertrace.alerting.config.service.v1.StaticThresholdCondition;
 import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,8 @@ public class StaticRuleEvaluator {
             metricAnomalyEventCondition.getMetricSelection(),
             alertTask.getTenantId(),
             alertTask.getCurrentExecutionTime()
-                - java.time.Duration.parse(metricAnomalyEventCondition.getRuleDuration())
+                - java.time.Duration.parse(
+                        metricAnomalyEventCondition.getEvaluationWindowDuration())
                     .toMillis(),
             alertTask.getCurrentExecutionTime());
 
@@ -90,7 +91,7 @@ public class StaticRuleEvaluator {
         staticThresholdOperatorToOperatorConvertor(staticThresholdCondition.getOperator()),
         metricValues,
         getConditionRhs(staticThresholdCondition),
-        metricAnomalyEventCondition.getRuleDuration());
+        metricAnomalyEventCondition.getEvaluationWindowDuration());
   }
 
   boolean compareThreshold(double lhs, StaticThresholdCondition staticThresholdCondition) {
@@ -103,7 +104,7 @@ public class StaticRuleEvaluator {
   }
 
   private boolean evalOperator(
-      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator operator,
+      org.hypertrace.alerting.config.service.v1.StaticThresholdOperator operator,
       double lhs,
       double rhs) {
     switch (operator) {
@@ -122,8 +123,7 @@ public class StaticRuleEvaluator {
   }
 
   private static StaticThresholdOperator staticThresholdOperatorToOperatorConvertor(
-      org.hypertrace.alert.engine.eventcondition.config.service.v1.StaticThresholdOperator
-          operator) {
+      org.hypertrace.alerting.config.service.v1.StaticThresholdOperator operator) {
     switch (operator) {
       case STATIC_THRESHOLD_OPERATOR_GT:
         return StaticThresholdOperator.STATIC_THRESHOLD_OPERATOR_GT;
@@ -146,7 +146,7 @@ public class StaticRuleEvaluator {
       StaticThresholdOperator operator,
       List<Double> metricValues,
       double staticThreshold,
-      String ruleDuration)
+      String evaluationWindowDuration)
       throws IOException {
 
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
@@ -160,7 +160,7 @@ public class StaticRuleEvaluator {
                     .setDataCount(dataCount)
                     .setViolationCount(violationCount)
                     .setOperator(operator)
-                    .setRuleDuration(ruleDuration)
+                    .setEvaluationWindowDuration(evaluationWindowDuration)
                     .build())
             .build());
 
