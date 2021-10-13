@@ -167,7 +167,7 @@ public class AlertRuleEvaluatorTest {
     assertEquals("channel1", metricAnomalyNotificationEvent.getChannelId());
     assertEquals("event-condition-1", metricAnomalyNotificationEvent.getEventConditionId());
     assertEquals(
-        "MetricAnomalyEventCondition", metricAnomalyNotificationEvent.getEventConditionType());
+        "metricAnomalyEventCondition", metricAnomalyNotificationEvent.getEventConditionType());
     assertEquals(timeStamp, metricAnomalyNotificationEvent.getViolationTimestamp());
   }
 
@@ -257,7 +257,7 @@ public class AlertRuleEvaluatorTest {
     assertEquals("channel1", metricAnomalyNotificationEvent.getChannelId());
     assertEquals("event-condition-1", metricAnomalyNotificationEvent.getEventConditionId());
     assertEquals(
-        "MetricAnomalyEventCondition", metricAnomalyNotificationEvent.getEventConditionType());
+        "metricAnomalyEventCondition", metricAnomalyNotificationEvent.getEventConditionType());
     assertEquals(timeStamp, metricAnomalyNotificationEvent.getViolationTimestamp());
   }
 
@@ -345,7 +345,7 @@ public class AlertRuleEvaluatorTest {
     assertEquals("channel1", metricAnomalyNotificationEvent.getChannelId());
     assertEquals("event-condition-1", metricAnomalyNotificationEvent.getEventConditionId());
     assertEquals(
-        "MetricAnomalyEventCondition", metricAnomalyNotificationEvent.getEventConditionType());
+        "metricAnomalyEventCondition", metricAnomalyNotificationEvent.getEventConditionType());
     assertEquals(timeStamp, metricAnomalyNotificationEvent.getViolationTimestamp());
   }
 
@@ -378,7 +378,7 @@ public class AlertRuleEvaluatorTest {
     alertTaskBuilder.setCurrentExecutionTime(timeStamp);
     alertTaskBuilder.setLastExecutionTime(timeStamp - Duration.ofMinutes(1).toMillis());
     alertTaskBuilder.setEventConditionId("event-condition-1");
-    alertTaskBuilder.setEventConditionType("MetricAnomalyEventCondition");
+    alertTaskBuilder.setEventConditionType("metricAnomalyEventCondition");
     alertTaskBuilder.setTenantId("__default");
     alertTaskBuilder.setEventConditionValue(
         metricAnomalyEventConditionBuilder.build().toByteString().asReadOnlyByteBuffer());
