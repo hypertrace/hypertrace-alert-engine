@@ -243,7 +243,7 @@ public class TaskManagerTest {
             new PlatformServiceLifecycle() {
               @Override
               public CompletionStage<Void> shutdownComplete() {
-                return null;
+                return new CompletableFuture().minimalCompletionStage();
               }
 
               @Override
