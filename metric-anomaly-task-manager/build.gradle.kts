@@ -21,8 +21,11 @@ dependencies {
     implementation("org.hypertrace.core.documentstore:document-store:0.5.7")
     implementation("org.hypertrace.config.service:config-service-api:0.1.12")
     implementation("org.hypertrace.config.service:alerting-config-service-api:0.1.12")
+    implementation("org.hypertrace.config.service:notification-rule-config-service-api:0.1.12")
     implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.5.2")
     implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.5.2")
+    implementation("org.apache.commons:commons-lang3:3.10")
+    implementation("io.grpc:grpc-netty:1.40.0")
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")
@@ -42,6 +45,7 @@ dependencies {
     integrationTestImplementation("org.testcontainers:testcontainers:1.15.2")
     integrationTestImplementation("org.testcontainers:junit-jupiter:1.15.2")
     integrationTestImplementation("org.testcontainers:kafka:1.15.2")
+    integrationTestImplementation("org.hypertrace.config.service:alerting-config-service-api:0.1.12")
 }
 
 tasks.test {
