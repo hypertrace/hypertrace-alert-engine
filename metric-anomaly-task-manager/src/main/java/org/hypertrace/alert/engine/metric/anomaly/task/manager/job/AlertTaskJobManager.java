@@ -11,13 +11,18 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_NAME;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_TRIGGER_NAME;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.KAFKA_QUEUE_CONFIG;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.RULE_SOURCE_TYPE;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.RULE_SOURCE_TYPE_DATASTORE;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.RULE_SOURCE_TYPE_FS;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.FSRuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
+import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -36,6 +41,12 @@ public class AlertTaskJobManager implements JobManager {
   private JobKey jobKey;
   private JobDetail jobDetail;
   private Trigger jobTrigger;
+  private PlatformServiceLifecycle platformServiceLifecycle;
+
+  public AlertTaskJobManager(
+      PlatformServiceLifecycle platformServiceLifecycle) {
+    this.platformServiceLifecycle = platformServiceLifecycle;
+  }
 
   public void initJob(Config appConfig) {
     Config jobConfig =
@@ -43,7 +54,7 @@ public class AlertTaskJobManager implements JobManager {
             ? appConfig.getConfig(JOB_CONFIG)
             : ConfigFactory.parseMap(Map.of());
 
-    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(ALERT_RULE_SOURCE));
+    RuleSource ruleSource = getRuleSource(appConfig.getConfig(ALERT_RULE_SOURCE));
     KafkaAlertTaskProducer kafkaAlertTaskProducer =
         new KafkaAlertTaskProducer(appConfig.getConfig(KAFKA_QUEUE_CONFIG));
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
@@ -80,6 +91,18 @@ public class AlertTaskJobManager implements JobManager {
   public void stopJob(Scheduler scheduler) throws SchedulerException {
     if (scheduler.checkExists(jobKey)) {
       scheduler.deleteJob(jobKey);
+    }
+  }
+
+  private RuleSource getRuleSource(Config ruleSourceConfig) {
+    String ruleSourceType = ruleSourceConfig.getString(RULE_SOURCE_TYPE);
+    switch (ruleSourceType) {
+      case RULE_SOURCE_TYPE_FS:
+        return new FSRuleSource(ruleSourceConfig.getConfig(RULE_SOURCE_TYPE_FS));
+      case RULE_SOURCE_TYPE_DATASTORE:
+        return new DbRuleSource(ruleSourceConfig.getConfig(RULE_SOURCE_TYPE_DATASTORE), platformServiceLifecycle);
+      default:
+        throw new RuntimeException(String.format("Invalid rule source type:%s", ruleSourceType));
     }
   }
 }

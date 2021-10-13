@@ -8,11 +8,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.CompletionStage;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskConsumer;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobManager;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
 import org.hypertrace.alerting.config.service.v1.MetricAnomalyEventCondition;
+import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -76,7 +78,17 @@ public class TaskManagerTest {
     // start the job
     SchedulerFactory schedulerFactory = new StdSchedulerFactory();
     Scheduler scheduler = schedulerFactory.getScheduler();
-    JobManager jobManager = new AlertTaskJobManager();
+    JobManager jobManager = new AlertTaskJobManager(new PlatformServiceLifecycle() {
+      @Override
+      public CompletionStage<Void> shutdownComplete() {
+        return null;
+      }
+
+      @Override
+      public State getState() {
+        return null;
+      }
+    });
     jobManager.initJob(appConfig);
 
     jobManager.startJob(scheduler);
