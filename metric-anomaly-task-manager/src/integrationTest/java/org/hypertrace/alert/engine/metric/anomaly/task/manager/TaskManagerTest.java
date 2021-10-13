@@ -67,7 +67,7 @@ import org.testcontainers.utility.DockerImageName;
 public class TaskManagerTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerTest.class);
-  private static final String EVENT_CONDITION_TYPE = "MetricAnomalyEventCondition";
+  private static final String EVENT_CONDITION_TYPE = "metricAnomalyEventCondition";
   private static final int CONTAINER_STARTUP_ATTEMPTS = 5;
   private static final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOG);
 
