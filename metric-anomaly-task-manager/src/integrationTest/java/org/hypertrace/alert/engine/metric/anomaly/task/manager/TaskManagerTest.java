@@ -78,17 +78,19 @@ public class TaskManagerTest {
     // start the job
     SchedulerFactory schedulerFactory = new StdSchedulerFactory();
     Scheduler scheduler = schedulerFactory.getScheduler();
-    JobManager jobManager = new AlertTaskJobManager(new PlatformServiceLifecycle() {
-      @Override
-      public CompletionStage<Void> shutdownComplete() {
-        return null;
-      }
+    JobManager jobManager =
+        new AlertTaskJobManager(
+            new PlatformServiceLifecycle() {
+              @Override
+              public CompletionStage<Void> shutdownComplete() {
+                return null;
+              }
 
-      @Override
-      public State getState() {
-        return null;
-      }
-    });
+              @Override
+              public State getState() {
+                return null;
+              }
+            });
     jobManager.initJob(appConfig);
 
     jobManager.startJob(scheduler);

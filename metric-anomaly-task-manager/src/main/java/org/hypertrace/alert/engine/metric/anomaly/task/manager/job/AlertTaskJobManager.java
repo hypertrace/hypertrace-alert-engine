@@ -21,7 +21,6 @@ import java.util.Map;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaAlertTaskProducer;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.FSRuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
@@ -43,8 +42,7 @@ public class AlertTaskJobManager implements JobManager {
   private Trigger jobTrigger;
   private PlatformServiceLifecycle platformServiceLifecycle;
 
-  public AlertTaskJobManager(
-      PlatformServiceLifecycle platformServiceLifecycle) {
+  public AlertTaskJobManager(PlatformServiceLifecycle platformServiceLifecycle) {
     this.platformServiceLifecycle = platformServiceLifecycle;
   }
 
@@ -100,7 +98,8 @@ public class AlertTaskJobManager implements JobManager {
       case RULE_SOURCE_TYPE_FS:
         return new FSRuleSource(ruleSourceConfig.getConfig(RULE_SOURCE_TYPE_FS));
       case RULE_SOURCE_TYPE_DATASTORE:
-        return new DbRuleSource(ruleSourceConfig.getConfig(RULE_SOURCE_TYPE_DATASTORE), platformServiceLifecycle);
+        return new DbRuleSource(
+            ruleSourceConfig.getConfig(RULE_SOURCE_TYPE_DATASTORE), platformServiceLifecycle);
       default:
         throw new RuntimeException(String.format("Invalid rule source type:%s", ruleSourceType));
     }
