@@ -98,7 +98,7 @@ class AlertTaskTest {
                 "tenant_id", "__default"));
     Optional<AlertTask.Builder> alertTaskBuilder =
         new AlertTaskConverter(jobConfig).toAlertTaskBuilder(documents.get(0));
-    assertEquals("MetricAnomalyEventCondition", alertTaskBuilder.get().getEventConditionType());
+    assertEquals("metricAnomalyEventCondition", alertTaskBuilder.get().getEventConditionType());
     assertEquals("channel-1", alertTaskBuilder.get().getChannelId());
     MetricAnomalyEventCondition actual =
         MetricAnomalyEventCondition.parseFrom(alertTaskBuilder.get().getEventConditionValue());
@@ -129,7 +129,7 @@ class AlertTaskTest {
                 "tenant_id", "__default"));
     Optional<AlertTask.Builder> alertTaskBuilder =
         new AlertTaskConverter(jobConfig).toAlertTaskBuilder(documents.get(0));
-    assertEquals("MetricAnomalyEventCondition", alertTaskBuilder.get().getEventConditionType());
+    assertEquals("metricAnomalyEventCondition", alertTaskBuilder.get().getEventConditionType());
     assertEquals("channel-1", alertTaskBuilder.get().getChannelId());
     MetricAnomalyEventCondition actual =
         MetricAnomalyEventCondition.parseFrom(alertTaskBuilder.get().getEventConditionValue());

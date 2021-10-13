@@ -73,39 +73,49 @@ public class DbRuleSource implements RuleSource {
 
   private List<Document> getForTenant(String tenantId) {
     RequestContext context = RequestContext.forTenantId(tenantId);
-    List<NotificationRule> notificationRules = context.call(
-            () -> notificationRuleStub.getAllNotificationRules(
-                GetAllNotificationRulesRequest.newBuilder().build()))
-        .getNotificationRulesList();
-    Map<String, JsonNode> idMetricAnomalyMap = context
-        .call(
-            () ->
-                this.configServiceBlockingStub.getAllConfigs(
-                    GetAllConfigsRequest.newBuilder()
-                        .setResourceName(this.resourceName)
-                        .setResourceNamespace(this.resourceNamespace)
-                        .build()))
-        .getContextSpecificConfigsList()
-        .stream()
-        .map(ContextSpecificConfig::getConfig)
-        .map(this::convert)
-        .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+    List<NotificationRule> notificationRules =
+        context
+            .call(
+                () ->
+                    notificationRuleStub.getAllNotificationRules(
+                        GetAllNotificationRulesRequest.newBuilder().build()))
+            .getNotificationRulesList();
+    Map<String, JsonNode> idMetricAnomalyMap =
+        context
+            .call(
+                () ->
+                    this.configServiceBlockingStub.getAllConfigs(
+                        GetAllConfigsRequest.newBuilder()
+                            .setResourceName(this.resourceName)
+                            .setResourceNamespace(this.resourceNamespace)
+                            .build()))
+            .getContextSpecificConfigsList()
+            .stream()
+            .map(ContextSpecificConfig::getConfig)
+            .map(this::convert)
+            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 
     return notificationRules.stream()
-        .filter(rule -> idMetricAnomalyMap.containsKey(
-            rule.getNotificationRuleMutableData().getEventConditionId()))
-        .map(rule -> {
-          try {
-            JsonNode metricAnomalyNode = idMetricAnomalyMap.get(
-                rule.getNotificationRuleMutableData().getEventConditionId());
-            JsonNode ruleNode = OBJECT_MAPPER.readTree(JsonFormat.printer().print(rule))
-                .get(NOTIFICATION_RULE_MUTABLE_DATA_KEY);
-            ((ObjectNode)ruleNode).set(AlertTaskConverter.EVENT_CONDITION, metricAnomalyNode);
-            return new JSONDocument(ruleNode);
-          } catch (IOException e) {
-            throw new UncheckedIOException(e);
-          }
-        })
+        .filter(
+            rule ->
+                idMetricAnomalyMap.containsKey(
+                    rule.getNotificationRuleMutableData().getEventConditionId()))
+        .map(
+            rule -> {
+              try {
+                JsonNode metricAnomalyNode =
+                    idMetricAnomalyMap.get(
+                        rule.getNotificationRuleMutableData().getEventConditionId());
+                JsonNode ruleNode =
+                    OBJECT_MAPPER
+                        .readTree(JsonFormat.printer().print(rule))
+                        .get(NOTIFICATION_RULE_MUTABLE_DATA_KEY);
+                ((ObjectNode) ruleNode).set(AlertTaskConverter.EVENT_CONDITION, metricAnomalyNode);
+                return new JSONDocument(ruleNode);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            })
         .collect(Collectors.toList());
   }
 
@@ -125,10 +135,12 @@ public class DbRuleSource implements RuleSource {
     } else if (jsonNode.get(EVENT_CONDITION_MUTABLE_DATA_KEY) != null) {
       jsonNode = jsonNode.get(EVENT_CONDITION_MUTABLE_DATA_KEY);
     } else {
-      throw new RuntimeException(String.format("Event condition is missing in the object %s", value));
+      throw new RuntimeException(
+          String.format("Event condition is missing in the object %s", value));
     }
     if (jsonNode.get(METRIC_ANOMALY_DATA_KEY) == null) {
-      throw new RuntimeException(String.format("MetricAnomalyEvent is missing in the object %s", value));
+      throw new RuntimeException(
+          String.format("MetricAnomalyEvent is missing in the object %s", value));
     }
     return Pair.of(id, jsonNode.get(METRIC_ANOMALY_DATA_KEY));
   }

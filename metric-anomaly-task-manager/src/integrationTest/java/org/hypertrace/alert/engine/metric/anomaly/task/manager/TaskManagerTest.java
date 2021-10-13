@@ -42,7 +42,6 @@ import org.hypertrace.core.grpcutils.client.RequestContextClientCallCredsProvide
 import org.hypertrace.core.grpcutils.context.RequestContext;
 import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
 import org.hypertrace.notification.config.service.v1.CreateNotificationRuleRequest;
-import org.hypertrace.notification.config.service.v1.NotificationChannelConfigServiceGrpc;
 import org.hypertrace.notification.config.service.v1.NotificationRule;
 import org.hypertrace.notification.config.service.v1.NotificationRuleConfigServiceGrpc;
 import org.hypertrace.notification.config.service.v1.NotificationRuleMutableData;
@@ -67,8 +66,7 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 public class TaskManagerTest {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(TaskManagerTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TaskManagerTest.class);
   private static final String EVENT_CONDITION_TYPE = "MetricAnomalyEventCondition";
   private static final int CONTAINER_STARTUP_ATTEMPTS = 5;
   private static final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOG);
@@ -103,9 +101,7 @@ public class TaskManagerTest {
     mongo.start();
 
     configService =
-        new GenericContainer<>(
-            DockerImageName.parse(
-                "hypertrace/config-service:main"))
+        new GenericContainer<>(DockerImageName.parse("hypertrace/config-service:main"))
             .withNetwork(network)
             .withNetworkAliases("config-service")
             .withEnv("MONGO_HOST", "mongo")
@@ -116,8 +112,10 @@ public class TaskManagerTest {
     configService.start();
     configService.followOutput(logConsumer);
 
-    managedChannel = ManagedChannelBuilder.forAddress("localhost",
-        configService.getMappedPort(50101)).usePlaintext().build();
+    managedChannel =
+        ManagedChannelBuilder.forAddress("localhost", configService.getMappedPort(50101))
+            .usePlaintext()
+            .build();
   }
 
   @AfterAll
@@ -133,48 +131,58 @@ public class TaskManagerTest {
   public void testReadRulesFromDb() throws IOException {
     // first create rules
     NotificationRuleConfigServiceGrpc.NotificationRuleConfigServiceBlockingStub
-        notificationRuleStub = NotificationRuleConfigServiceGrpc.newBlockingStub(managedChannel)
-        .withCallCredentials(
-            RequestContextClientCallCredsProviderFactory.getClientCallCredsProvider().get());
-    EventConditionConfigServiceGrpc.EventConditionConfigServiceBlockingStub
-        eventConditionStub = EventConditionConfigServiceGrpc.newBlockingStub(managedChannel)
-        .withCallCredentials(
-            RequestContextClientCallCredsProviderFactory.getClientCallCredsProvider().get());
+        notificationRuleStub =
+            NotificationRuleConfigServiceGrpc.newBlockingStub(managedChannel)
+                .withCallCredentials(
+                    RequestContextClientCallCredsProviderFactory.getClientCallCredsProvider()
+                        .get());
+    EventConditionConfigServiceGrpc.EventConditionConfigServiceBlockingStub eventConditionStub =
+        EventConditionConfigServiceGrpc.newBlockingStub(managedChannel)
+            .withCallCredentials(
+                RequestContextClientCallCredsProviderFactory.getClientCallCredsProvider().get());
 
     RequestContext context = RequestContext.forTenantId("tenant-1");
 
     EventCondition eventCondition =
-        context.call(() ->
-                eventConditionStub
-                    .createEventCondition(
+        context
+            .call(
+                () ->
+                    eventConditionStub.createEventCondition(
                         CreateEventConditionRequest.newBuilder()
-                            .setNewEventCondition(NewEventCondition.newBuilder()
-                                .setEventConditionData(
-                                    EventConditionMutableData.newBuilder()
-                                        .setMetricAnomalyEventCondition(
-                                            getMetricAnomalyEventCondition("PT1M"))
-                                        .build())
-                                .build())
+                            .setNewEventCondition(
+                                NewEventCondition.newBuilder()
+                                    .setEventConditionData(
+                                        EventConditionMutableData.newBuilder()
+                                            .setMetricAnomalyEventCondition(
+                                                getMetricAnomalyEventCondition("PT1M"))
+                                            .build())
+                                    .build())
                             .build()))
             .getEventCondition();
 
-    NotificationRuleMutableData notificationRuleMutableData = NotificationRuleMutableData.newBuilder()
-        .setRuleName("rule-1")
-        .setDescription("sample rule")
-        .setChannelId("channel-1")
-        .setEventConditionType("metricAnomalyEventCondition")
-        .setEventConditionId(eventCondition.getId())
-        .build();
+    NotificationRuleMutableData notificationRuleMutableData =
+        NotificationRuleMutableData.newBuilder()
+            .setRuleName("rule-1")
+            .setDescription("sample rule")
+            .setChannelId("channel-1")
+            .setEventConditionType("metricAnomalyEventCondition")
+            .setEventConditionId(eventCondition.getId())
+            .build();
 
-        context.call(() ->
-                notificationRuleStub.createNotificationRule(
-                    CreateNotificationRuleRequest.newBuilder()
-                        .setNotificationRuleMutableData(notificationRuleMutableData).build()))
+    NotificationRule notificationRule =
+        context
+            .call(
+                () ->
+                    notificationRuleStub.createNotificationRule(
+                        CreateNotificationRuleRequest.newBuilder()
+                            .setNotificationRuleMutableData(notificationRuleMutableData)
+                            .build()))
             .getNotificationRule();
 
     Map<String, String> testConfigMap =
         Map.of(
-            "alertRuleSource.dataStore.config.service.port", String.valueOf(configService.getMappedPort(50101)));
+            "alertRuleSource.dataStore.config.service.port",
+            String.valueOf(configService.getMappedPort(50101)));
 
     URL resourceUrl =
         Thread.currentThread().getContextClassLoader().getResource("application.conf");
@@ -183,22 +191,28 @@ public class TaskManagerTest {
             .withFallback(ConfigFactory.parseURL(resourceUrl))
             .resolve();
 
-    DbRuleSource dbRuleSource = new DbRuleSource(appConfig.getConfig("alertRuleSource.dataStore"), new PlatformServiceLifecycle() {
-      @Override
-      public CompletionStage<Void> shutdownComplete() {
-        return new CompletableFuture().minimalCompletionStage();
-      }
+    DbRuleSource dbRuleSource =
+        new DbRuleSource(
+            appConfig.getConfig("alertRuleSource.dataStore"),
+            new PlatformServiceLifecycle() {
+              @Override
+              public CompletionStage<Void> shutdownComplete() {
+                return new CompletableFuture().minimalCompletionStage();
+              }
 
-      @Override
-      public State getState() {
-        return null;
-      }
-    });
+              @Override
+              public State getState() {
+                return null;
+              }
+            });
 
     List<Document> documentList = dbRuleSource.getAllRules(null);
-    Optional<Builder> builderOptional = new AlertTaskConverter(appConfig).toAlertTaskBuilder(documentList.get(0));
+    Optional<Builder> builderOptional =
+        new AlertTaskConverter(appConfig).toAlertTaskBuilder(documentList.get(0));
     Assertions.assertTrue(builderOptional.isPresent());
-
+    Assertions.assertEquals(
+        notificationRule.getNotificationRuleMutableData().getChannelId(),
+        builderOptional.get().getChannelId());
   }
 
   @Test
