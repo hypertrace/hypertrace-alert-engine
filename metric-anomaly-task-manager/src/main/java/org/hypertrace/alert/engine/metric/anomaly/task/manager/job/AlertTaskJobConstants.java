@@ -6,6 +6,9 @@ public class AlertTaskJobConstants {
   public static final String JOB_DATA_MAP_TASK_CONVERTER = "taskConverter";
   public static final String JOB_DATA_MAP_JOB_CONFIG = "jobConfig";
   public static final String ALERT_RULE_SOURCE = "alertRuleSource";
+  public static final String RULE_SOURCE_TYPE = "type";
+  public static final String RULE_SOURCE_TYPE_FS = "fs";
+  public static final String RULE_SOURCE_TYPE_DATASTORE = "dataStore";
 
   public static final String JOB_NAME = "alert-task";
   public static final String JOB_GROUP = "alerting";
