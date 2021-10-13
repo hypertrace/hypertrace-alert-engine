@@ -27,7 +27,7 @@ Below is a sample alert rule.
     "ruleName": "high_avg_latency",
     "description": "Alert for high avg latency of payment service",
     "eventConditionId": "event_condition_1",
-    "eventConditionType": "MetricAnomalyEventCondition",
+    "eventConditionType": "metricAnomalyEventCondition",
     "channelId": "channel-id-1",
     "eventCondition" :  {
       "metricSelection": {

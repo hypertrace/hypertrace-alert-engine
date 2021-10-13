@@ -19,5 +19,5 @@ public class AlertTaskJobConstants {
   public static final String JOB_CONFIG = "job.config";
   public static final String JOB_CONFIG_CRON_EXPRESSION = "cronExpression";
 
-  public static final String METRIC_ANOMALY_EVENT_CONDITION = "MetricAnomalyEventCondition";
+  public static final String METRIC_ANOMALY_EVENT_CONDITION = "metricAnomalyEventCondition";
 }
