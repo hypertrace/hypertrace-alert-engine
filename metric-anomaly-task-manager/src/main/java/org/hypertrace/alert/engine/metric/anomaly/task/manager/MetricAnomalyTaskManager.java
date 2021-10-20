@@ -22,7 +22,7 @@ public class MetricAnomalyTaskManager extends PlatformService {
     try {
       SchedulerFactory schedulerFactory = new StdSchedulerFactory();
       scheduler = schedulerFactory.getScheduler();
-      jobManager = new AlertTaskJobManager();
+      jobManager = new AlertTaskJobManager(getLifecycle());
       jobManager.initJob(getAppConfig());
     } catch (SchedulerException e) {
       throw new RuntimeException(e);

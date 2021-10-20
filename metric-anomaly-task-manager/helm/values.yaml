@@ -75,6 +75,10 @@ metricAnomalyTaskManagerConfig:
   queueConfig:
     outputTopic: alert-tasks
     bootstrapServers: bootstrap
+  alertRuleSource:
+    type: fs
+    fs:
+      path: "/app/resources/configs/metric-anomaly-task-manager/rules.json"
 
 logConfig:
   name: metric-anomaly-task-manager-log-appender-config
@@ -94,7 +98,7 @@ alertRulesConfig:
         "ruleName": "high_avg_latency",
         "description": "Alert for high avg latency of payment service",
         "eventConditionId": "event_condition_1",
-        "eventConditionType": "MetricAnomalyEventCondition",
+        "eventConditionType": "metricAnomalyEventCondition",
         "channelId": "channel-id-1",
         "eventCondition": {
           "metricSelection": {

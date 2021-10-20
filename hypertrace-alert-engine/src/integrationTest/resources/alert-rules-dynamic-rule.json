@@ -4,7 +4,7 @@
     "ruleName": "high_avg_latency_baseline",
     "description": "Alert for high avg latency baseline of customer service",
     "eventConditionId": "event_condition_2",
-    "eventConditionType": "MetricAnomalyEventCondition",
+    "eventConditionType": "metricAnomalyEventCondition",
     "channelId": "channel-id-1",
     "eventCondition" :  {
       "metricSelection": {
