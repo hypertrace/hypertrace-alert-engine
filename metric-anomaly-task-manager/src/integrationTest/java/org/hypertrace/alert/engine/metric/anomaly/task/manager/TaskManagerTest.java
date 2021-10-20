@@ -162,6 +162,7 @@ public class TaskManagerTest {
     List<Document> documentList = dbRuleSource.getAllRules(null);
     Optional<Builder> builderOptional =
         new AlertTaskConverter(appConfig).toAlertTaskBuilder(documentList.get(0));
+    Assertions.assertEquals(1, documentList.size());
     Assertions.assertTrue(builderOptional.isPresent());
     Assertions.assertEquals(
         notificationRule.getNotificationRuleMutableData().getChannelId(),

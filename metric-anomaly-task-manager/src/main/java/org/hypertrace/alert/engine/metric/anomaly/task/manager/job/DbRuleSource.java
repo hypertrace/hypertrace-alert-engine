@@ -28,8 +28,11 @@ import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
 import org.hypertrace.notification.config.service.v1.GetAllNotificationRulesRequest;
 import org.hypertrace.notification.config.service.v1.NotificationRule;
 import org.hypertrace.notification.config.service.v1.NotificationRuleConfigServiceGrpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DbRuleSource implements RuleSource {
+  private static final Logger LOGGER = LoggerFactory.getLogger(DbRuleSource.class);
 
   private static final String EVENT_CONDITION_DATA_KEY = "eventConditionData";
   private static final String EVENT_CONDITION_MUTABLE_DATA_KEY = "eventConditionMutableData";
@@ -43,7 +46,7 @@ public class DbRuleSource implements RuleSource {
   private static final String TENANT_IDS_CONFIG_KEY = "tenantIds";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private final ConfigServiceBlockingStub configServiceBlockingStub;
+  private final ConfigServiceBlockingStub configServiceStub;
   private final NotificationRuleConfigServiceGrpc.NotificationRuleConfigServiceBlockingStub
       notificationRuleStub;
   private final String resourceNamespace;
@@ -60,7 +63,7 @@ public class DbRuleSource implements RuleSource {
     lifecycle.shutdownComplete().thenRun(configChannel::shutdown);
     this.resourceName = dataStoreConfig.getString(RESOURCE_NAME_CONFIG_KEY);
     this.resourceNamespace = dataStoreConfig.getString(RESOURCE_NAMESPACE_CONFIG_KEY);
-    configServiceBlockingStub =
+    configServiceStub =
         ConfigServiceGrpc.newBlockingStub(configChannel)
             .withCallCredentials(
                 RequestContextClientCallCredsProviderFactory.getClientCallCredsProvider().get());
@@ -98,7 +101,7 @@ public class DbRuleSource implements RuleSource {
     return requestContext
         .call(
             () ->
-                this.configServiceBlockingStub.getAllConfigs(
+                this.configServiceStub.getAllConfigs(
                     GetAllConfigsRequest.newBuilder()
                         .setResourceName(this.resourceName)
                         .setResourceNamespace(this.resourceNamespace)
@@ -142,10 +145,12 @@ public class DbRuleSource implements RuleSource {
     try {
       jsonNode = OBJECT_MAPPER.readTree(JsonFormat.printer().print(value));
     } catch (IOException e) {
-      throw new UncheckedIOException(e);
+      LOGGER.error("Error converting EventCondition to json {}", value);
+      return Pair.of(null, null);
     }
     if (jsonNode.get(ID) == null) {
-      throw new RuntimeException(String.format("id is missing in the object %s", value));
+      LOGGER.error("EventCondition object missing id {}", value);
+      return Pair.of(null, null);
     }
     String id = jsonNode.get(ID).textValue();
     if (jsonNode.get(EVENT_CONDITION_DATA_KEY) != null) {
@@ -153,8 +158,8 @@ public class DbRuleSource implements RuleSource {
     } else if (jsonNode.get(EVENT_CONDITION_MUTABLE_DATA_KEY) != null) {
       jsonNode = jsonNode.get(EVENT_CONDITION_MUTABLE_DATA_KEY);
     } else {
-      throw new RuntimeException(
-          String.format("Event condition is missing in the object %s", value));
+      LOGGER.error("Event condition is missing in the object {}", value);
+      return Pair.of(id, null);
     }
     return Pair.of(id, jsonNode.get(METRIC_ANOMALY_DATA_KEY));
   }
