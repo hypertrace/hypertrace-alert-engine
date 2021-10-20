@@ -110,7 +110,7 @@ public class DbRuleSource implements RuleSource {
         .stream()
         .map(ContextSpecificConfig::getConfig)
         .map(this::convert)
-        .filter(v -> v.getRight() != null)
+        .filter(v -> (v.getLeft() != null && v.getRight() != null))
         .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
   }
 
