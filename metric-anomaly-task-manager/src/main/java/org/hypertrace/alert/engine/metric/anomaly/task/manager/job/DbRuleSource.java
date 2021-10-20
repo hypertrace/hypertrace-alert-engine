@@ -35,7 +35,13 @@ public class DbRuleSource implements RuleSource {
   private static final String EVENT_CONDITION_MUTABLE_DATA_KEY = "eventConditionMutableData";
   private static final String NOTIFICATION_RULE_MUTABLE_DATA_KEY = "notificationRuleMutableData";
   private static final String METRIC_ANOMALY_DATA_KEY = "metricAnomalyEventCondition";
+  private static final String CONFIG_SERVICE_HOST_CONFIG_KEY = "config.service.host";
+  private static final String CONFIG_SERVICE_PORT_CONFIG_KEY = "config.service.port";
+  private static final String RESOURCE_NAME_CONFIG_KEY = "resourceName";
+  private static final String RESOURCE_NAMESPACE_CONFIG_KEY = "resourceNamespace";
+  private static final String TENANT_IDS_CONFIG_KEY = "tenantIds";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   private final ConfigServiceBlockingStub configServiceBlockingStub;
   private final NotificationRuleConfigServiceGrpc.NotificationRuleConfigServiceBlockingStub
       notificationRuleStub;
@@ -46,13 +52,13 @@ public class DbRuleSource implements RuleSource {
   public DbRuleSource(Config dataStoreConfig, PlatformServiceLifecycle lifecycle) {
     ManagedChannel configChannel =
         ManagedChannelBuilder.forAddress(
-                dataStoreConfig.getString("config.service.host"),
-                dataStoreConfig.getInt("config.service.port"))
+                dataStoreConfig.getString(CONFIG_SERVICE_HOST_CONFIG_KEY),
+                dataStoreConfig.getInt(CONFIG_SERVICE_PORT_CONFIG_KEY))
             .usePlaintext()
             .build();
     lifecycle.shutdownComplete().thenRun(configChannel::shutdown);
-    this.resourceName = dataStoreConfig.getString("resourceName");
-    this.resourceNamespace = dataStoreConfig.getString("resourceNamespace");
+    this.resourceName = dataStoreConfig.getString(RESOURCE_NAME_CONFIG_KEY);
+    this.resourceNamespace = dataStoreConfig.getString(RESOURCE_NAMESPACE_CONFIG_KEY);
     configServiceBlockingStub =
         ConfigServiceGrpc.newBlockingStub(configChannel)
             .withCallCredentials(
@@ -61,7 +67,7 @@ public class DbRuleSource implements RuleSource {
         NotificationRuleConfigServiceGrpc.newBlockingStub(configChannel)
             .withCallCredentials(
                 RequestContextClientCallCredsProviderFactory.getClientCallCredsProvider().get());
-    this.tenantIds = dataStoreConfig.getStringList("tenantIds");
+    this.tenantIds = dataStoreConfig.getStringList(TENANT_IDS_CONFIG_KEY);
   }
 
   @Override
@@ -73,38 +79,49 @@ public class DbRuleSource implements RuleSource {
 
   private List<Document> getForTenant(String tenantId) {
     RequestContext context = RequestContext.forTenantId(tenantId);
-    List<NotificationRule> notificationRules =
-        context
-            .call(
-                () ->
-                    notificationRuleStub.getAllNotificationRules(
-                        GetAllNotificationRulesRequest.newBuilder().build()))
-            .getNotificationRulesList();
-    Map<String, JsonNode> idMetricAnomalyMap =
-        context
-            .call(
-                () ->
-                    this.configServiceBlockingStub.getAllConfigs(
-                        GetAllConfigsRequest.newBuilder()
-                            .setResourceName(this.resourceName)
-                            .setResourceNamespace(this.resourceNamespace)
-                            .build()))
-            .getContextSpecificConfigsList()
-            .stream()
-            .map(ContextSpecificConfig::getConfig)
-            .map(this::convert)
-            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+    List<NotificationRule> notificationRules = getNotificationRules(context);
+    Map<String, JsonNode> idMetricAnomalyJsonMap = getMetricAnomalyJsonMap(context);
+    return mergeNotificationRuleEventCondition(notificationRules, idMetricAnomalyJsonMap);
+  }
 
+  private List<NotificationRule> getNotificationRules(RequestContext requestContext) {
+    return requestContext
+        .call(
+            () ->
+                notificationRuleStub.getAllNotificationRules(
+                    GetAllNotificationRulesRequest.newBuilder().build()))
+        .getNotificationRulesList();
+  }
+
+  private Map<String, JsonNode> getMetricAnomalyJsonMap(RequestContext requestContext) {
+    return requestContext
+        .call(
+            () ->
+                this.configServiceBlockingStub.getAllConfigs(
+                    GetAllConfigsRequest.newBuilder()
+                        .setResourceName(this.resourceName)
+                        .setResourceNamespace(this.resourceNamespace)
+                        .build()))
+        .getContextSpecificConfigsList()
+        .stream()
+        .map(ContextSpecificConfig::getConfig)
+        .map(this::convert)
+        .filter(v -> v.getRight() != null)
+        .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+  }
+
+  private List<Document> mergeNotificationRuleEventCondition(
+      List<NotificationRule> notificationRules, Map<String, JsonNode> idMetricAnomalyJsonMap) {
     return notificationRules.stream()
         .filter(
             rule ->
-                idMetricAnomalyMap.containsKey(
+                idMetricAnomalyJsonMap.containsKey(
                     rule.getNotificationRuleMutableData().getEventConditionId()))
         .map(
             rule -> {
               try {
                 JsonNode metricAnomalyNode =
-                    idMetricAnomalyMap.get(
+                    idMetricAnomalyJsonMap.get(
                         rule.getNotificationRuleMutableData().getEventConditionId());
                 JsonNode ruleNode =
                     OBJECT_MAPPER
@@ -137,10 +154,6 @@ public class DbRuleSource implements RuleSource {
     } else {
       throw new RuntimeException(
           String.format("Event condition is missing in the object %s", value));
-    }
-    if (jsonNode.get(METRIC_ANOMALY_DATA_KEY) == null) {
-      throw new RuntimeException(
-          String.format("MetricAnomalyEvent is missing in the object %s", value));
     }
     return Pair.of(id, jsonNode.get(METRIC_ANOMALY_DATA_KEY));
   }

@@ -91,7 +91,7 @@ public class TaskManagerTest {
     kafkaZk.start();
 
     mongo =
-        new GenericContainer<>(DockerImageName.parse("mongo:4.2.0"))
+        new GenericContainer<>(DockerImageName.parse("mongo:4.4.0"))
             .withNetwork(network)
             .withNetworkAliases("mongo")
             .withExposedPorts(27017)
@@ -130,6 +130,45 @@ public class TaskManagerTest {
   @Test
   public void testReadRulesFromDb() throws IOException {
     // first create rules
+    NotificationRule notificationRule = setupRules();
+
+    Map<String, String> testConfigMap =
+        Map.of(
+            "alertRuleSource.dataStore.config.service.port",
+            String.valueOf(configService.getMappedPort(50101)));
+
+    URL resourceUrl =
+        Thread.currentThread().getContextClassLoader().getResource("application.conf");
+    Config appConfig =
+        ConfigFactory.parseMap(testConfigMap)
+            .withFallback(ConfigFactory.parseURL(resourceUrl))
+            .resolve();
+
+    DbRuleSource dbRuleSource =
+        new DbRuleSource(
+            appConfig.getConfig("alertRuleSource.dataStore"),
+            new PlatformServiceLifecycle() {
+              @Override
+              public CompletionStage<Void> shutdownComplete() {
+                return new CompletableFuture().minimalCompletionStage();
+              }
+
+              @Override
+              public State getState() {
+                return null;
+              }
+            });
+
+    List<Document> documentList = dbRuleSource.getAllRules(null);
+    Optional<Builder> builderOptional =
+        new AlertTaskConverter(appConfig).toAlertTaskBuilder(documentList.get(0));
+    Assertions.assertTrue(builderOptional.isPresent());
+    Assertions.assertEquals(
+        notificationRule.getNotificationRuleMutableData().getChannelId(),
+        builderOptional.get().getChannelId());
+  }
+
+  private NotificationRule setupRules() {
     NotificationRuleConfigServiceGrpc.NotificationRuleConfigServiceBlockingStub
         notificationRuleStub =
             NotificationRuleConfigServiceGrpc.newBlockingStub(managedChannel)
@@ -169,50 +208,14 @@ public class TaskManagerTest {
             .setEventConditionId(eventCondition.getId())
             .build();
 
-    NotificationRule notificationRule =
-        context
-            .call(
-                () ->
-                    notificationRuleStub.createNotificationRule(
-                        CreateNotificationRuleRequest.newBuilder()
-                            .setNotificationRuleMutableData(notificationRuleMutableData)
-                            .build()))
-            .getNotificationRule();
-
-    Map<String, String> testConfigMap =
-        Map.of(
-            "alertRuleSource.dataStore.config.service.port",
-            String.valueOf(configService.getMappedPort(50101)));
-
-    URL resourceUrl =
-        Thread.currentThread().getContextClassLoader().getResource("application.conf");
-    Config appConfig =
-        ConfigFactory.parseMap(testConfigMap)
-            .withFallback(ConfigFactory.parseURL(resourceUrl))
-            .resolve();
-
-    DbRuleSource dbRuleSource =
-        new DbRuleSource(
-            appConfig.getConfig("alertRuleSource.dataStore"),
-            new PlatformServiceLifecycle() {
-              @Override
-              public CompletionStage<Void> shutdownComplete() {
-                return new CompletableFuture().minimalCompletionStage();
-              }
-
-              @Override
-              public State getState() {
-                return null;
-              }
-            });
-
-    List<Document> documentList = dbRuleSource.getAllRules(null);
-    Optional<Builder> builderOptional =
-        new AlertTaskConverter(appConfig).toAlertTaskBuilder(documentList.get(0));
-    Assertions.assertTrue(builderOptional.isPresent());
-    Assertions.assertEquals(
-        notificationRule.getNotificationRuleMutableData().getChannelId(),
-        builderOptional.get().getChannelId());
+    return context
+        .call(
+            () ->
+                notificationRuleStub.createNotificationRule(
+                    CreateNotificationRuleRequest.newBuilder()
+                        .setNotificationRuleMutableData(notificationRuleMutableData)
+                        .build()))
+        .getNotificationRule();
   }
 
   @Test
