@@ -35,6 +35,7 @@ public class DbRuleSource implements RuleSource {
   private static final String EVENT_CONDITION_MUTABLE_DATA_KEY = "eventConditionMutableData";
   private static final String NOTIFICATION_RULE_MUTABLE_DATA_KEY = "notificationRuleMutableData";
   private static final String METRIC_ANOMALY_DATA_KEY = "metricAnomalyEventCondition";
+  private static final String ID = "id";
   private static final String CONFIG_SERVICE_HOST_CONFIG_KEY = "config.service.host";
   private static final String CONFIG_SERVICE_PORT_CONFIG_KEY = "config.service.port";
   private static final String RESOURCE_NAME_CONFIG_KEY = "resourceName";
@@ -143,10 +144,10 @@ public class DbRuleSource implements RuleSource {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
-    if (jsonNode.get("id") == null) {
+    if (jsonNode.get(ID) == null) {
       throw new RuntimeException(String.format("id is missing in the object %s", value));
     }
-    String id = jsonNode.get("id").textValue();
+    String id = jsonNode.get(ID).textValue();
     if (jsonNode.get(EVENT_CONDITION_DATA_KEY) != null) {
       jsonNode = jsonNode.get(EVENT_CONDITION_DATA_KEY);
     } else if (jsonNode.get(EVENT_CONDITION_MUTABLE_DATA_KEY) != null) {
