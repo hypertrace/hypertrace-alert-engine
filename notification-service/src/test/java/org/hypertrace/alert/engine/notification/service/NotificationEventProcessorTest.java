@@ -1,6 +1,7 @@
 package org.hypertrace.alert.engine.notification.service;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import okhttp3.mockwebserver.MockResponse;
@@ -56,7 +57,7 @@ class NotificationEventProcessorTest {
 
     NotificationChannel notificationChannel = getNotificationChannel();
     Assertions.assertEquals(0, mockWebServer.getRequestCount());
-    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
+    new NotificationEventProcessor().process(notificationEvent, List.of(notificationChannel));
     Assertions.assertEquals(1, mockWebServer.getRequestCount());
     // verify body
     // RecordedRequest request = mockWebServer.takeRequest();
@@ -91,7 +92,8 @@ class NotificationEventProcessorTest {
     NotificationChannel notificationChannel = getNotificationChannel();
 
     Assertions.assertEquals(0, mockWebServer.getRequestCount());
-    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
+    new NotificationEventProcessor()
+        .process(notificationEvent, Collections.singletonList(notificationChannel));
     Assertions.assertEquals(1, mockWebServer.getRequestCount());
   }
 

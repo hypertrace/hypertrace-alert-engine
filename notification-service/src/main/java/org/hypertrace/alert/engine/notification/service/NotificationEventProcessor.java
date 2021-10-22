@@ -21,19 +21,10 @@ public class NotificationEventProcessor {
   static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
 
   private static final HttpWithJsonSender HTTP_WITH_JSON_SENDER = HttpWithJsonSender.getInstance();
-
-  private final Map<String, NotificationChannel> notificationChannelMap;
   private final WebhookNotifier webhookNotifier;
 
-  public NotificationEventProcessor(List<NotificationChannel> notificationChannels) {
-    this.notificationChannelMap = getNotificationChannelMap(notificationChannels);
+  public NotificationEventProcessor() {
     this.webhookNotifier = new WebhookNotifier(new WebhookSender(HTTP_WITH_JSON_SENDER));
-  }
-
-  NotificationEventProcessor(
-      List<NotificationChannel> notificationChannels, WebhookNotifier webhookNotifier) {
-    this.notificationChannelMap = getNotificationChannelMap(notificationChannels);
-    this.webhookNotifier = webhookNotifier;
   }
 
   private Map<String, NotificationChannel> getNotificationChannelMap(
@@ -42,7 +33,10 @@ public class NotificationEventProcessor {
         .collect(Collectors.toMap(NotificationChannel::getChannelId, Function.identity()));
   }
 
-  public void process(NotificationEvent notificationEvent) {
+  public void process(
+      NotificationEvent notificationEvent, List<NotificationChannel> notificationChannels) {
+    Map<String, NotificationChannel> notificationChannelMap =
+        getNotificationChannelMap(notificationChannels);
     LOGGER.debug("Processing notification {} {}", notificationEvent, notificationChannelMap);
     EventRecord eventRecord = notificationEvent.getEventRecord();
     if (!eventRecord.getEventType().equals(METRIC_ANOMALY_ACTION_EVENT_TYPE)) {

@@ -40,7 +40,7 @@ public class AlertTaskJobManager implements JobManager {
   private JobKey jobKey;
   private JobDetail jobDetail;
   private Trigger jobTrigger;
-  private PlatformServiceLifecycle platformServiceLifecycle;
+  private final PlatformServiceLifecycle platformServiceLifecycle;
 
   public AlertTaskJobManager(PlatformServiceLifecycle platformServiceLifecycle) {
     this.platformServiceLifecycle = platformServiceLifecycle;
@@ -92,7 +92,7 @@ public class AlertTaskJobManager implements JobManager {
     }
   }
 
-  private RuleSource getRuleSource(Config ruleSourceConfig) {
+  public RuleSource getRuleSource(Config ruleSourceConfig) {
     String ruleSourceType = ruleSourceConfig.getString(RULE_SOURCE_TYPE);
     switch (ruleSourceType) {
       case RULE_SOURCE_TYPE_FS:
