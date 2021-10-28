@@ -38,7 +38,9 @@ public class FSRuleSource implements RuleSource {
       throw new IOException("File should contain an array of notification rules");
     }
 
-    LOGGER.info("Reading document {}", jsonNode.toPrettyString());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Reading document  {}", jsonNode.toPrettyString());
+    }
     return StreamSupport.stream(jsonNode.spliterator(), false)
         .collect(Collectors.toUnmodifiableList());
   }
