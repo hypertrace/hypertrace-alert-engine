@@ -52,7 +52,8 @@ public class NotificationEventProcessorService extends PlatformService {
         ConsumerRecords<String, ByteBuffer> records =
             consumer.poll(Duration.ofMillis(CONSUMER_POLL_TIMEOUT_MS));
         for (ConsumerRecord<String, ByteBuffer> record : records) {
-          notificationEventProcessor.process(MetricAnomalyNotificationEvent.fromByteBuffer(record.value()));
+          notificationEventProcessor.process(
+              MetricAnomalyNotificationEvent.fromByteBuffer(record.value()));
         }
       } catch (IOException e) {
         LOGGER.error("Exception processing record", e);

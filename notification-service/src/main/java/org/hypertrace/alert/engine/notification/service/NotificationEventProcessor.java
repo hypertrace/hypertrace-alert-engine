@@ -66,8 +66,7 @@ public class NotificationEventProcessor {
     LOGGER.debug("Processing notification {}", notificationEvent);
 
     NotificationChannel notificationChannel =
-        getNotificationChannel(
-            notificationEvent.getTenantId(), notificationEvent.getChannelId());
+        getNotificationChannel(notificationEvent.getTenantId(), notificationEvent.getChannelId());
     if (notificationChannel != null) {
       LOGGER.debug("Sending notification event {}", notificationEvent);
       webhookNotifier.notify(notificationEvent, notificationChannel);

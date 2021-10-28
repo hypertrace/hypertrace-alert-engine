@@ -124,18 +124,18 @@ class NotificationEventProcessorTest {
     Assertions.assertEquals(1, mockWebServer.getRequestCount());
   }
 
-  private MetricAnomalyNotificationEvent getNotificationEvent(List<ViolationSummary> violationSummaries) {
-    return
-        MetricAnomalyNotificationEvent.newBuilder()
-            .setChannelId("channel-id-1")
-            .setEventConditionId("high-service-latency")
-            .setViolationTimestamp(System.currentTimeMillis())
-            .setEventConditionType("grth")
-            .setViolationSummaryList(List.of())
-            .setViolationSummaryList(violationSummaries)
-            .setTenantId("__default")
-            .setEventTimeMillis(System.currentTimeMillis())
-            .build();
+  private MetricAnomalyNotificationEvent getNotificationEvent(
+      List<ViolationSummary> violationSummaries) {
+    return MetricAnomalyNotificationEvent.newBuilder()
+        .setChannelId("channel-id-1")
+        .setEventConditionId("high-service-latency")
+        .setViolationTimestamp(System.currentTimeMillis())
+        .setEventConditionType("grth")
+        .setViolationSummaryList(List.of())
+        .setViolationSummaryList(violationSummaries)
+        .setTenantId("__default")
+        .setEventTimeMillis(System.currentTimeMillis())
+        .build();
   }
 
   @AfterEach
