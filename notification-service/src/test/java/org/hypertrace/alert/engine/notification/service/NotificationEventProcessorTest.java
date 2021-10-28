@@ -83,6 +83,7 @@ class NotificationEventProcessorTest {
   }
 
   @Test
+  @SetEnvironmentVariable(key = "SERVICE_NAME", value = "notification-service")
   void testProcessForDynamicThreshold() throws IOException {
     MockResponse mockedResponse =
         new MockResponse()
