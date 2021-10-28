@@ -38,7 +38,7 @@ jobs:
       - name: publish docker image
         uses: hypertrace/github-actions/gradle@main
         with: 
-          args: dockerPushImages
+          args: publish dockerPushImages
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKERHUB_PUBLISH_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PUBLISH_TOKEN }}
