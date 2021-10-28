@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -29,15 +28,13 @@ public class NotificationEventProcessorService extends PlatformService {
   private final KafkaConfigReader kafkaConfigReader;
   private final KafkaConsumer<String, ByteBuffer> consumer;
   private final NotificationEventProcessor notificationEventProcessor;
-  private final NotificationChannelsReader notificationChannelsReader;
 
   public NotificationEventProcessorService(ConfigClient configClient) {
     super(configClient);
-    notificationChannelsReader =
-        new NotificationChannelsReader(
+    notificationEventProcessor =
+        new NotificationEventProcessor(
             getAppConfig().getConfig(NotificationChannelsReader.NOTIIFICATION_CHANNELS_SOURCE),
             getLifecycle());
-    notificationEventProcessor = new NotificationEventProcessor();
     this.kafkaConfigReader = new KafkaConfigReader(getAppConfig().getConfig("queue.config.kafka"));
     Properties props = new Properties();
     props.putAll(kafkaConfigReader.getConsumerConfig(createBaseProperties()));
@@ -50,15 +47,12 @@ public class NotificationEventProcessorService extends PlatformService {
 
   @Override
   protected void doStart() {
-    List<NotificationChannel> notificationChannels =
-        notificationChannelsReader.readNotificationChannels();
     while (true) {
       try {
         ConsumerRecords<String, ByteBuffer> records =
             consumer.poll(Duration.ofMillis(CONSUMER_POLL_TIMEOUT_MS));
         for (ConsumerRecord<String, ByteBuffer> record : records) {
-          notificationEventProcessor.process(
-              NotificationEvent.fromByteBuffer(record.value()), notificationChannels);
+          notificationEventProcessor.process(NotificationEvent.fromByteBuffer(record.value()));
         }
       } catch (IOException e) {
         LOGGER.error("Exception processing record", e);

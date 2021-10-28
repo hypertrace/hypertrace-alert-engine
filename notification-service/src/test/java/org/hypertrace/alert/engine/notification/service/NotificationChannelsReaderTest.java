@@ -33,7 +33,7 @@ class NotificationChannelsReaderTest {
                     return null;
                   }
                 })
-            .readNotificationChannels();
+            .readAllNotificationChannelsForTenant("default");
 
     assertEquals(1, notificationChannels.size());
     assertEquals("channel-1", notificationChannels.get(0).getChannelName());
@@ -47,7 +47,7 @@ class NotificationChannelsReaderTest {
                 notificationChannels.get(0).getNotificationChannelConfig().get(0))
             .getWebhookFormat());
     assertEquals(
-        "https://hooks.slack.com/services/abc",
+        "http://localhost:11502/hello/world",
         ((WebFormatNotificationChannelConfig)
                 notificationChannels.get(0).getNotificationChannelConfig().get(0))
             .getUrl());

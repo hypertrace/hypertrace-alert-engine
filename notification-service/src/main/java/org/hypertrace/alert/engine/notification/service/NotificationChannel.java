@@ -10,6 +10,7 @@ public class NotificationChannel {
 
   private final String channelName;
   private final String channelId;
+  private final String tenantId;
   private final List<NotificationChannelConfig> notificationChannelConfig;
 
   @SuperBuilder

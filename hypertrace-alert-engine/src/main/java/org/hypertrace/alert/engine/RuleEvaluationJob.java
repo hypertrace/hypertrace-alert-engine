@@ -17,7 +17,6 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
-import org.hypertrace.alert.engine.notification.service.NotificationChannel;
 import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;
 import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.quartz.Job;
@@ -54,9 +53,6 @@ public class RuleEvaluationJob implements Job {
 
     Config jobConfig = (Config) jobDataMap.get(AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG);
 
-    List<NotificationChannel> notificationChannels =
-        (List<NotificationChannel>) jobDataMap.get(RuleEvaluationJobManager.NOTIFICATION_CHANNELS);
-
     for (AlertTask.Builder alertTaskBuilder : alertTasks) {
       Instant startTime = Instant.now();
       Instant now = AlertTaskConverter.getCurrent(jobConfig);
@@ -72,8 +68,7 @@ public class RuleEvaluationJob implements Job {
       try {
         Optional<NotificationEvent> notificationEventOptional =
             alertRuleEvaluator.process(alertTaskBuilder.build());
-        notificationEventOptional.ifPresent(
-            event -> notificationEventProcessor.process(event, notificationChannels));
+        notificationEventOptional.ifPresent(notificationEventProcessor::process);
       } catch (IOException e) {
         alertProcessingErrorCounter
             .computeIfAbsent(

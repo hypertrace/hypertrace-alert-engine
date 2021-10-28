@@ -25,7 +25,6 @@ import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobC
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.DbRuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.MetricAnomalyAlertTaskJob;
-import org.hypertrace.alert.engine.notification.service.NotificationChannel;
 import org.hypertrace.alert.engine.notification.service.NotificationChannelsReader;
 import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;
 import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
@@ -48,13 +47,12 @@ public class RuleEvaluationJobManager implements JobManager {
   static final String ALERT_TASKS = "ALERT_TASKS";
   static final String ALERT_RULE_EVALUATOR = "ALERT_RULE_EVALUATOR";
   static final String NOTIFICATION_PROCESSOR = "NOTIFICATION_PROCESSOR";
-  static final String NOTIFICATION_CHANNELS = "NOTIFICATION_CHANNELS";
   static final String JOB_SUFFIX = "jobSuffix";
 
   private JobKey jobKey;
   private JobDetail jobDetail;
   private Trigger jobTrigger;
-  private PlatformServiceLifecycle lifecycle;
+  private final PlatformServiceLifecycle lifecycle;
 
   public RuleEvaluationJobManager(PlatformServiceLifecycle lifecycle) {
     this.lifecycle = lifecycle;
@@ -153,12 +151,10 @@ public class RuleEvaluationJobManager implements JobManager {
   private void addNotificationProcessorToJobData(
       JobDataMap jobDataMap, Config appConfig, PlatformServiceLifecycle platformServiceLifecycle) {
 
-    List<NotificationChannel> notificationChannels =
-        new NotificationChannelsReader(
-                appConfig.getConfig(NotificationChannelsReader.NOTIIFICATION_CHANNELS_SOURCE),
-                platformServiceLifecycle)
-            .readNotificationChannels();
-    jobDataMap.put(NOTIFICATION_CHANNELS, notificationChannels);
-    jobDataMap.put(NOTIFICATION_PROCESSOR, new NotificationEventProcessor());
+    jobDataMap.put(
+        NOTIFICATION_PROCESSOR,
+        new NotificationEventProcessor(
+            appConfig.getConfig(NotificationChannelsReader.NOTIIFICATION_CHANNELS_SOURCE),
+            platformServiceLifecycle));
   }
 }

@@ -7,7 +7,6 @@ import com.typesafe.config.Config;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.FSRuleSource;
@@ -21,6 +20,7 @@ public class NotificationChannelsReader {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NotificationChannelsReader.class);
   public static final String NOTIIFICATION_CHANNELS_SOURCE = "notificationChannelsSource";
+  private static final String TENANT_ID = "tenantId";
   private static final String CHANNEL_ID = "channelId";
   private static final String CHANNEL_NAME = "channelName";
   private static final String CHANNEL_CONFIG = "channelConfig";
@@ -58,16 +58,16 @@ public class NotificationChannelsReader {
     }
   }
 
-  public List<NotificationChannel> readNotificationChannels() {
+  public List<NotificationChannel> readAllNotificationChannelsForTenant(String tenantId) {
     if (ruleSourceTypeFs) {
-      return readNotificationChannelsFromFs();
+      return readNotificationChannelsFromFs(tenantId);
     }
-    return readNotificationChannelFromDb();
+    return readNotificationChannelsFromDb(tenantId);
   }
 
-  private List<NotificationChannel> readNotificationChannelFromDb() {
+  private List<NotificationChannel> readNotificationChannelsFromDb(String tenantId) {
     List<org.hypertrace.notification.config.service.v1.NotificationChannel> notificationChannels =
-        dbRuleSource.getAllRules();
+        dbRuleSource.getNotificationChannelsForTenant(tenantId);
     return notificationChannels.stream()
         .filter(
             notificationChannel ->
@@ -92,6 +92,7 @@ public class NotificationChannelsReader {
                       .collect(Collectors.toUnmodifiableList());
 
               return NotificationChannel.builder()
+                  .tenantId(tenantId)
                   .channelId(notificationChannel.getId())
                   .channelName(
                       notificationChannel.getNotificationChannelMutableData().getChannelName())
@@ -101,7 +102,7 @@ public class NotificationChannelsReader {
         .collect(Collectors.toUnmodifiableList());
   }
 
-  private List<NotificationChannel> readNotificationChannelsFromFs() {
+  private List<NotificationChannel> readNotificationChannelsFromFs(String tenantId) {
     try {
       return fsRuleSource.getAllRules(jsonNode -> true).stream()
           .map(
@@ -113,7 +114,7 @@ public class NotificationChannelsReader {
                 }
                 return null;
               })
-          .filter(Objects::nonNull)
+          .filter(node -> node != null && tenantId.equals(node.get(TENANT_ID).asText()))
           .map(
               node ->
                   NotificationChannel.builder()
