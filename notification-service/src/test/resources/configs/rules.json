@@ -1,11 +1,12 @@
 [
   {
+    "tenantId": "__default",
     "channelName": "channel-1",
     "channelId": "channel-id-1",
     "channelConfig": [
       {
         "channelConfigType": "WEBHOOK",
-        "url": "https://hooks.slack.com/services/abc",
+        "url": "http://localhost:11502/hello/world",
         "webhookFormat": "WEBHOOK_FORMAT_SLACK"
       }
     ]

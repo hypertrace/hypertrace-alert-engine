@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -30,11 +29,12 @@ public class NotificationEventProcessorService extends PlatformService {
   private final KafkaConsumer<String, ByteBuffer> consumer;
   private final NotificationEventProcessor notificationEventProcessor;
 
-  public NotificationEventProcessorService(ConfigClient configClient) throws IOException {
+  public NotificationEventProcessorService(ConfigClient configClient) {
     super(configClient);
-    List<NotificationChannel> notificationChannels =
-        NotificationChannelsReader.readNotificationChannels(getAppConfig());
-    notificationEventProcessor = new NotificationEventProcessor(notificationChannels);
+    notificationEventProcessor =
+        new NotificationEventProcessor(
+            getAppConfig().getConfig(NotificationChannelsReader.NOTIIFICATION_CHANNELS_SOURCE),
+            getLifecycle());
     this.kafkaConfigReader = new KafkaConfigReader(getAppConfig().getConfig("queue.config.kafka"));
     Properties props = new Properties();
     props.putAll(kafkaConfigReader.getConsumerConfig(createBaseProperties()));

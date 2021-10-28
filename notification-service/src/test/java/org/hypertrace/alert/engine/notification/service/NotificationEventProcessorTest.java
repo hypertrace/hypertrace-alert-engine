@@ -1,8 +1,11 @@
 package org.hypertrace.alert.engine.notification.service;
 
+import com.typesafe.config.Config;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
@@ -12,11 +15,13 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOperator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
-import org.hypertrace.alert.engine.notification.service.NotificationChannel.WebFormatNotificationChannelConfig;
+import org.hypertrace.core.serviceframework.config.ConfigClientFactory;
+import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.SetEnvironmentVariable;
 
 class NotificationEventProcessorTest {
 
@@ -29,6 +34,7 @@ class NotificationEventProcessorTest {
   }
 
   @Test
+  @SetEnvironmentVariable(key = "SERVICE_NAME", value = "notification-service")
   void testProcessForStaticThreshold() throws IOException {
     MockResponse mockedResponse =
         new MockResponse()
@@ -54,15 +60,29 @@ class NotificationEventProcessorTest {
 
     NotificationEvent notificationEvent = getNotificationEvent(violationSummaryList);
 
-    NotificationChannel notificationChannel = getNotificationChannel();
     Assertions.assertEquals(0, mockWebServer.getRequestCount());
-    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
+    Config config = ConfigClientFactory.getClient().getConfig();
+    new NotificationEventProcessor(
+            config.getConfig("notificationChannelsSource"),
+            new PlatformServiceLifecycle() {
+              @Override
+              public CompletionStage<Void> shutdownComplete() {
+                return new CompletableFuture().minimalCompletionStage();
+              }
+
+              @Override
+              public State getState() {
+                return null;
+              }
+            })
+        .process(notificationEvent);
     Assertions.assertEquals(1, mockWebServer.getRequestCount());
     // verify body
     // RecordedRequest request = mockWebServer.takeRequest();
   }
 
   @Test
+  @SetEnvironmentVariable(key = "SERVICE_NAME", value = "notification-service")
   void testProcessForDynamicThreshold() throws IOException {
     MockResponse mockedResponse =
         new MockResponse()
@@ -88,10 +108,22 @@ class NotificationEventProcessorTest {
 
     NotificationEvent notificationEvent = getNotificationEvent(violationSummaryList);
 
-    NotificationChannel notificationChannel = getNotificationChannel();
-
     Assertions.assertEquals(0, mockWebServer.getRequestCount());
-    new NotificationEventProcessor(List.of(notificationChannel)).process(notificationEvent);
+    Config config = ConfigClientFactory.getClient().getConfig();
+    new NotificationEventProcessor(
+            config.getConfig("notificationChannelsSource"),
+            new PlatformServiceLifecycle() {
+              @Override
+              public CompletionStage<Void> shutdownComplete() {
+                return new CompletableFuture().minimalCompletionStage();
+              }
+
+              @Override
+              public State getState() {
+                return null;
+              }
+            })
+        .process(notificationEvent);
     Assertions.assertEquals(1, mockWebServer.getRequestCount());
   }
 
@@ -99,7 +131,7 @@ class NotificationEventProcessorTest {
       throws IOException {
     MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
         MetricAnomalyNotificationEvent.newBuilder()
-            .setChannelId("1")
+            .setChannelId("channel-id-1")
             .setEventConditionId("high-service-latency")
             .setViolationTimestamp(System.currentTimeMillis())
             .setEventConditionType("grth")
@@ -117,22 +149,8 @@ class NotificationEventProcessorTest {
     return NotificationEvent.newBuilder()
         .setEventRecord(eventRecord)
         .setNotificationEventMetadata(Map.of())
-        .setTenantId("tenant-1")
+        .setTenantId("__default")
         .setEventTimeMillis(System.currentTimeMillis())
-        .build();
-  }
-
-  private NotificationChannel getNotificationChannel() {
-    return NotificationChannel.builder()
-        .channelName("1")
-        .channelId("1")
-        .notificationChannelConfig(
-            List.of(
-                WebFormatNotificationChannelConfig.builder()
-                    .channelConfigType(NotificationChannelsReader.CHANNEL_CONFIG_TYPE_WEBHOOK)
-                    .url("http://localhost:11502/hello/world")
-                    .webhookFormat(NotificationChannelsReader.WEBHOOK_FORMAT_SLACK)
-                    .build()))
         .build();
   }
 

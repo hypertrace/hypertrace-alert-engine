@@ -4,27 +4,29 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.CRON_EXPRESSION;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG_CRON_EXPRESSION;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_TASK_CONVERTER;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_GROUP;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_NAME;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_TRIGGER_NAME;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.RULE_SOURCE_TYPE;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.RULE_SOURCE_TYPE_DATASTORE;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.RULE_SOURCE_TYPE_FS;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.FSRuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.DbRuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.MetricAnomalyAlertTaskJob;
-import org.hypertrace.alert.engine.notification.service.NotificationChannel;
 import org.hypertrace.alert.engine.notification.service.NotificationChannelsReader;
 import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;
+import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -41,7 +43,6 @@ public class RuleEvaluationJobManager implements JobManager {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RuleEvaluationJobManager.class);
 
-  static final String ALERT_TASKS = "ALERT_TASKS";
   static final String ALERT_RULE_EVALUATOR = "ALERT_RULE_EVALUATOR";
   static final String NOTIFICATION_PROCESSOR = "NOTIFICATION_PROCESSOR";
   static final String JOB_SUFFIX = "jobSuffix";
@@ -49,6 +50,11 @@ public class RuleEvaluationJobManager implements JobManager {
   private JobKey jobKey;
   private JobDetail jobDetail;
   private Trigger jobTrigger;
+  private final PlatformServiceLifecycle lifecycle;
+
+  public RuleEvaluationJobManager(PlatformServiceLifecycle lifecycle) {
+    this.lifecycle = lifecycle;
+  }
 
   public void initJob(Config appConfig) {
     Config jobConfig =
@@ -69,7 +75,7 @@ public class RuleEvaluationJobManager implements JobManager {
 
     addEvaluatorToJobData(jobDataMap, appConfig);
 
-    addNotificationProcessorToJobData(jobDataMap, appConfig);
+    addNotificationProcessorToJobData(jobDataMap, appConfig, lifecycle);
 
     addJobConfigToJobData(jobDataMap, appConfig);
 
@@ -103,14 +109,25 @@ public class RuleEvaluationJobManager implements JobManager {
   }
 
   private void addAlertTasksToJobData(JobDataMap jobDataMap, Config appConfig) {
-    RuleSource ruleSource = RuleSourceProvider.getProvider(appConfig.getConfig(ALERT_RULE_SOURCE));
+    RuleSource ruleSource = getAlertRuleSource(appConfig.getConfig(ALERT_RULE_SOURCE));
     Config jobConfig = getJobConfig(appConfig);
 
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
-    List<AlertTask.Builder> alertTasks =
-        MetricAnomalyAlertTaskJob.getAlertTasks(alertTaskConverter, ruleSource);
 
-    jobDataMap.put(ALERT_TASKS, alertTasks);
+    jobDataMap.put(JOB_DATA_MAP_RULE_SOURCE, ruleSource);
+    jobDataMap.put(JOB_DATA_MAP_TASK_CONVERTER, alertTaskConverter);
+  }
+
+  private RuleSource getAlertRuleSource(Config ruleSourceConfig) {
+    String ruleSourceType = ruleSourceConfig.getString(RULE_SOURCE_TYPE);
+    switch (ruleSourceType) {
+      case RULE_SOURCE_TYPE_FS:
+        return new FSRuleSource(ruleSourceConfig.getConfig(RULE_SOURCE_TYPE_FS));
+      case RULE_SOURCE_TYPE_DATASTORE:
+        return new DbRuleSource(ruleSourceConfig.getConfig(RULE_SOURCE_TYPE_DATASTORE), lifecycle);
+      default:
+        throw new RuntimeException(String.format("Invalid rule source type:%s", ruleSourceType));
+    }
   }
 
   private void addEvaluatorToJobData(JobDataMap jobDataMap, Config appConfig) {
@@ -128,13 +145,13 @@ public class RuleEvaluationJobManager implements JobManager {
         : ConfigFactory.parseMap(Map.of());
   }
 
-  private void addNotificationProcessorToJobData(JobDataMap jobDataMap, Config appConfig) {
-    try {
-      List<NotificationChannel> notificationChannels =
-          NotificationChannelsReader.readNotificationChannels(appConfig);
-      jobDataMap.put(NOTIFICATION_PROCESSOR, new NotificationEventProcessor(notificationChannels));
-    } catch (IOException e) {
-      throw new RuntimeException();
-    }
+  private void addNotificationProcessorToJobData(
+      JobDataMap jobDataMap, Config appConfig, PlatformServiceLifecycle platformServiceLifecycle) {
+
+    jobDataMap.put(
+        NOTIFICATION_PROCESSOR,
+        new NotificationEventProcessor(
+            appConfig.getConfig(NotificationChannelsReader.NOTIIFICATION_CHANNELS_SOURCE),
+            platformServiceLifecycle));
   }
 }

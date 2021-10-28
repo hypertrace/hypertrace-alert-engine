@@ -90,6 +90,7 @@ notificationChannelsConfig:
   channels:
     [
       {
+        "tenantId": "default",
         "channelName": "channel-1",
         "channelId": "channel-id-1",
         "channelConfig": [

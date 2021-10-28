@@ -1,5 +1,8 @@
 package org.hypertrace.alert.engine;
 
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_TASK_CONVERTER;
+
 import com.typesafe.config.Config;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
@@ -14,9 +17,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.MetricAnomalyAlertTaskJob;
 import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;
 import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.quartz.Job;
@@ -42,8 +47,6 @@ public class RuleEvaluationJob implements Job {
     LOGGER.debug("Starting Hypertrace Alert Engine: {}", jobDetail.getKey());
 
     JobDataMap jobDataMap = jobDetail.getJobDataMap();
-    List<AlertTask.Builder> alertTasks =
-        (List<AlertTask.Builder>) jobDataMap.get(RuleEvaluationJobManager.ALERT_TASKS);
 
     AlertRuleEvaluator alertRuleEvaluator =
         (AlertRuleEvaluator) jobDataMap.get(RuleEvaluationJobManager.ALERT_RULE_EVALUATOR);
@@ -52,6 +55,13 @@ public class RuleEvaluationJob implements Job {
             jobDataMap.get(RuleEvaluationJobManager.NOTIFICATION_PROCESSOR);
 
     Config jobConfig = (Config) jobDataMap.get(AlertTaskJobConstants.JOB_DATA_MAP_JOB_CONFIG);
+    RuleSource ruleSource = (RuleSource) jobDataMap.get(JOB_DATA_MAP_RULE_SOURCE);
+
+    AlertTaskConverter alertTaskConverter =
+        (AlertTaskConverter) jobDataMap.get(JOB_DATA_MAP_TASK_CONVERTER);
+
+    List<AlertTask.Builder> alertTasks =
+        MetricAnomalyAlertTaskJob.getAlertTasks(alertTaskConverter, ruleSource);
 
     for (AlertTask.Builder alertTaskBuilder : alertTasks) {
       Instant startTime = Instant.now();

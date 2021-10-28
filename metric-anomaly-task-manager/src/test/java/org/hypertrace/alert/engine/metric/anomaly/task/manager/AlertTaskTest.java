@@ -12,12 +12,14 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSourceProvider;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
+import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobManager;
 import org.hypertrace.alerting.config.service.v1.Attribute;
 import org.hypertrace.alerting.config.service.v1.BaselineThresholdCondition;
 import org.hypertrace.alerting.config.service.v1.Filter;
@@ -33,13 +35,34 @@ import org.hypertrace.alerting.config.service.v1.StaticThresholdOperator;
 import org.hypertrace.alerting.config.service.v1.ValueOperator;
 import org.hypertrace.alerting.config.service.v1.ViolationCondition;
 import org.hypertrace.core.documentstore.Document;
+import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class AlertTaskTest {
+
+  private static AlertTaskJobManager alertTaskJobManager;
+
+  @BeforeAll
+  public static void setup() {
+    alertTaskJobManager =
+        new AlertTaskJobManager(
+            new PlatformServiceLifecycle() {
+              @Override
+              public CompletionStage<Void> shutdownComplete() {
+                return new CompletableFuture<Void>().minimalCompletionStage();
+              }
+
+              @Override
+              public State getState() {
+                return null;
+              }
+            });
+  }
 
   @ParameterizedTest
   @MethodSource("provideInvalidRules")
@@ -50,7 +73,7 @@ class AlertTaskTest {
     String absolutePath = file.getAbsolutePath();
 
     Config ruleSourceConfig = ConfigFactory.parseMap(Map.of("type", "fs", "fs.path", absolutePath));
-    RuleSource ruleSource = RuleSourceProvider.getProvider(ruleSourceConfig);
+    RuleSource ruleSource = alertTaskJobManager.getRuleSource(ruleSourceConfig);
     Predicate<JsonNode> PREDICATE =
         node -> (node.get("eventConditionType").textValue().equals(METRIC_ANOMALY_EVENT_CONDITION));
     List<Document> documents = ruleSource.getAllRules(PREDICATE);
@@ -84,7 +107,7 @@ class AlertTaskTest {
     String absolutePath = file.getAbsolutePath();
 
     Config ruleSourceConfig = ConfigFactory.parseMap(Map.of("type", "fs", "fs.path", absolutePath));
-    RuleSource ruleSource = RuleSourceProvider.getProvider(ruleSourceConfig);
+    RuleSource ruleSource = alertTaskJobManager.getRuleSource(ruleSourceConfig);
     Predicate<JsonNode> PREDICATE =
         node -> (node.get("eventConditionType").textValue().equals(METRIC_ANOMALY_EVENT_CONDITION));
     List<Document> documents = ruleSource.getAllRules(PREDICATE);
@@ -115,7 +138,7 @@ class AlertTaskTest {
     String absolutePath = file.getAbsolutePath();
 
     Config ruleSourceConfig = ConfigFactory.parseMap(Map.of("type", "fs", "fs.path", absolutePath));
-    RuleSource ruleSource = RuleSourceProvider.getProvider(ruleSourceConfig);
+    RuleSource ruleSource = alertTaskJobManager.getRuleSource(ruleSourceConfig);
     Predicate<JsonNode> PREDICATE =
         node -> (node.get("eventConditionType").textValue().equals(METRIC_ANOMALY_EVENT_CONDITION));
     List<Document> documents = ruleSource.getAllRules(PREDICATE);
