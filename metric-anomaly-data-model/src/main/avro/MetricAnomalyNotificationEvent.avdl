@@ -31,6 +31,8 @@ protocol MetricAnomalyNotificationEventProtocol {
   }
 
   record MetricAnomalyNotificationEvent {
+    string tenant_id;
+    long event_time_millis;
     string event_condition_id;
     string event_condition_type;
     long violation_timestamp;
