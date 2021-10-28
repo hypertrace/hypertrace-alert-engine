@@ -10,7 +10,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaConfigReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ class NotificationEventProducer {
     producer = new KafkaProducer<String, ByteBuffer>(properties);
   }
 
-  public void publish(NotificationEvent notificationEvent) {
+  public void publish(MetricAnomalyNotificationEvent notificationEvent) {
     try {
       producer.send(
           new ProducerRecord<String, ByteBuffer>(

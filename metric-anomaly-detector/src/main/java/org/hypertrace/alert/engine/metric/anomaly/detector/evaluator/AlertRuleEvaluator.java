@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alerting.config.service.v1.MetricAnomalyEventCondition;
 import org.hypertrace.alerting.config.service.v1.ViolationCondition;
 import org.hypertrace.core.attribute.service.client.AttributeServiceClient;
@@ -18,7 +18,6 @@ public class AlertRuleEvaluator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AlertRuleEvaluator.class);
   private static final String METRIC_ANOMALY_EVENT_CONDITION = "metricAnomalyEventCondition";
-  static final String METRIC_ANOMALY_ACTION_EVENT_TYPE = "MetricAnomalyViolation";
   private final StaticRuleEvaluator staticRuleEvaluator;
   private final BaselineRuleEvaluator baselineRuleEvaluator;
 
@@ -39,7 +38,7 @@ public class AlertRuleEvaluator {
     baselineRuleEvaluator = new BaselineRuleEvaluator(metricCache);
   }
 
-  public Optional<NotificationEvent> process(AlertTask alertTask) throws IOException {
+  public Optional<MetricAnomalyNotificationEvent> process(AlertTask alertTask) throws IOException {
     MetricAnomalyEventCondition metricAnomalyEventCondition;
 
     if (alertTask.getEventConditionType().equals(METRIC_ANOMALY_EVENT_CONDITION)) {

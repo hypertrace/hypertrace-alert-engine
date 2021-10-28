@@ -18,9 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.alerting.config.service.v1.BaselineThresholdCondition;
 import org.hypertrace.alerting.config.service.v1.MetricAnomalyEventCondition;
@@ -43,7 +41,7 @@ public class BaselineRuleEvaluator {
     this.metricCache = metricCache;
   }
 
-  Optional<NotificationEvent> evaluateRule(
+  Optional<MetricAnomalyNotificationEvent> evaluateRule(
       MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask)
       throws IOException {
     Instant startTime = Instant.now();
@@ -129,7 +127,7 @@ public class BaselineRuleEvaluator {
         metricAnomalyEventCondition.getEvaluationWindowDuration());
   }
 
-  private Optional<NotificationEvent> getNotificationEvent(
+  private Optional<MetricAnomalyNotificationEvent> getNotificationEvent(
       AlertTask alertTask,
       int dataCount,
       int violationCount,
@@ -161,24 +159,11 @@ public class BaselineRuleEvaluator {
             .setEventConditionId(alertTask.getEventConditionId())
             .setEventConditionType(alertTask.getEventConditionType())
             .setViolationSummaryList(violationSummaryList)
-            .build();
-
-    EventRecord eventRecord =
-        EventRecord.newBuilder()
-            .setEventType(AlertRuleEvaluator.METRIC_ANOMALY_ACTION_EVENT_TYPE)
-            .setEventRecordMetadata(Map.of())
-            .setEventValue(metricAnomalyNotificationEvent.toByteBuffer())
-            .build();
-
-    NotificationEvent notificationEvent =
-        NotificationEvent.newBuilder()
-            .setTenantId(alertTask.getTenantId())
-            .setNotificationEventMetadata(Map.of())
             .setEventTimeMillis(alertTask.getCurrentExecutionTime())
-            .setEventRecord(eventRecord)
+            .setTenantId(alertTask.getTenantId())
             .build();
 
-    LOGGER.debug("Notification Event {}", notificationEvent);
-    return Optional.of(notificationEvent);
+    LOGGER.debug("Notification Event {}", metricAnomalyNotificationEvent);
+    return Optional.of(metricAnomalyNotificationEvent);
   }
 }

@@ -3,7 +3,6 @@ package org.hypertrace.alert.engine.metric.anomaly.detector.evaluator;
 import static org.hypertrace.alert.engine.metric.anomaly.detector.MetricAnomalyDetectorConstants.TENANT_ID_KEY;
 
 import io.micrometer.core.instrument.Timer;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,9 +14,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOperator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
@@ -39,9 +36,8 @@ public class StaticRuleEvaluator {
     this.metricCache = metricCache;
   }
 
-  Optional<NotificationEvent> evaluateRule(
-      MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask)
-      throws IOException {
+  Optional<MetricAnomalyNotificationEvent> evaluateRule(
+      MetricAnomalyEventCondition metricAnomalyEventCondition, AlertTask alertTask) {
     Instant startTime = Instant.now();
     StaticThresholdCondition staticThresholdCondition =
         metricAnomalyEventCondition
@@ -139,15 +135,14 @@ public class StaticRuleEvaluator {
     }
   }
 
-  private Optional<NotificationEvent> getNotificationEvent(
+  private Optional<MetricAnomalyNotificationEvent> getNotificationEvent(
       AlertTask alertTask,
       int dataCount,
       int violationCount,
       StaticThresholdOperator operator,
       List<Double> metricValues,
       double staticThreshold,
-      String evaluationWindowDuration)
-      throws IOException {
+      String evaluationWindowDuration) {
 
     List<ViolationSummary> violationSummaryList = new ArrayList<>();
 
@@ -171,24 +166,11 @@ public class StaticRuleEvaluator {
             .setEventConditionId(alertTask.getEventConditionId())
             .setEventConditionType(alertTask.getEventConditionType())
             .setViolationSummaryList(violationSummaryList)
-            .build();
-
-    EventRecord eventRecord =
-        EventRecord.newBuilder()
-            .setEventType(AlertRuleEvaluator.METRIC_ANOMALY_ACTION_EVENT_TYPE)
-            .setEventRecordMetadata(Map.of())
-            .setEventValue(metricAnomalyNotificationEvent.toByteBuffer())
-            .build();
-
-    NotificationEvent notificationEvent =
-        NotificationEvent.newBuilder()
-            .setTenantId(alertTask.getTenantId())
-            .setNotificationEventMetadata(Map.of())
             .setEventTimeMillis(alertTask.getCurrentExecutionTime())
-            .setEventRecord(eventRecord)
+            .setTenantId(alertTask.getTenantId())
             .build();
 
-    LOGGER.debug("Notification Event {}", notificationEvent);
-    return Optional.of(notificationEvent);
+    LOGGER.debug("Notification Event {}", metricAnomalyNotificationEvent);
+    return Optional.of(metricAnomalyNotificationEvent);
   }
 }
