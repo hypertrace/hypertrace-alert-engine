@@ -15,6 +15,7 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.RULE_SOURCE_TYPE_DATASTORE;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.RULE_SOURCE_TYPE_FS;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.Map;
@@ -92,6 +93,7 @@ public class AlertTaskJobManager implements JobManager {
     }
   }
 
+  @VisibleForTesting
   public RuleSource getRuleSource(Config ruleSourceConfig) {
     String ruleSourceType = ruleSourceConfig.getString(RULE_SOURCE_TYPE);
     switch (ruleSourceType) {
