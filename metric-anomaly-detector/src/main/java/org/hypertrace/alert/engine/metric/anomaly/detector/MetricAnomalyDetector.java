@@ -22,7 +22,8 @@ class MetricAnomalyDetector {
   }
 
   void process(AlertTask alertTask) throws IOException {
-    Optional<MetricAnomalyNotificationEvent> optionalNotificationEvent = alertRuleEvaluator.process(alertTask);
+    Optional<MetricAnomalyNotificationEvent> optionalNotificationEvent =
+        alertRuleEvaluator.process(alertTask);
     optionalNotificationEvent.ifPresent(eventProducer::publish);
   }
 }
