@@ -17,7 +17,6 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOpera
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
 import org.hypertrace.core.serviceframework.config.ConfigClientFactory;
 import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
-import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle.State;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -150,7 +149,7 @@ class NotificationEventProcessorTest {
     return NotificationEvent.newBuilder()
         .setEventRecord(eventRecord)
         .setNotificationEventMetadata(Map.of())
-        .setTenantId("default")
+        .setTenantId("__default")
         .setEventTimeMillis(System.currentTimeMillis())
         .build();
   }

@@ -33,7 +33,7 @@ class NotificationChannelsReaderTest {
                     return null;
                   }
                 })
-            .readAllNotificationChannelsForTenant("default");
+            .readAllNotificationChannelsForTenant("__default");
 
     assertEquals(1, notificationChannels.size());
     assertEquals("channel-1", notificationChannels.get(0).getChannelName());
