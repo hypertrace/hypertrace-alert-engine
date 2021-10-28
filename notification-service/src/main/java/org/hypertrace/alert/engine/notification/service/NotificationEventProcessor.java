@@ -4,16 +4,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.typesafe.config.Config;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.notification.service.notification.WebhookNotifier;
 import org.hypertrace.alert.engine.notification.transport.webhook.WebhookSender;
 import org.hypertrace.alert.engine.notification.transport.webhook.http.HttpWithJsonSender;
@@ -64,29 +61,16 @@ public class NotificationEventProcessor {
     return notificationChannelMap;
   }
 
-  public void process(NotificationEvent notificationEvent) {
+  public void process(MetricAnomalyNotificationEvent notificationEvent) {
 
     LOGGER.debug("Processing notification {}", notificationEvent);
 
-    EventRecord eventRecord = notificationEvent.getEventRecord();
-    if (!eventRecord.getEventType().equals(METRIC_ANOMALY_ACTION_EVENT_TYPE)) {
-      LOGGER.debug("Received unsupported event type {}", eventRecord.getEventType());
-      return;
-    }
-
-    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent;
-    try {
-      metricAnomalyNotificationEvent =
-          MetricAnomalyNotificationEvent.fromByteBuffer(eventRecord.getEventValue());
-    } catch (IOException e) {
-      throw new RuntimeException("Exception deserializing MetricAnomalyNotificationEvent", e);
-    }
     NotificationChannel notificationChannel =
         getNotificationChannel(
-            notificationEvent.getTenantId(), metricAnomalyNotificationEvent.getChannelId());
+            notificationEvent.getTenantId(), notificationEvent.getChannelId());
     if (notificationChannel != null) {
-      LOGGER.debug("Sending notification event {}", metricAnomalyNotificationEvent);
-      webhookNotifier.notify(metricAnomalyNotificationEvent, notificationChannel);
+      LOGGER.debug("Sending notification event {}", notificationEvent);
+      webhookNotifier.notify(notificationEvent, notificationChannel);
     }
   }
 

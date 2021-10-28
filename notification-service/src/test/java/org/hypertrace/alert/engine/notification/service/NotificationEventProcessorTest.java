@@ -3,15 +3,12 @@ package org.hypertrace.alert.engine.notification.service;
 import com.typesafe.config.Config;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.BaselineRuleViolationSummary;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.EventRecord;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticRuleViolationSummary;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.StaticThresholdOperator;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.ViolationSummary;
@@ -58,7 +55,7 @@ class NotificationEventProcessorTest {
                         .build())
                 .build());
 
-    NotificationEvent notificationEvent = getNotificationEvent(violationSummaryList);
+    MetricAnomalyNotificationEvent notificationEvent = getNotificationEvent(violationSummaryList);
 
     Assertions.assertEquals(0, mockWebServer.getRequestCount());
     Config config = ConfigClientFactory.getClient().getConfig();
@@ -106,7 +103,7 @@ class NotificationEventProcessorTest {
                         .build())
                 .build());
 
-    NotificationEvent notificationEvent = getNotificationEvent(violationSummaryList);
+    MetricAnomalyNotificationEvent notificationEvent = getNotificationEvent(violationSummaryList);
 
     Assertions.assertEquals(0, mockWebServer.getRequestCount());
     Config config = ConfigClientFactory.getClient().getConfig();
@@ -127,9 +124,8 @@ class NotificationEventProcessorTest {
     Assertions.assertEquals(1, mockWebServer.getRequestCount());
   }
 
-  private NotificationEvent getNotificationEvent(List<ViolationSummary> violationSummaries)
-      throws IOException {
-    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
+  private MetricAnomalyNotificationEvent getNotificationEvent(List<ViolationSummary> violationSummaries) {
+    return
         MetricAnomalyNotificationEvent.newBuilder()
             .setChannelId("channel-id-1")
             .setEventConditionId("high-service-latency")
@@ -137,21 +133,9 @@ class NotificationEventProcessorTest {
             .setEventConditionType("grth")
             .setViolationSummaryList(List.of())
             .setViolationSummaryList(violationSummaries)
+            .setTenantId("__default")
+            .setEventTimeMillis(System.currentTimeMillis())
             .build();
-
-    EventRecord eventRecord =
-        EventRecord.newBuilder()
-            .setEventValue(metricAnomalyNotificationEvent.toByteBuffer())
-            .setEventType(NotificationEventProcessor.METRIC_ANOMALY_ACTION_EVENT_TYPE)
-            .setEventRecordMetadata(Map.of())
-            .build();
-
-    return NotificationEvent.newBuilder()
-        .setEventRecord(eventRecord)
-        .setNotificationEventMetadata(Map.of())
-        .setTenantId("__default")
-        .setEventTimeMillis(System.currentTimeMillis())
-        .build();
   }
 
   @AfterEach
