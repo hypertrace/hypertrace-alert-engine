@@ -4,6 +4,8 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.CRON_EXPRESSION;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_CONFIG_CRON_EXPRESSION;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_RULE_SOURCE;
+import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_DATA_MAP_TASK_CONVERTER;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_GROUP;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_NAME;
 import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants.JOB_TRIGGER_NAME;
@@ -13,10 +15,8 @@ import static org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertT
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.FSRuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
@@ -24,7 +24,6 @@ import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConv
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskJobConstants;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.DbRuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.JobManager;
-import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.MetricAnomalyAlertTaskJob;
 import org.hypertrace.alert.engine.notification.service.NotificationChannelsReader;
 import org.hypertrace.alert.engine.notification.service.NotificationEventProcessor;
 import org.hypertrace.core.serviceframework.spi.PlatformServiceLifecycle;
@@ -44,7 +43,6 @@ public class RuleEvaluationJobManager implements JobManager {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RuleEvaluationJobManager.class);
 
-  static final String ALERT_TASKS = "ALERT_TASKS";
   static final String ALERT_RULE_EVALUATOR = "ALERT_RULE_EVALUATOR";
   static final String NOTIFICATION_PROCESSOR = "NOTIFICATION_PROCESSOR";
   static final String JOB_SUFFIX = "jobSuffix";
@@ -115,10 +113,9 @@ public class RuleEvaluationJobManager implements JobManager {
     Config jobConfig = getJobConfig(appConfig);
 
     AlertTaskConverter alertTaskConverter = new AlertTaskConverter(jobConfig);
-    List<AlertTask.Builder> alertTasks =
-        MetricAnomalyAlertTaskJob.getAlertTasks(alertTaskConverter, ruleSource);
 
-    jobDataMap.put(ALERT_TASKS, alertTasks);
+    jobDataMap.put(JOB_DATA_MAP_RULE_SOURCE, ruleSource);
+    jobDataMap.put(JOB_DATA_MAP_TASK_CONVERTER, alertTaskConverter);
   }
 
   private RuleSource getAlertRuleSource(Config ruleSourceConfig) {
