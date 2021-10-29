@@ -19,7 +19,6 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.detector.MetricQueryBuilder;
 import org.hypertrace.alerting.config.service.v1.Attribute;
 import org.hypertrace.alerting.config.service.v1.BaselineThresholdCondition;
@@ -155,14 +154,11 @@ public class AlertRuleEvaluatorTest {
     AlertRuleEvaluator alertRuleEvaluator =
         new AlertRuleEvaluator(config, attributesServiceClient, queryServiceClient);
 
-    Optional<NotificationEvent> notificationEventOptional =
+    Optional<MetricAnomalyNotificationEvent> notificationEventOptional =
         alertRuleEvaluator.process(alertTaskBuilder.build());
     Assertions.assertTrue(notificationEventOptional.isPresent());
 
-    NotificationEvent notificationEvent = notificationEventOptional.get();
-    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
-        MetricAnomalyNotificationEvent.fromByteBuffer(
-            notificationEvent.getEventRecord().getEventValue());
+    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent = notificationEventOptional.get();
 
     assertEquals("channel1", metricAnomalyNotificationEvent.getChannelId());
     assertEquals("event-condition-1", metricAnomalyNotificationEvent.getEventConditionId());
@@ -245,14 +241,11 @@ public class AlertRuleEvaluatorTest {
     AlertRuleEvaluator alertRuleEvaluator =
         new AlertRuleEvaluator(config, attributesServiceClient, queryServiceClient);
 
-    Optional<NotificationEvent> notificationEventOptional =
+    Optional<MetricAnomalyNotificationEvent> notificationEventOptional =
         alertRuleEvaluator.process(alertTaskBuilder.build());
     Assertions.assertTrue(notificationEventOptional.isPresent());
 
-    NotificationEvent notificationEvent = notificationEventOptional.get();
-    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
-        MetricAnomalyNotificationEvent.fromByteBuffer(
-            notificationEvent.getEventRecord().getEventValue());
+    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent = notificationEventOptional.get();
 
     assertEquals("channel1", metricAnomalyNotificationEvent.getChannelId());
     assertEquals("event-condition-1", metricAnomalyNotificationEvent.getEventConditionId());
@@ -333,14 +326,11 @@ public class AlertRuleEvaluatorTest {
     AlertRuleEvaluator alertRuleEvaluator =
         new AlertRuleEvaluator(config, attributesServiceClient, queryServiceClient);
 
-    Optional<NotificationEvent> notificationEventOptional =
+    Optional<MetricAnomalyNotificationEvent> notificationEventOptional =
         alertRuleEvaluator.process(alertTaskBuilder.build());
     Assertions.assertTrue(notificationEventOptional.isPresent());
 
-    NotificationEvent notificationEvent = notificationEventOptional.get();
-    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent =
-        MetricAnomalyNotificationEvent.fromByteBuffer(
-            notificationEvent.getEventRecord().getEventValue());
+    MetricAnomalyNotificationEvent metricAnomalyNotificationEvent = notificationEventOptional.get();
 
     assertEquals("channel1", metricAnomalyNotificationEvent.getChannelId());
     assertEquals("event-condition-1", metricAnomalyNotificationEvent.getEventConditionId());

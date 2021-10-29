@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.rule.source.RuleSource;
 import org.hypertrace.alert.engine.metric.anomaly.detector.evaluator.AlertRuleEvaluator;
 import org.hypertrace.alert.engine.metric.anomaly.task.manager.job.AlertTaskConverter;
@@ -76,7 +76,7 @@ public class RuleEvaluationJob implements Job {
           Instant.ofEpochMilli(alertTaskBuilder.getLastExecutionTime()));
 
       try {
-        Optional<NotificationEvent> notificationEventOptional =
+        Optional<MetricAnomalyNotificationEvent> notificationEventOptional =
             alertRuleEvaluator.process(alertTaskBuilder.build());
         notificationEventOptional.ifPresent(notificationEventProcessor::process);
       } catch (IOException e) {

@@ -11,7 +11,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.hypertrace.alert.engine.metric.anomaly.datamodel.NotificationEvent;
+import org.hypertrace.alert.engine.metric.anomaly.datamodel.MetricAnomalyNotificationEvent;
 import org.hypertrace.alert.engine.metric.anomaly.datamodel.queue.KafkaConfigReader;
 import org.hypertrace.core.serviceframework.PlatformService;
 import org.hypertrace.core.serviceframework.config.ConfigClient;
@@ -52,7 +52,8 @@ public class NotificationEventProcessorService extends PlatformService {
         ConsumerRecords<String, ByteBuffer> records =
             consumer.poll(Duration.ofMillis(CONSUMER_POLL_TIMEOUT_MS));
         for (ConsumerRecord<String, ByteBuffer> record : records) {
-          notificationEventProcessor.process(NotificationEvent.fromByteBuffer(record.value()));
+          notificationEventProcessor.process(
+              MetricAnomalyNotificationEvent.fromByteBuffer(record.value()));
         }
       } catch (IOException e) {
         LOGGER.error("Exception processing record", e);
