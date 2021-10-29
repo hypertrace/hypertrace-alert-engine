@@ -1,9 +1,11 @@
 package org.hypertrace.alert.engine.metric.anomaly.datamodel.queue;
 
+import com.google.common.base.Joiner;
 import com.typesafe.config.Config;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public class KafkaConfigReader {
   static final String TOPIC_NAME_CONFIG = "topic";
@@ -17,8 +19,18 @@ public class KafkaConfigReader {
     this.kafkaQueueConfig = kafkaQueueConfig;
   }
 
-  public String getTopicName() {
-    return kafkaQueueConfig.getString(TOPIC_NAME_CONFIG);
+  public String getConsumerTopicName() {
+    return kafkaQueueConfig.getString(
+        new StringJoiner(".")
+            .add(CONSUMER_CONFIG)
+            .add(TOPIC_NAME_CONFIG).toString());
+  }
+
+  public String getProducerTopicName() {
+    return kafkaQueueConfig.getString(
+        new StringJoiner(".")
+            .add(CONSUMER_CONFIG)
+            .add(TOPIC_NAME_CONFIG).toString());
   }
 
   public String getBootstrapServer() {
@@ -34,21 +46,17 @@ public class KafkaConfigReader {
   }
 
   private Map<String, Object> getFlatMapConfig(Config config, String path) {
-    Map<String, Object> propertiesMap = new HashMap();
+    Map<String, Object> propertiesMap = new HashMap<>();
     Config subConfig = config.getConfig(path);
-    subConfig.entrySet().stream()
-        .forEach(
-            (entry) -> {
-              propertiesMap.put(
-                  (String) entry.getKey(), subConfig.getString((String) entry.getKey()));
-            });
+    subConfig.entrySet()
+        .forEach(entry -> propertiesMap.put(entry.getKey(), subConfig.getString(entry.getKey())));
     return propertiesMap;
   }
 
   private Map<String, Object> mergeProperties(
       Map<String, Object> baseProps, Map<String, Object> props) {
     Objects.requireNonNull(baseProps);
-    props.forEach(baseProps::put);
+    baseProps.putAll(props);
     return baseProps;
   }
 }

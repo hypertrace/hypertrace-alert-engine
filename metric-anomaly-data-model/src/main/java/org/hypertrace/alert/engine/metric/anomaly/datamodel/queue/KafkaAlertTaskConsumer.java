@@ -29,20 +29,20 @@ public class KafkaAlertTaskConsumer {
     this.kafkaConfigReader = new KafkaConfigReader(kafkaQueueConfig);
     Properties props = new Properties();
     props.putAll(kafkaConfigReader.getConsumerConfig(createBaseProperties()));
-    consumer = new KafkaConsumer<String, ByteBuffer>(props);
-    consumer.subscribe(Collections.singletonList(kafkaConfigReader.getTopicName()));
+    consumer = new KafkaConsumer<>(props);
+    consumer.subscribe(Collections.singletonList(kafkaConfigReader.getConsumerTopicName()));
   }
 
   public AlertTask dequeue() throws IOException {
     if (linkedList.isEmpty()) {
       ConsumerRecords<String, ByteBuffer> records =
           consumer.poll(Duration.ofMillis(CONSUMER_POLL_TIMEOUT_MS));
-      records.forEach(record -> linkedList.addLast(record));
+      records.forEach(linkedList::addLast);
     }
 
     if (!linkedList.isEmpty()) {
       ConsumerRecord<String, ByteBuffer> record = linkedList.remove();
-      LOGGER.info("offset = {}, key = {}, value = {}", record.offset(), record.key());
+      LOGGER.info("offset = {}, key = {}", record.offset(), record.key());
       return AlertTask.fromByteBuffer(record.value());
     }
 

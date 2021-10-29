@@ -14,20 +14,20 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 
 public class KafkaAlertTaskProducer {
 
-  private Producer<String, ByteBuffer> producer;
-  private KafkaConfigReader kafkaConfigReader;
+  private final Producer<String, ByteBuffer> producer;
+  private final KafkaConfigReader kafkaConfigReader;
 
   public KafkaAlertTaskProducer(Config kafkaQueueConfig) {
     this.kafkaConfigReader = new KafkaConfigReader(kafkaQueueConfig);
     Properties props = new Properties();
     props.putAll(kafkaConfigReader.getProducerConfig(createBaseProperties()));
-    producer = new KafkaProducer<String, ByteBuffer>(props);
+    producer = new KafkaProducer<>(props);
   }
 
   public void enqueue(AlertTask alertTask) throws IOException {
     producer.send(
-        new ProducerRecord<String, ByteBuffer>(
-            kafkaConfigReader.getTopicName(), null, alertTask.toByteBuffer()));
+        new ProducerRecord<>(
+            kafkaConfigReader.getProducerTopicName(), null, alertTask.toByteBuffer()));
   }
 
   public void close() {
