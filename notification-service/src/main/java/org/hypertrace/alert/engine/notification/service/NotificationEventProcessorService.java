@@ -39,7 +39,7 @@ public class NotificationEventProcessorService extends PlatformService {
     Properties props = new Properties();
     props.putAll(kafkaConfigReader.getConsumerConfig(createBaseProperties()));
     consumer = new KafkaConsumer<String, ByteBuffer>(props);
-    consumer.subscribe(Collections.singletonList(kafkaConfigReader.getTopicName()));
+    consumer.subscribe(Collections.singletonList(kafkaConfigReader.getConsumerTopicName()));
   }
 
   @Override
