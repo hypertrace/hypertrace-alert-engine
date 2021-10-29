@@ -26,6 +26,7 @@ dependencies {
     implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.5.2")
     implementation("org.apache.commons:commons-lang3:3.10")
     implementation("io.grpc:grpc-netty:1.40.0")
+    implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.22")
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")
