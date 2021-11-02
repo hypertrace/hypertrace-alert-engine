@@ -1,7 +1,5 @@
 package org.hypertrace.alert.engine.notification.service;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +24,7 @@ public class NotificationEventProcessorService extends PlatformService {
   private static final int CONSUMER_POLL_TIMEOUT_MS = 100;
 
   private final KafkaConfigReader kafkaConfigReader;
-  private final KafkaConsumer<String, ByteBuffer> consumer;
+  private final KafkaConsumer<String, MetricAnomalyNotificationEvent> consumer;
   private final NotificationEventProcessor notificationEventProcessor;
 
   public NotificationEventProcessorService(ConfigClient configClient) {
@@ -48,15 +46,10 @@ public class NotificationEventProcessorService extends PlatformService {
   @Override
   protected void doStart() {
     while (true) {
-      try {
-        ConsumerRecords<String, ByteBuffer> records =
-            consumer.poll(Duration.ofMillis(CONSUMER_POLL_TIMEOUT_MS));
-        for (ConsumerRecord<String, ByteBuffer> record : records) {
-          notificationEventProcessor.process(
-              MetricAnomalyNotificationEvent.fromByteBuffer(record.value()));
-        }
-      } catch (IOException e) {
-        LOGGER.error("Exception processing record", e);
+      ConsumerRecords<String, MetricAnomalyNotificationEvent> records =
+          consumer.poll(Duration.ofMillis(CONSUMER_POLL_TIMEOUT_MS));
+      for (ConsumerRecord<String, MetricAnomalyNotificationEvent> record : records) {
+        notificationEventProcessor.process(record.value());
       }
     }
   }
