@@ -27,6 +27,7 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.10")
     implementation("io.grpc:grpc-netty:1.40.0")
     implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.22")
+    implementation("io.confluent:kafka-streams-avro-serde:6.0.1")
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")

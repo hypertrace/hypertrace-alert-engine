@@ -35,6 +35,7 @@ dependencies {
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.hypertrace.config.service:alerting-config-service-api:0.1.12")
     implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.22")
+    implementation("io.confluent:kafka-streams-avro-serde:6.0.1")
 
     annotationProcessor("org.projectlombok:lombok:1.18.18")
     compileOnly("org.projectlombok:lombok:1.18.18")
