@@ -2,7 +2,6 @@ package org.hypertrace.alert.engine.metric.anomaly.datamodel.queue;
 
 import com.typesafe.config.Config;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -14,7 +13,7 @@ import org.hypertrace.alert.engine.metric.anomaly.datamodel.AlertTask;
 
 public class KafkaAlertTaskProducer {
 
-  private final Producer<String, ByteBuffer> producer;
+  private final Producer<String, AlertTask> producer;
   private final KafkaConfigReader kafkaConfigReader;
 
   public KafkaAlertTaskProducer(Config kafkaQueueConfig) {
@@ -25,9 +24,7 @@ public class KafkaAlertTaskProducer {
   }
 
   public void enqueue(AlertTask alertTask) throws IOException {
-    producer.send(
-        new ProducerRecord<>(
-            kafkaConfigReader.getProducerTopicName(), null, alertTask.toByteBuffer()));
+    producer.send(new ProducerRecord<>(kafkaConfigReader.getProducerTopicName(), null, alertTask));
   }
 
   public void close() {
@@ -41,12 +38,7 @@ public class KafkaAlertTaskProducer {
     baseProperties.put(ProducerConfig.ACKS_CONFIG, "all");
     baseProperties.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
     baseProperties.put(ProducerConfig.LINGER_MS_CONFIG, 1);
-    baseProperties.put(
-        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-        "org.apache.kafka.common.serialization.StringSerializer");
-    baseProperties.put(
-        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-        "org.apache.kafka.common.serialization.ByteBufferSerializer");
+    baseProperties.putAll(kafkaConfigReader.getProducerSerdeProperties());
     return baseProperties;
   }
 }

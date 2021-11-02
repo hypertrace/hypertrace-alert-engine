@@ -2,7 +2,6 @@ package org.hypertrace.alert.engine.metric.anomaly.datamodel.queue;
 
 import com.typesafe.config.Config;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,8 +21,8 @@ public class KafkaAlertTaskConsumer {
   private static final int CONSUMER_POLL_TIMEOUT_MS = 100;
 
   private final KafkaConfigReader kafkaConfigReader;
-  private final KafkaConsumer<String, ByteBuffer> consumer;
-  private final LinkedList<ConsumerRecord<String, ByteBuffer>> linkedList = new LinkedList<>();
+  private final KafkaConsumer<String, AlertTask> consumer;
+  private final LinkedList<ConsumerRecord<String, AlertTask>> linkedList = new LinkedList<>();
 
   public KafkaAlertTaskConsumer(Config kafkaQueueConfig) {
     this.kafkaConfigReader = new KafkaConfigReader(kafkaQueueConfig);
@@ -35,15 +34,15 @@ public class KafkaAlertTaskConsumer {
 
   public AlertTask dequeue() throws IOException {
     if (linkedList.isEmpty()) {
-      ConsumerRecords<String, ByteBuffer> records =
+      ConsumerRecords<String, AlertTask> records =
           consumer.poll(Duration.ofMillis(CONSUMER_POLL_TIMEOUT_MS));
       records.forEach(linkedList::addLast);
     }
 
     if (!linkedList.isEmpty()) {
-      ConsumerRecord<String, ByteBuffer> record = linkedList.remove();
+      ConsumerRecord<String, AlertTask> record = linkedList.remove();
       LOGGER.info("offset = {}, key = {}", record.offset(), record.key());
-      return AlertTask.fromByteBuffer(record.value());
+      return record.value();
     }
 
     return null;
@@ -61,12 +60,7 @@ public class KafkaAlertTaskConsumer {
     baseProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
     baseProperties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
     baseProperties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
-    baseProperties.put(
-        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-        "org.apache.kafka.common.serialization.StringDeserializer");
-    baseProperties.put(
-        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-        "org.apache.kafka.common.serialization.ByteBufferDeserializer");
+    baseProperties.putAll(kafkaConfigReader.getConsumerSerdeProperties());
     return baseProperties;
   }
 }
