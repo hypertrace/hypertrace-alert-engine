@@ -4,11 +4,8 @@ import com.typesafe.config.Config;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Properties;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -20,14 +17,13 @@ public class KafkaAlertTaskConsumer {
   private static final Logger LOGGER = LoggerFactory.getLogger(KafkaAlertTaskConsumer.class);
   private static final int CONSUMER_POLL_TIMEOUT_MS = 100;
 
-  private final KafkaConfigReader kafkaConfigReader;
   private final KafkaConsumer<String, AlertTask> consumer;
   private final LinkedList<ConsumerRecord<String, AlertTask>> linkedList = new LinkedList<>();
 
   public KafkaAlertTaskConsumer(Config kafkaQueueConfig) {
-    this.kafkaConfigReader = new KafkaConfigReader(kafkaQueueConfig);
+    KafkaConfigReader kafkaConfigReader = new KafkaConfigReader(kafkaQueueConfig);
     Properties props = new Properties();
-    props.putAll(kafkaConfigReader.getConsumerConfig(createBaseProperties()));
+    props.putAll(kafkaConfigReader.getConsumerConfig());
     consumer = new KafkaConsumer<>(props);
     consumer.subscribe(Collections.singletonList(kafkaConfigReader.getConsumerTopicName()));
   }
@@ -50,17 +46,5 @@ public class KafkaAlertTaskConsumer {
 
   public void close() {
     consumer.close();
-  }
-
-  private Map<String, Object> createBaseProperties() {
-    Map<String, Object> baseProperties = new HashMap<>();
-    baseProperties.put(
-        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigReader.getBootstrapServer());
-    baseProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "alert-task-consumer");
-    baseProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
-    baseProperties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
-    baseProperties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
-    baseProperties.putAll(kafkaConfigReader.getConsumerSerdeProperties());
-    return baseProperties;
   }
 }

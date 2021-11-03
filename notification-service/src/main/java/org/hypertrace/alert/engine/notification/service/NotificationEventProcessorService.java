@@ -35,7 +35,7 @@ public class NotificationEventProcessorService extends PlatformService {
             getLifecycle());
     this.kafkaConfigReader = new KafkaConfigReader(getAppConfig().getConfig("queue.config.kafka"));
     Properties props = new Properties();
-    props.putAll(kafkaConfigReader.getConsumerConfig(createBaseProperties()));
+    props.putAll(kafkaConfigReader.getConsumerConfig());
     consumer = new KafkaConsumer<>(props);
     consumer.subscribe(Collections.singletonList(kafkaConfigReader.getConsumerTopicName()));
   }
