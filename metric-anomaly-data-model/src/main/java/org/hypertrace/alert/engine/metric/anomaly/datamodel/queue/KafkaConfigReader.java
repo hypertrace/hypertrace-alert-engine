@@ -33,7 +33,7 @@ public class KafkaConfigReader {
 
   public String getProducerTopicName() {
     return kafkaQueueConfig.getString(
-        new StringJoiner(".").add(CONSUMER_CONFIG).add(TOPIC_NAME_CONFIG).toString());
+        new StringJoiner(".").add(PRODUCER_CONFIG).add(TOPIC_NAME_CONFIG).toString());
   }
 
   public String getBootstrapServer() {
