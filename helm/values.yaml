@@ -45,7 +45,7 @@ hypertraceAlertEngineConfig:
 
   queryService:
     host: query-service
-    port: 9012
+    port: 8090
   attributeService:
     host: attribute-service
     port: 9012
@@ -102,7 +102,7 @@ metricAnomalyDetectorConfig:
 
   queryService:
     host: query-service
-    port: 9012
+    port: 8090
   attributeService:
     host: attribute-service
     port: 9012
