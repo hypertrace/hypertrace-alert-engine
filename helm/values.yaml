@@ -1,0 +1,329 @@
+hypertraceAlertEngineConfig:
+  name: hypertrace-alert-engine-config
+  replicaCount: 1
+  maxUnavailable: 0
+  image:
+    repository: hypertrace/hypertrace-alert-engine
+    pullPolicy: IfNotPresent
+    tagOverride: ""
+  imagePullSecrets: [ ]
+  nodeLabels: { }
+  containerAdminPort: 8099
+  javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    failureThreshold: 10
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    failureThreshold: 10
+  deploymentLabels:
+    app: hypertrace-alert-engine
+  podLabels:
+    app: hypertrace-alert-engine
+  podAnnotations: { }
+  deploymentSelectorMatchLabels:
+    app: hypertrace-alert-engine
+  serviceSelectorLabels:
+    app: hypertrace-alert-engine
+  resources:
+    requests:
+      cpu: 0.1
+      memory: 1024Mi
+    limits:
+      cpu: 0.2
+      memory: 1024Mi
+  logConfig:
+    name: hypertrace-alert-engine-log-appender-config
+    monitorInterval: 30
+    rootLogger:
+      level: INFO
+    appender:
+      rolling:
+        enabled: false
+
+  queryService:
+    host: query-service
+    port: 9012
+  attributeService:
+    host: attribute-service
+    port: 9012
+  notificationChannelsConfig:
+    name: hypertrace-alert-engine-notification-channels-config
+    channels:
+      [
+        {
+          "channelName": "channel-1",
+          "channelId": "channel-id-1",
+          "channelConfig": [
+            {
+              "channelConfigType": "WEBHOOK",
+              "url": "https://hooks.slack.com/services/abc",
+              "webhookFormat": "WEBHOOK_FORMAT_SLACK"
+            }
+          ]
+        }
+      ]
+  alertRulesConfig:
+    name: hypertrace-alert-engine-alert-rules-config
+    rules:
+      [
+        {
+          "id": "notification_rule_1",
+          "ruleName": "high_avg_latency",
+          "description": "Alert for high avg latency of payment service",
+          "eventConditionId": "event_condition_1",
+          "eventConditionType": "metricAnomalyEventCondition",
+          "channelId": "channel-id-1",
+          "eventCondition": {
+            "metricSelection": {
+              "metricAttribute": {
+                "key": "duration",
+                "scope": "SERVICE"
+              },
+              "metricAggregationFunction": "METRIC_AGGREGATION_FUNCTION_TYPE_AVG",
+              "metricAggregationInterval": "PT15S",
+              "filter": {
+                "leafFilter": {
+                  "lhsExpression": {
+                    "attribute": {
+                      "key": "name",
+                      "scope": "SERVICE"
+                    }
+                  },
+                  "valueOperator": "VALUE_OPERATOR_EQ",
+                  "rhsExpression": {
+                    "stringValue": "customer"
+                  }
+                }
+              }
+            },
+            "violationCondition": [ {
+              "staticThresholdCondition": {
+                "operator": "STATIC_THRESHOLD_OPERATOR_GT",
+                "value": 5.0,
+                "minimumViolationDuration": "PT5M",
+                "severity": "SEVERITY_CRITICAL"
+              }
+            } ]
+          }
+        }
+      ]
+
+metricAnomalyDetectorConfig:
+  name: metric-anomlay-detector-config
+  replicaCount: 1
+  maxUnavailable: 0
+  image:
+    repository: hypertrace/metric-anomlay-detector
+    pullPolicy: IfNotPresent
+    tagOverride: ""
+  imagePullSecrets: [ ]
+  nodeLabels: { }
+  containerAdminPort: 8099
+  javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    failureThreshold: 5
+  deploymentLabels:
+    app: metric-anomlay-detector
+  podLabels:
+    app: metric-anomlay-detector
+  podAnnotations: { }
+  deploymentSelectorMatchLabels:
+    app: metric-anomlay-detector
+  serviceSelectorLabels:
+    app: metric-anomlay-detector
+  resources:
+    requests:
+      cpu: 0.1
+      memory: 1024Mi
+    limits:
+      cpu: 0.2
+      memory: 1024Mi
+  logConfig:
+    name: metric-anomlay-detector-log-appender-config
+    monitorInterval: 30
+    rootLogger:
+      level: INFO
+    appender:
+      rolling:
+        enabled: false
+
+  queryService:
+    host: query-service
+    port: 9012
+  attributeService:
+    host: attribute-service
+    port: 9012
+  queueConfig:
+    inputTopic: alert-tasks
+    outputTopic: action-events
+    bootstrapServers: bootstrap
+
+metricAnomalyTaskManagerConfig:
+  name: metric-anomaly-task-manager-config
+  replicaCount: 1
+  maxUnavailable: 0
+  image:
+    repository: hypertrace/metric-anomaly-task-manager
+    pullPolicy: IfNotPresent
+    tagOverride: ""
+  imagePullSecrets: [ ]
+  nodeLabels: { }
+  containerAdminPort: 8099
+  javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    failureThreshold: 5
+  deploymentLabels:
+    app: metric-anomaly-task-manager
+  podLabels:
+    app: metric-anomaly-task-manager
+  podAnnotations: { }
+  deploymentSelectorMatchLabels:
+    app: metric-anomaly-task-manager
+  serviceSelectorLabels:
+    app: metric-anomaly-task-manager
+  resources:
+    requests:
+      cpu: 0.1
+      memory: 1024Mi
+    limits:
+      cpu: 0.2
+      memory: 1024Mi
+  logConfig:
+    name: metric-anomaly-task-manager-log-appender-config
+    monitorInterval: 30
+    rootLogger:
+      level: INFO
+    appender:
+      rolling:
+        enabled: false
+
+  queueConfig:
+    outputTopic: alert-tasks
+    bootstrapServers: bootstrap
+  alertRuleSource:
+    type: fs
+    fs:
+      path: "/app/resources/configs/metric-anomaly-task-manager/rules.json"
+  alertRulesConfig:
+    name: metric-anomaly-task-manager-alert-rules-config
+    rules:
+      [
+        {
+          "id": "notification_rule_1",
+          "ruleName": "high_avg_latency",
+          "description": "Alert for high avg latency of payment service",
+          "eventConditionId": "event_condition_1",
+          "eventConditionType": "metricAnomalyEventCondition",
+          "channelId": "channel-id-1",
+          "eventCondition": {
+            "metricSelection": {
+              "metricAttribute": {
+                "key": "duration",
+                "scope": "SERVICE"
+              },
+              "metricAggregationFunction": "METRIC_AGGREGATION_FUNCTION_TYPE_AVG",
+              "metricAggregationInterval": "PT15S",
+              "filter": {
+                "leafFilter": {
+                  "lhsExpression": {
+                    "attribute": {
+                      "key": "name",
+                      "scope": "SERVICE"
+                    }
+                  },
+                  "valueOperator": "VALUE_OPERATOR_EQ",
+                  "rhsExpression": {
+                    "stringValue": "customer"
+                  }
+                }
+              }
+            },
+            "violationCondition": [ {
+              "staticThresholdCondition": {
+                "operator": "STATIC_THRESHOLD_OPERATOR_GT",
+                "value": 5.0,
+                "minimumViolationDuration": "PT5M",
+                "severity": "SEVERITY_CRITICAL"
+              }
+            } ]
+          }
+        }
+      ]
+
+notificationServiceConfig:
+  name: notification-service-config
+  replicaCount: 1
+  maxUnavailable: 0
+  image:
+    repository: hypertrace/notification-service
+    pullPolicy: IfNotPresent
+    tagOverride: ""
+  imagePullSecrets: [ ]
+  nodeLabels: { }
+  containerAdminPort: 8099
+  javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    failureThreshold: 5
+  deploymentLabels:
+    app: notification-service
+  podLabels:
+    app: notification-service
+  podAnnotations: { }
+  deploymentSelectorMatchLabels:
+    app: notification-service
+  serviceSelectorLabels:
+    app: notification-service
+  resources:
+    requests:
+      cpu: 0.1
+      memory: 1024Mi
+    limits:
+      cpu: 0.2
+      memory: 1024Mi
+  logConfig:
+    name: notification-service-log-appender-config
+    monitorInterval: 30
+    rootLogger:
+      level: INFO
+    appender:
+      rolling:
+        enabled: false
+
+  queueConfig:
+    inputTopic: action-events
+    bootstrapServers: bootstrap
+  notificationChannelsConfig:
+    name: hypertrace-alert-engine-notification-channels-config
+    channels:
+      [
+        {
+          "tenantId": "default",
+          "channelName": "channel-1",
+          "channelId": "channel-id-1",
+          "channelConfig": [
+            {
+              "channelConfigType": "WEBHOOK",
+              "url": "<https://hooks.slack.com/services/abc>",
+              "webhookFormat": "WEBHOOK_FORMAT_SLACK"
+            }
+          ]
+        }
+      ]
