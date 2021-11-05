@@ -8,8 +8,12 @@ data:
   application.conf: |-
     queue.config {
       kafka = {
-        topic = {{ .Values.metricAnomalyTaskManagerConfig.queueConfig.outputTopic }}
         bootstrap.servers = {{ .Values.metricAnomalyTaskManagerConfig.queueConfig.bootstrapServers }}
+        producer {
+          schema.registry.url = {{ .Values.metricAnomalyTaskManagerConfig.queueConfig.schemaRegistryUrl }}
+          key.serializer= {{ .Values.metricAnomalyTaskManagerConfig.queueConfig.producer.keySerializer }}
+          value.serializer= {{ .Values.metricAnomalyTaskManagerConfig.queueConfig.producer.valueSerializer }}
+        }
       }
     }
 

@@ -7,8 +7,12 @@ metadata:
 data:
   application.conf: |-
     queue.config {
-      kafka = {
-        topic = {{ .Values.notificationServiceConfig.queueConfig.inputTopic }}
+      kafka {
         bootstrap.servers = {{ .Values.notificationServiceConfig.queueConfig.bootstrapServers }}
+        consumer {
+          schema.registry.url = {{ .Values.notificationServiceConfig.queueConfig.schemaRegistryUrl }}
+          key.deserializer= {{ .Values.notificationServiceConfig.queueConfig.consumer.keyDeserializer }}
+          value.deserializer= {{ .Values.notificationServiceConfig.queueConfig.consumer.valueDeserializer }}
+        }
       }
     }

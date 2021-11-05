@@ -162,9 +162,14 @@ metricAnomalyDetectorConfig:
     host: attribute-service
     port: 9012
   queueConfig:
-    inputTopic: alert-tasks
-    outputTopic: action-events
     bootstrapServers: bootstrap
+    schemaRegistryUrl: localhost
+    consumer:
+      keyDeserializer: ""
+      valueDeserializer: ""
+    producer:
+      keySerializer: ""
+      valueSerializer: ""
 
 metricAnomalyTaskManagerConfig:
   name: metric-anomaly-task-manager-config
@@ -211,8 +216,11 @@ metricAnomalyTaskManagerConfig:
         enabled: false
 
   queueConfig:
-    outputTopic: alert-tasks
     bootstrapServers: bootstrap
+    schemaRegistryUrl: localhost
+    producer:
+      keySerializer: ""
+      valueSerializer: ""
   alertRuleSource:
     type: fs
     fs:
@@ -308,8 +316,11 @@ notificationServiceConfig:
         enabled: false
 
   queueConfig:
-    inputTopic: action-events
     bootstrapServers: bootstrap
+    schemaRegistryUrl: localhost
+    consumer:
+      keyDeserializer: ""
+      valueDeserializer: ""
   notificationChannelsConfig:
     name: hypertrace-alert-engine-notification-channels-config
     channels:
