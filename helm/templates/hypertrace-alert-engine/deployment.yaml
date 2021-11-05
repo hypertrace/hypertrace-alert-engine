@@ -24,7 +24,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/application-config.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/hypertrace-alert-engine/application-config.yaml") . | sha256sum }}
         prometheus.io/scrape: "true"
         prometheus.io/port: {{ .Values.hypertraceAlertEngineConfig.containerAdminPort | quote }}
       {{- with .Values.hypertraceAlertEngineConfig.podAnnotations }}
