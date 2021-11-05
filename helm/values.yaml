@@ -52,64 +52,9 @@ hypertraceAlertEngineConfig:
   notificationChannelsConfig:
     name: hypertrace-alert-engine-notification-channels-config
     channels:
-      [
-        {
-          "channelName": "channel-1",
-          "channelId": "channel-id-1",
-          "channelConfig": [
-            {
-              "channelConfigType": "WEBHOOK",
-              "url": "https://hooks.slack.com/services/abc",
-              "webhookFormat": "WEBHOOK_FORMAT_SLACK"
-            }
-          ]
-        }
-      ]
   alertRulesConfig:
     name: hypertrace-alert-engine-alert-rules-config
     rules:
-      [
-        {
-          "id": "notification_rule_1",
-          "ruleName": "high_avg_latency",
-          "description": "Alert for high avg latency of payment service",
-          "eventConditionId": "event_condition_1",
-          "eventConditionType": "metricAnomalyEventCondition",
-          "channelId": "channel-id-1",
-          "eventCondition": {
-            "metricSelection": {
-              "metricAttribute": {
-                "key": "duration",
-                "scope": "SERVICE"
-              },
-              "metricAggregationFunction": "METRIC_AGGREGATION_FUNCTION_TYPE_AVG",
-              "metricAggregationInterval": "PT15S",
-              "filter": {
-                "leafFilter": {
-                  "lhsExpression": {
-                    "attribute": {
-                      "key": "name",
-                      "scope": "SERVICE"
-                    }
-                  },
-                  "valueOperator": "VALUE_OPERATOR_EQ",
-                  "rhsExpression": {
-                    "stringValue": "customer"
-                  }
-                }
-              }
-            },
-            "violationCondition": [ {
-              "staticThresholdCondition": {
-                "operator": "STATIC_THRESHOLD_OPERATOR_GT",
-                "value": 5.0,
-                "minimumViolationDuration": "PT5M",
-                "severity": "SEVERITY_CRITICAL"
-              }
-            } ]
-          }
-        }
-      ]
 
 metricAnomalyDetectorConfig:
   name: metric-anomaly-detector-config
@@ -228,48 +173,6 @@ metricAnomalyTaskManagerConfig:
   alertRulesConfig:
     name: metric-anomaly-task-manager-alert-rules-config
     rules:
-      [
-        {
-          "id": "notification_rule_1",
-          "ruleName": "high_avg_latency",
-          "description": "Alert for high avg latency of payment service",
-          "eventConditionId": "event_condition_1",
-          "eventConditionType": "metricAnomalyEventCondition",
-          "channelId": "channel-id-1",
-          "eventCondition": {
-            "metricSelection": {
-              "metricAttribute": {
-                "key": "duration",
-                "scope": "SERVICE"
-              },
-              "metricAggregationFunction": "METRIC_AGGREGATION_FUNCTION_TYPE_AVG",
-              "metricAggregationInterval": "PT15S",
-              "filter": {
-                "leafFilter": {
-                  "lhsExpression": {
-                    "attribute": {
-                      "key": "name",
-                      "scope": "SERVICE"
-                    }
-                  },
-                  "valueOperator": "VALUE_OPERATOR_EQ",
-                  "rhsExpression": {
-                    "stringValue": "customer"
-                  }
-                }
-              }
-            },
-            "violationCondition": [ {
-              "staticThresholdCondition": {
-                "operator": "STATIC_THRESHOLD_OPERATOR_GT",
-                "value": 5.0,
-                "minimumViolationDuration": "PT5M",
-                "severity": "SEVERITY_CRITICAL"
-              }
-            } ]
-          }
-        }
-      ]
 
 notificationServiceConfig:
   name: notification-service-config
@@ -324,20 +227,6 @@ notificationServiceConfig:
   notificationChannelsConfig:
     name: hypertrace-alert-engine-notification-channels-config
     channels:
-      [
-        {
-          "tenantId": "default",
-          "channelName": "channel-1",
-          "channelId": "channel-id-1",
-          "channelConfig": [
-            {
-              "channelConfigType": "WEBHOOK",
-              "url": "<https://hooks.slack.com/services/abc>",
-              "webhookFormat": "WEBHOOK_FORMAT_SLACK"
-            }
-          ]
-        }
-      ]
 
 kafka-topic-creator:
   jobName: alertable-events-kafka-topic-creator
