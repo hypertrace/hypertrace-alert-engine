@@ -34,6 +34,8 @@ dependencies {
     implementation("com.typesafe:config:1.4.1")
     implementation("org.apache.kafka:kafka-clients:2.6.0")
     implementation("com.google.protobuf:protobuf-java-util:4.0.0-rc-2")
+    implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.22")
+    implementation("io.confluent:kafka-streams-avro-serde:6.0.1")
 
     annotationProcessor("org.projectlombok:lombok:1.18.18")
     compileOnly("org.projectlombok:lombok:1.18.18")

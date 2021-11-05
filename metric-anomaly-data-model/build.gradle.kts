@@ -13,6 +13,8 @@ dependencies {
     implementation("com.typesafe:config:1.4.1")
     implementation("org.apache.kafka:kafka-clients:2.6.0")
     implementation("org.hypertrace.core.documentstore:document-store:0.5.7")
+    implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.22")
+    implementation("io.confluent:kafka-streams-avro-serde:6.0.1")
 
     annotationProcessor("org.projectlombok:lombok:1.18.18")
     compileOnly("org.projectlombok:lombok:1.18.18")
