@@ -112,11 +112,11 @@ hypertraceAlertEngineConfig:
       ]
 
 metricAnomalyDetectorConfig:
-  name: metric-anomlay-detector-config
+  name: metric-anomaly-detector-config
   replicaCount: 1
   maxUnavailable: 0
   image:
-    repository: hypertrace/metric-anomlay-detector
+    repository: hypertrace/metric-anomaly-detector
     pullPolicy: IfNotPresent
     tagOverride: ""
   imagePullSecrets: [ ]
@@ -131,14 +131,14 @@ metricAnomalyDetectorConfig:
     periodSeconds: 15
     failureThreshold: 5
   deploymentLabels:
-    app: metric-anomlay-detector
+    app: metric-anomaly-detector
   podLabels:
-    app: metric-anomlay-detector
+    app: metric-anomaly-detector
   podAnnotations: { }
   deploymentSelectorMatchLabels:
-    app: metric-anomlay-detector
+    app: metric-anomaly-detector
   serviceSelectorLabels:
-    app: metric-anomlay-detector
+    app: metric-anomaly-detector
   resources:
     requests:
       cpu: 0.1
@@ -147,7 +147,7 @@ metricAnomalyDetectorConfig:
       cpu: 0.2
       memory: 1024Mi
   logConfig:
-    name: metric-anomlay-detector-log-appender-config
+    name: metric-anomaly-detector-log-appender-config
     monitorInterval: 30
     rootLogger:
       level: INFO
