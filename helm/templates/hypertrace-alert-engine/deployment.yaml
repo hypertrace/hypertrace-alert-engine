@@ -67,7 +67,7 @@ spec:
               value: "file:///app/resources/configs"
             - name: LOG4J_CONFIGURATION_FILE
               value: "/var/{{ .Chart.Name }}/log/log4j2.properties"
-            - name: JAVA_TOOL_OPTIONS
+            - name: JAVA_OPTS
               value: {{ .Values.hypertraceAlertEngineConfig.javaOpts | quote }}
             - name: ALERT_RULES_PATH
               value: "/var/{{ .Chart.Name }}/rules/alert-rules.json"

@@ -64,7 +64,7 @@ spec:
               value: "file:///app/resources/configs"
             - name: LOG4J_CONFIGURATION_FILE
               value: "/var/{{ .Chart.Name }}/log/log4j2.properties"
-            - name: JAVA_TOOL_OPTIONS
+            - name: JAVA_OPTS
               value: {{ .Values.notificationServiceConfig.javaOpts | quote }}
             - name: NOTIFICATION_CHANNELS_PATH
               value: "/var/{{ .Chart.Name }}/rules/notification-channels.json"
