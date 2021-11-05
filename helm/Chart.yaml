@@ -8,3 +8,9 @@ type: application
 # to the chart and its templates, including the app version. The "helm package" command will take care of setting this.
 # A new chart will be created for each new version of the service.
 version: 0.1.0
+appVersion: 0.1.0
+
+dependencies:
+  - name: kafka-topic-creator
+    repository: "https://storage.googleapis.com/hypertrace-helm-charts"
+    version: 0.1.9

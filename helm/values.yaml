@@ -338,3 +338,23 @@ notificationServiceConfig:
           ]
         }
       ]
+
+kafka-topic-creator:
+  jobName: alertable-events-kafka-topic-creator
+  helmHook: pre-install,pre-upgrade
+  kafka:
+    topics:
+      - name: alerting-metric-anomaly-alert-tasks
+        replicationFactor: 3
+        partitions: 8
+        configs:
+          - retention.bytes=6442450944
+          - retention.ms=259200000
+      - name: alerting-metric-anomaly-events
+        replicationFactor: 3
+        partitions: 8
+        configs:
+          - retention.bytes=6442450944
+          - retention.ms=259200000
+  zookeeper:
+    address: zookeeper:2181
