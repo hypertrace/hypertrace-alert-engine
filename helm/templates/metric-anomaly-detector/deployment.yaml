@@ -48,7 +48,7 @@ spec:
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ include "metricanomalydetector.image" . }}"
+          image: "{{ include "service.image" (dict "name" .Values.metricAnomalyDetectorConfig "context" . ) }}"
           imagePullPolicy: {{ .Values.metricAnomalyDetectorConfig.image.pullPolicy }}
           ports:
             - name: admin-port

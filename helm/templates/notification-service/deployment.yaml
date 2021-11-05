@@ -51,7 +51,7 @@ spec:
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ include "notificationservice.image" . }}"
+          image: "{{ include "service.image" (dict "name" .Values.notificationServiceConfig "context" . ) }}"
           imagePullPolicy: {{ .Values.notificationServiceConfig.image.pullPolicy }}
           ports:
             - name: admin-port

@@ -54,7 +54,7 @@ spec:
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ include "hypertracealertengine.image" . }}"
+          image: "{{ include "service.image" (dict "name" .Values.hypertraceAlertEngineConfig "context" . ) }}"
           imagePullPolicy: {{ .Values.hypertraceAlertEngineConfig.image.pullPolicy }}
           ports:
             - name: admin-port
