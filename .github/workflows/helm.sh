@@ -1,8 +1,6 @@
 #!/bin/sh
 set -eu
 
-SUB_PROJECTS_DIRS="./"
-
 subcommand=$1; shift
 case "$subcommand" in
   validate)
