@@ -4,34 +4,34 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     release: {{ .Release.Name }}
-  {{- with .Values.deploymentLabels }}
+  {{- with .Values.notificationServiceConfig.deploymentLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.notificationServiceConfig.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: {{ .Values.maxUnavailable }}
+      maxUnavailable: {{ .Values.notificationServiceConfig.maxUnavailable }}
   selector:
     matchLabels:
-      {{- toYaml .Values.deploymentSelectorMatchLabels | nindent 6 }}
+      {{- toYaml .Values.notificationServiceConfig.deploymentSelectorMatchLabels | nindent 6 }}
   template:
     metadata:
       labels:
         release: {{ .Release.Name }}
-      {{- with .Values.podLabels }}
+      {{- with .Values.notificationServiceConfig.podLabels }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/application-config.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/notification-service/application-config.yaml") . | sha256sum }}
         prometheus.io/scrape: "true"
-        prometheus.io/port: {{ .Values.containerAdminPort | quote }}
-      {{- with .Values.podAnnotations }}
+        prometheus.io/port: {{ .Values.notificationServiceConfig.containerAdminPort | quote }}
+      {{- with .Values.notificationServiceConfig.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+    {{- with .Values.notificationServiceConfig.imagePullSecrets }}
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
     {{- end }}
@@ -41,21 +41,21 @@ spec:
             name: {{ .Values.notificationServiceConfig.name }}
         - name: log4j-config
           configMap:
-            name: {{ .Values.logConfig.name }}
+            name: {{ .Values.notificationServiceConfig.logConfig.name }}
         - name: notification-channels-config
           configMap:
-            name: {{ .Values.notificationChannelsConfig.name }}
-    {{- with .Values.nodeLabels }}
+            name: {{ .Values.notificationServiceConfig.notificationChannelsConfig.name }}
+    {{- with .Values.notificationServiceConfig.nodeLabels }}
       nodeSelector:
       {{- toYaml . | nindent 8}}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ include "notificationservice.image" . }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ include "service.image" (dict "name" .Values.notificationServiceConfig "context" . ) }}"
+          imagePullPolicy: {{ .Values.notificationServiceConfig.image.pullPolicy }}
           ports:
             - name: admin-port
-              containerPort: {{ .Values.containerAdminPort }}
+              containerPort: {{ .Values.notificationServiceConfig.containerAdminPort }}
               protocol: TCP
           env:
             - name: SERVICE_NAME
@@ -64,8 +64,8 @@ spec:
               value: "file:///app/resources/configs"
             - name: LOG4J_CONFIGURATION_FILE
               value: "/var/{{ .Chart.Name }}/log/log4j2.properties"
-            - name: JAVA_TOOL_OPTIONS
-              value: {{ .Values.javaOpts | quote }}
+            - name: JAVA_OPTS
+              value: {{ .Values.notificationServiceConfig.javaOpts | quote }}
             - name: NOTIFICATION_CHANNELS_PATH
               value: "/var/{{ .Chart.Name }}/rules/notification-channels.json"
           volumeMounts:
@@ -78,16 +78,16 @@ spec:
               mountPath: /var/{{ .Chart.Name }}/rules/notification-channels.json
               subPath: notification-channels.json
           livenessProbe:
-            initialDelaySeconds: {{ int .Values.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ int .Values.notificationServiceConfig.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.notificationServiceConfig.livenessProbe.periodSeconds }}
             tcpSocket:
               port: admin-port
           readinessProbe:
-            initialDelaySeconds: {{ int .Values.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.readinessProbe.periodSeconds }}
-            failureThreshold: {{ int .Values.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ int .Values.notificationServiceConfig.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.notificationServiceConfig.readinessProbe.periodSeconds }}
+            failureThreshold: {{ int .Values.notificationServiceConfig.readinessProbe.failureThreshold }}
             httpGet:
               path: /health
-              port: {{ .Values.containerAdminPort }}
+              port: {{ .Values.notificationServiceConfig.containerAdminPort }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.notificationServiceConfig.resources | nindent 12 }}

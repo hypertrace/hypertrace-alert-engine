@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.metricAnomalyTaskManagerConfig.alertRulesConfig.name }}
+  labels:
+    release: {{ .Release.Name }}
+data:
+  alert-rules.json: |-
+    {{ .Values.metricAnomalyTaskManagerConfig.alertRulesConfig.rules |  toJson  }}

@@ -20,10 +20,14 @@ data:
       kafka = {
         bootstrap.servers = {{ .Values.metricAnomalyDetectorConfig.queueConfig.bootstrapServers }}
         consumer {
-          topic = {{ .Values.metricAnomalyDetectorConfig.queueConfig.inputTopic }}
+          schema.registry.url = {{ .Values.metricAnomalyDetectorConfig.queueConfig.schemaRegistryUrl }}
+          key.deserializer= {{ .Values.metricAnomalyDetectorConfig.queueConfig.consumer.keyDeserializer }}
+          value.deserializer= {{ .Values.metricAnomalyDetectorConfig.queueConfig.consumer.valueDeserializer }}
         }
         producer {
-          topic = {{ .Values.metricAnomalyDetectorConfig.queueConfig.outputTopic }}
+          schema.registry.url = {{ .Values.metricAnomalyDetectorConfig.queueConfig.schemaRegistryUrl }}
+          key.serializer= {{ .Values.metricAnomalyDetectorConfig.queueConfig.producer.keySerializer }}
+          value.serializer= {{ .Values.metricAnomalyDetectorConfig.queueConfig.producer.valueSerializer }}
         }
       }
     }
