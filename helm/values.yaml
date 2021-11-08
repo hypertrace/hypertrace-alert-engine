@@ -1,6 +1,10 @@
+hypertraceAlertEngine:
+  enabled: false
+notificationService:
+  enabled: false
+
 hypertraceAlertEngineConfig:
   name: hypertrace-alert-engine-config
-  enabled: false
   replicaCount: 1
   maxUnavailable: 0
   image:
@@ -177,7 +181,6 @@ metricAnomalyTaskManagerConfig:
 
 notificationServiceConfig:
   name: notification-service-config
-  enabled: false
   replicaCount: 1
   maxUnavailable: 0
   image:

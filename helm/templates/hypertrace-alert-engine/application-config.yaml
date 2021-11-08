@@ -1,4 +1,4 @@
-{{- if .Values.hypertraceAlertEngineConfig.enabled}}
+{{- if .Values.hypertraceAlertEngine.enabled}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
