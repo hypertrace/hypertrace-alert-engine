@@ -1,3 +1,8 @@
+hypertraceAlertEngine:
+  enabled: false
+notificationService:
+  enabled: false
+
 hypertraceAlertEngineConfig:
   name: hypertrace-alert-engine-config
   replicaCount: 1

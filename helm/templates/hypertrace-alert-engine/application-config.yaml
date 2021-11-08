@@ -1,3 +1,4 @@
+{{- if .Values.hypertraceAlertEngine.enabled}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -15,3 +16,4 @@ data:
       host = {{ .Values.hypertraceAlertEngineConfig.attributeService.host }}
       port = {{ .Values.hypertraceAlertEngineConfig.attributeService.port }}
     }
+{{- end }}

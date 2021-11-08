@@ -1,3 +1,4 @@
+{{- if .Values.hypertraceAlertEngine.enabled}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -99,3 +100,4 @@ spec:
               port: {{ .Values.hypertraceAlertEngineConfig.containerAdminPort }}
           resources:
             {{- toYaml .Values.hypertraceAlertEngineConfig.resources | nindent 12 }}
+{{- end }}
