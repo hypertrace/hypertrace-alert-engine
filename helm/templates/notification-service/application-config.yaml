@@ -1,4 +1,4 @@
-{{- if .Values.notificationService.enabled}}
+{{- if and (not .Values.hypertraceAlertEngine.enabled) .Values.notificationService.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

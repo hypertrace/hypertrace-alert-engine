@@ -1,4 +1,4 @@
-{{- if .Values.notificationService.enabled}}
+{{- if and (not .Values.hypertraceAlertEngine.enabled) .Values.notificationService.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
