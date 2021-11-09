@@ -112,14 +112,14 @@ metricAnomalyDetectorConfig:
     host: attribute-service
     port: 9012
   queueConfig:
-    bootstrapServers: bootstrap
-    schemaRegistryUrl: localhost
+    bootstrapServers: "bootstrap:9092"
+    schemaRegistryUrl: "http://schema-registry-service:8081"
     consumer:
-      keyDeserializer: ""
-      valueDeserializer: ""
+      keyDeserializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer"
+      valueDeserializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer"
     producer:
-      keySerializer: ""
-      valueSerializer: ""
+      keySerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
+      valueSerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
 
 metricAnomalyTaskManagerConfig:
   name: metric-anomaly-task-manager-config
@@ -166,11 +166,11 @@ metricAnomalyTaskManagerConfig:
         enabled: false
 
   queueConfig:
-    bootstrapServers: bootstrap
-    schemaRegistryUrl: localhost
+    bootstrapServers: "bootstrap:9092"
+    schemaRegistryUrl: "http://schema-registry-service:8081"
     producer:
-      keySerializer: ""
-      valueSerializer: ""
+      keySerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
+      valueSerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
   alertRuleSource:
     type: fs
     fs:
@@ -224,11 +224,11 @@ notificationServiceConfig:
         enabled: false
 
   queueConfig:
-    bootstrapServers: bootstrap
-    schemaRegistryUrl: localhost
+    bootstrapServers: "bootstrap:9092"
+    schemaRegistryUrl: "http://schema-registry-service:8081"
     consumer:
-      keyDeserializer: ""
-      valueDeserializer: ""
+      keyDeserializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer"
+      valueDeserializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer"
   notificationChannelsConfig:
     name: hypertrace-alert-engine-notification-channels-config
     channels:
