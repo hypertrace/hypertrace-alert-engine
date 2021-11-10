@@ -1,15 +1,16 @@
+{{- if (eq .Values.deploymentType "individual") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.metricAnomalyTaskManagerConfig.logConfig.name }}
+  name: {{ .Values.individual.metricAnomalyTaskManagerConfig.logConfig.name }}
   labels:
     release: {{ .Release.Name }}
 data:
   log4j2.properties: |-
     status = error
     name = PropertiesConfig
-    {{- if .Values.metricAnomalyTaskManagerConfig.logConfig.monitorInterval}}
-    monitorInterval = {{ .Values.metricAnomalyTaskManagerConfig.logConfig.monitorInterval }}
+    {{- if .Values.individual.metricAnomalyTaskManagerConfig.logConfig.monitorInterval}}
+    monitorInterval = {{ .Values.individual.metricAnomalyTaskManagerConfig.logConfig.monitorInterval }}
     {{- end }}
 
     appender.console.type = Console
@@ -17,7 +18,7 @@ data:
     appender.console.layout.type = PatternLayout
     appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %c{1.} - %msg%n
 
-    {{- if .Values.metricAnomalyTaskManagerConfig.logConfig.appender.rolling.enabled }}
+    {{- if .Values.individual.metricAnomalyTaskManagerConfig.logConfig.appender.rolling.enabled }}
     appender.rolling.type = RollingFile
     appender.rolling.name = ROLLING_FILE
     appender.rolling.fileName = ${env:SERVICE_NAME:-service}.log
@@ -34,8 +35,9 @@ data:
     appender.rolling.strategy.max = 5
     {{- end }}
 
-    rootLogger.level = {{ .Values.metricAnomalyTaskManagerConfig.logConfig.rootLogger.level }}
+    rootLogger.level = {{ .Values.individual.metricAnomalyTaskManagerConfig.logConfig.rootLogger.level }}
     rootLogger.appenderRef.stdout.ref = STDOUT
-    {{- if .Values.metricAnomalyTaskManagerConfig.logConfig.appender.rolling.enabled }}
+    {{- if .Values.individual.metricAnomalyTaskManagerConfig.logConfig.appender.rolling.enabled }}
     rootLogger.appenderRef.rolling.ref = ROLLING_FILE
     {{- end }}
+{{- end }}

@@ -1,19 +1,19 @@
-{{- if .Values.notificationService.enabled}}
+{{- if and (eq .Values.deploymentType "individual") .Values.individual.notificationServiceConfig.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.notificationServiceConfig.name }}
+  name: {{ .Values.individual.notificationServiceConfig.name }}
   labels:
     release: {{ .Release.Name }}
 data:
   application.conf: |-
     queue.config {
       kafka {
-        bootstrap.servers = {{ .Values.notificationServiceConfig.queueConfig.bootstrapServers }}
+        bootstrap.servers = {{ .Values.individual.notificationServiceConfig.queueConfig.bootstrapServers }}
         consumer {
-          schema.registry.url = {{ .Values.notificationServiceConfig.queueConfig.schemaRegistryUrl }}
-          key.deserializer= {{ .Values.notificationServiceConfig.queueConfig.consumer.keyDeserializer }}
-          value.deserializer= {{ .Values.notificationServiceConfig.queueConfig.consumer.valueDeserializer }}
+          schema.registry.url = {{ .Values.individual.notificationServiceConfig.queueConfig.schemaRegistryUrl }}
+          key.deserializer= {{ .Values.individual.notificationServiceConfig.queueConfig.consumer.keyDeserializer }}
+          value.deserializer= {{ .Values.individual.notificationServiceConfig.queueConfig.consumer.valueDeserializer }}
         }
       }
     }

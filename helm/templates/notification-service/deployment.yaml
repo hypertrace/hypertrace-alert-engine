@@ -1,62 +1,62 @@
-{{- if .Values.notificationService.enabled}}
+{{- if and (eq .Values.deploymentType "individual") .Values.individual.notificationServiceConfig.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   labels:
     release: {{ .Release.Name }}
-  {{- with .Values.notificationServiceConfig.deploymentLabels }}
+  {{- with .Values.individual.notificationServiceConfig.deploymentLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.notificationServiceConfig.replicaCount }}
+  replicas: {{ .Values.individual.notificationServiceConfig.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: {{ .Values.notificationServiceConfig.maxUnavailable }}
+      maxUnavailable: {{ .Values.individual.notificationServiceConfig.maxUnavailable }}
   selector:
     matchLabels:
-      {{- toYaml .Values.notificationServiceConfig.deploymentSelectorMatchLabels | nindent 6 }}
+      {{- toYaml .Values.individual.notificationServiceConfig.deploymentSelectorMatchLabels | nindent 6 }}
   template:
     metadata:
       labels:
         release: {{ .Release.Name }}
-      {{- with .Values.notificationServiceConfig.podLabels }}
+      {{- with .Values.individual.notificationServiceConfig.podLabels }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/notification-service/application-config.yaml") . | sha256sum }}
         prometheus.io/scrape: "true"
-        prometheus.io/port: {{ .Values.notificationServiceConfig.containerAdminPort | quote }}
-      {{- with .Values.notificationServiceConfig.podAnnotations }}
+        prometheus.io/port: {{ .Values.individual.notificationServiceConfig.containerAdminPort | quote }}
+      {{- with .Values.individual.notificationServiceConfig.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-    {{- with .Values.notificationServiceConfig.imagePullSecrets }}
+    {{- with .Values.individual.notificationServiceConfig.imagePullSecrets }}
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
     {{- end }}
       volumes:
         - name: service-config
           configMap:
-            name: {{ .Values.notificationServiceConfig.name }}
+            name: {{ .Values.individual.notificationServiceConfig.name }}
         - name: log4j-config
           configMap:
-            name: {{ .Values.notificationServiceConfig.logConfig.name }}
+            name: {{ .Values.individual.notificationServiceConfig.logConfig.name }}
         - name: notification-channels-config
           configMap:
-            name: {{ .Values.notificationServiceConfig.notificationChannelsConfig.name }}
-    {{- with .Values.notificationServiceConfig.nodeLabels }}
+            name: {{ .Values.individual.notificationServiceConfig.notificationChannelsConfig.name }}
+    {{- with .Values.individual.notificationServiceConfig.nodeLabels }}
       nodeSelector:
       {{- toYaml . | nindent 8}}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ include "service.image" (dict "name" .Values.notificationServiceConfig "context" . ) }}"
-          imagePullPolicy: {{ .Values.notificationServiceConfig.image.pullPolicy }}
+          image: "{{ include "service.image" (dict "name" .Values.individual.notificationServiceConfig "context" . ) }}"
+          imagePullPolicy: {{ .Values.individual.notificationServiceConfig.image.pullPolicy }}
           ports:
             - name: admin-port
-              containerPort: {{ .Values.notificationServiceConfig.containerAdminPort }}
+              containerPort: {{ .Values.individual.notificationServiceConfig.containerAdminPort }}
               protocol: TCP
           env:
             - name: SERVICE_NAME
@@ -66,7 +66,7 @@ spec:
             - name: LOG4J_CONFIGURATION_FILE
               value: "/var/{{ .Chart.Name }}/log/log4j2.properties"
             - name: JAVA_OPTS
-              value: {{ .Values.notificationServiceConfig.javaOpts | quote }}
+              value: {{ .Values.individual.notificationServiceConfig.javaOpts | quote }}
             - name: NOTIFICATION_CHANNELS_PATH
               value: "/var/{{ .Chart.Name }}/rules/notification-channels.json"
           volumeMounts:
@@ -79,17 +79,17 @@ spec:
               mountPath: /var/{{ .Chart.Name }}/rules/notification-channels.json
               subPath: notification-channels.json
           livenessProbe:
-            initialDelaySeconds: {{ int .Values.notificationServiceConfig.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.notificationServiceConfig.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ int .Values.individual.notificationServiceConfig.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.individual.notificationServiceConfig.livenessProbe.periodSeconds }}
             tcpSocket:
               port: admin-port
           readinessProbe:
-            initialDelaySeconds: {{ int .Values.notificationServiceConfig.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.notificationServiceConfig.readinessProbe.periodSeconds }}
-            failureThreshold: {{ int .Values.notificationServiceConfig.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ int .Values.individual.notificationServiceConfig.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.individual.notificationServiceConfig.readinessProbe.periodSeconds }}
+            failureThreshold: {{ int .Values.individual.notificationServiceConfig.readinessProbe.failureThreshold }}
             httpGet:
               path: /health
-              port: {{ .Values.notificationServiceConfig.containerAdminPort }}
+              port: {{ .Values.individual.notificationServiceConfig.containerAdminPort }}
           resources:
-            {{- toYaml .Values.notificationServiceConfig.resources | nindent 12 }}
+            {{- toYaml .Values.individual.notificationServiceConfig.resources | nindent 12 }}
 {{- end }}

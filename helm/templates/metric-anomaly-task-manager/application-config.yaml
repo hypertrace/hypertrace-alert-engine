@@ -1,37 +1,39 @@
+{{- if (eq .Values.deploymentType "individual") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.metricAnomalyTaskManagerConfig.name }}
+  name: {{ .Values.individual.metricAnomalyTaskManagerConfig.name }}
   labels:
     release: {{ .Release.Name }}
 data:
   application.conf: |-
     queue.config {
       kafka = {
-        bootstrap.servers = {{ .Values.metricAnomalyTaskManagerConfig.queueConfig.bootstrapServers }}
+        bootstrap.servers = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.bootstrapServers }}
         producer {
-          schema.registry.url = {{ .Values.metricAnomalyTaskManagerConfig.queueConfig.schemaRegistryUrl }}
-          key.serializer= {{ .Values.metricAnomalyTaskManagerConfig.queueConfig.producer.keySerializer }}
-          value.serializer= {{ .Values.metricAnomalyTaskManagerConfig.queueConfig.producer.valueSerializer }}
+          schema.registry.url = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.schemaRegistryUrl }}
+          key.serializer= {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.producer.keySerializer }}
+          value.serializer= {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.producer.valueSerializer }}
         }
       }
     }
 
     alertRuleSource {
-      type =  {{ .Values.metricAnomalyTaskManagerConfig.alertRuleSource.type }}
-      {{- if eq "fs" .Values.metricAnomalyTaskManagerConfig.alertRuleSource.type }}
+      type =  {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.type }}
+      {{- if eq "fs" .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.type }}
       fs {
-        path = {{ .Values.metricAnomalyTaskManagerConfig.alertRuleSource.fs.path | quote }}
+        path = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.fs.path | quote }}
       }
      {{- else }}
       dataStore {
-        resourceName = {{ .Values.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceName | quote }}
-        resourceNamespace = {{ .Values.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceNamespace | quote }}
+        resourceName = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceName | quote }}
+        resourceNamespace = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceNamespace | quote }}
         config.service {
-          host={{ .Values.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.host | quote }}
-          port={{ .Values.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.port | quote }}
+          host={{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.host | quote }}
+          port={{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.port | quote }}
         }
-        tenantIds = {{ .Values.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.tenantIds }}
+        tenantIds = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.tenantIds }}
       }
       {{- end }}
     }
+{{- end }}

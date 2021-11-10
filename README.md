@@ -77,7 +77,7 @@ Various fields of the rule are:
 
   - First we specify the metric attribute and its scope using *metricAttribute* field. Currently we support alerts on metrics like numCall / duration / error count where the scope could be at API or SERVICE level.
     
-  - Then we need to specify the metric aggretgation function which would be used to aggregate the data points over the specified time interval (granularity). This can be configured using *metricAggregationFunction* and *metricAggregationInterval* fields respectively.
+  - Then we need to specify the metric aggretgation function which would be used to aggregated the data points over the specified time interval (granularity). This can be configured using *metricAggregationFunction* and *metricAggregationInterval* fields respectively.
 
   - Next we need to select a filter to be applied on the respective SERVICE/API as there can be multiple services/apis. As an example, the above rule uses the filter : "select the service where service name is customer".
 

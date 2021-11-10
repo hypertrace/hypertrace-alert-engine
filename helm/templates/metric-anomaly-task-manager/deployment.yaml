@@ -1,61 +1,62 @@
+{{- if (eq .Values.deploymentType "individual") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   labels:
     release: {{ .Release.Name }}
-  {{- with .Values.metricAnomalyTaskManagerConfig.deploymentLabels }}
+  {{- with .Values.individual.metricAnomalyTaskManagerConfig.deploymentLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.metricAnomalyTaskManagerConfig.replicaCount }}
+  replicas: {{ .Values.individual.metricAnomalyTaskManagerConfig.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: {{ .Values.metricAnomalyTaskManagerConfig.maxUnavailable }}
+      maxUnavailable: {{ .Values.individual.metricAnomalyTaskManagerConfig.maxUnavailable }}
   selector:
     matchLabels:
-      {{- toYaml .Values.metricAnomalyTaskManagerConfig.deploymentSelectorMatchLabels | nindent 6 }}
+      {{- toYaml .Values.individual.metricAnomalyTaskManagerConfig.deploymentSelectorMatchLabels | nindent 6 }}
   template:
     metadata:
       labels:
         release: {{ .Release.Name }}
-      {{- with .Values.metricAnomalyTaskManagerConfig.podLabels }}
+      {{- with .Values.individual.metricAnomalyTaskManagerConfig.podLabels }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/metric-anomaly-task-manager/application-config.yaml") . | sha256sum }}
         prometheus.io/scrape: "true"
-        prometheus.io/port: {{ .Values.metricAnomalyTaskManagerConfig.containerAdminPort | quote }}
-      {{- with .Values.metricAnomalyTaskManagerConfig.podAnnotations }}
+        prometheus.io/port: {{ .Values.individual.metricAnomalyTaskManagerConfig.containerAdminPort | quote }}
+      {{- with .Values.individual.metricAnomalyTaskManagerConfig.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-    {{- with .Values.metricAnomalyTaskManagerConfig.imagePullSecrets }}
+    {{- with .Values.individual.metricAnomalyTaskManagerConfig.imagePullSecrets }}
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
     {{- end }}
       volumes:
         - name: service-config
           configMap:
-            name: {{ .Values.metricAnomalyTaskManagerConfig.name }}
+            name: {{ .Values.individual.metricAnomalyTaskManagerConfig.name }}
         - name: log4j-config
           configMap:
-            name: {{ .Values.metricAnomalyTaskManagerConfig.logConfig.name }}
+            name: {{ .Values.individual.metricAnomalyTaskManagerConfig.logConfig.name }}
         - name: alert-rules-config
           configMap:
-            name: {{ .Values.metricAnomalyTaskManagerConfig.alertRulesConfig.name }}
-    {{- with .Values.metricAnomalyTaskManagerConfig.nodeLabels }}
+            name: {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRulesConfig.name }}
+    {{- with .Values.individual.metricAnomalyTaskManagerConfig.nodeLabels }}
       nodeSelector:
       {{- toYaml . | nindent 8}}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ include "service.image" (dict "name" .Values.metricAnomalyTaskManagerConfig "context" . ) }}"
-          imagePullPolicy: {{ .Values.metricAnomalyTaskManagerConfig.image.pullPolicy }}
+          image: "{{ include "service.image" (dict "name" .Values.individual.metricAnomalyTaskManagerConfig "context" . ) }}"
+          imagePullPolicy: {{ .Values.individual.metricAnomalyTaskManagerConfig.image.pullPolicy }}
           ports:
             - name: admin-port
-              containerPort: {{ .Values.metricAnomalyTaskManagerConfig.containerAdminPort }}
+              containerPort: {{ .Values.individual.metricAnomalyTaskManagerConfig.containerAdminPort }}
               protocol: TCP
           env:
             - name: SERVICE_NAME
@@ -65,7 +66,7 @@ spec:
             - name: LOG4J_CONFIGURATION_FILE
               value: "/var/{{ .Chart.Name }}/log/log4j2.properties"
             - name: JAVA_OPTS
-              value: {{ .Values.metricAnomalyTaskManagerConfig.javaOpts | quote }}
+              value: {{ .Values.individual.metricAnomalyTaskManagerConfig.javaOpts | quote }}
             - name: ALERT_RULES_PATH
               value: "/var/{{ .Chart.Name }}/rules/alert-rules.json"
           volumeMounts:
@@ -78,16 +79,17 @@ spec:
               mountPath: /var/{{ .Chart.Name }}/rules/alert-rules.json
               subPath: alert-rules.json
           livenessProbe:
-            initialDelaySeconds: {{ int .Values.metricAnomalyTaskManagerConfig.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.metricAnomalyTaskManagerConfig.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ int .Values.individual.metricAnomalyTaskManagerConfig.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.individual.metricAnomalyTaskManagerConfig.livenessProbe.periodSeconds }}
             tcpSocket:
               port: admin-port
           readinessProbe:
-            initialDelaySeconds: {{ int .Values.metricAnomalyTaskManagerConfig.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.metricAnomalyTaskManagerConfig.readinessProbe.periodSeconds }}
-            failureThreshold: {{ int .Values.metricAnomalyTaskManagerConfig.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ int .Values.individual.metricAnomalyTaskManagerConfig.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.individual.metricAnomalyTaskManagerConfig.readinessProbe.periodSeconds }}
+            failureThreshold: {{ int .Values.individual.metricAnomalyTaskManagerConfig.readinessProbe.failureThreshold }}
             httpGet:
               path: /health
-              port: {{ .Values.metricAnomalyTaskManagerConfig.containerAdminPort }}
+              port: {{ .Values.individual.metricAnomalyTaskManagerConfig.containerAdminPort }}
           resources:
-            {{- toYaml .Values.metricAnomalyTaskManagerConfig.resources | nindent 12 }}
+            {{- toYaml .Values.individual.metricAnomalyTaskManagerConfig.resources | nindent 12 }}
+{{- end }}

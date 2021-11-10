@@ -1,9 +1,11 @@
+{{- if (eq .Values.deploymentType "individual") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.metricAnomalyTaskManagerConfig.alertRulesConfig.name }}
+  name: {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRulesConfig.name }}
   labels:
     release: {{ .Release.Name }}
 data:
   alert-rules.json: |-
-    {{ .Values.metricAnomalyTaskManagerConfig.alertRulesConfig.rules |  toJson  }}
+    {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRulesConfig.rules |  toJson  }}
+{{- end }}

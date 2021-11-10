@@ -1,239 +1,240 @@
-hypertraceAlertEngine:
-  enabled: false
-notificationService:
-  enabled: false
+deploymentType: "individual"
 
-hypertraceAlertEngineConfig:
-  name: hypertrace-alert-engine-config
-  replicaCount: 1
-  maxUnavailable: 0
-  image:
-    repository: hypertrace/hypertrace-alert-engine
-    pullPolicy: IfNotPresent
-    tagOverride: ""
-  imagePullSecrets: [ ]
-  nodeLabels: { }
-  containerAdminPort: 8099
-  javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
-  livenessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 15
-    failureThreshold: 10
-  readinessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 15
-    failureThreshold: 10
-  deploymentLabels:
-    app: hypertrace-alert-engine
-  podLabels:
-    app: hypertrace-alert-engine
-  podAnnotations: { }
-  deploymentSelectorMatchLabels:
-    app: hypertrace-alert-engine
-  serviceSelectorLabels:
-    app: hypertrace-alert-engine
-  resources:
-    requests:
-      cpu: 0.1
-      memory: 1024Mi
-    limits:
-      cpu: 0.2
-      memory: 1024Mi
-  logConfig:
-    name: hypertrace-alert-engine-log-appender-config
-    monitorInterval: 30
-    rootLogger:
-      level: INFO
-    appender:
-      rolling:
-        enabled: false
+aggregated:
+  hypertraceAlertEngineConfig:
+    name: hypertrace-alert-engine-config
+    replicaCount: 1
+    maxUnavailable: 0
+    image:
+      repository: hypertrace/hypertrace-alert-engine
+      pullPolicy: IfNotPresent
+      tagOverride: ""
+    imagePullSecrets: [ ]
+    nodeLabels: { }
+    containerAdminPort: 8099
+    javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
+    livenessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      failureThreshold: 10
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      failureThreshold: 10
+    deploymentLabels:
+      app: hypertrace-alert-engine
+    podLabels:
+      app: hypertrace-alert-engine
+    podAnnotations: { }
+    deploymentSelectorMatchLabels:
+      app: hypertrace-alert-engine
+    serviceSelectorLabels:
+      app: hypertrace-alert-engine
+    resources:
+      requests:
+        cpu: 0.1
+        memory: 1024Mi
+      limits:
+        cpu: 0.2
+        memory: 1024Mi
+    logConfig:
+      name: hypertrace-alert-engine-log-appender-config
+      monitorInterval: 30
+      rootLogger:
+        level: INFO
+      appender:
+        rolling:
+          enabled: false
 
-  queryService:
-    host: query-service
-    port: 8090
-  attributeService:
-    host: attribute-service
-    port: 9012
-  notificationChannelsConfig:
-    name: hypertrace-alert-engine-notification-channels-config
-    channels:
-  alertRulesConfig:
-    name: hypertrace-alert-engine-alert-rules-config
-    rules:
+    queryService:
+      host: query-service
+      port: 8090
+    attributeService:
+      host: attribute-service
+      port: 9012
+    notificationChannelsConfig:
+      name: hypertrace-alert-engine-notification-channels-config
+      channels:
+    alertRulesConfig:
+      name: hypertrace-alert-engine-alert-rules-config
+      rules:
 
-metricAnomalyDetectorConfig:
-  name: metric-anomaly-detector-config
-  replicaCount: 1
-  maxUnavailable: 0
-  image:
-    repository: hypertrace/metric-anomaly-detector
-    pullPolicy: IfNotPresent
-    tagOverride: ""
-  imagePullSecrets: [ ]
-  nodeLabels: { }
-  containerAdminPort: 8099
-  javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
-  livenessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 5
-  readinessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 15
-    failureThreshold: 5
-  deploymentLabels:
-    app: metric-anomaly-detector
-  podLabels:
-    app: metric-anomaly-detector
-  podAnnotations: { }
-  deploymentSelectorMatchLabels:
-    app: metric-anomaly-detector
-  serviceSelectorLabels:
-    app: metric-anomaly-detector
-  resources:
-    requests:
-      cpu: 0.1
-      memory: 1024Mi
-    limits:
-      cpu: 0.2
-      memory: 1024Mi
-  logConfig:
-    name: metric-anomaly-detector-log-appender-config
-    monitorInterval: 30
-    rootLogger:
-      level: INFO
-    appender:
-      rolling:
-        enabled: false
+individual:
+  metricAnomalyDetectorConfig:
+    name: metric-anomaly-detector-config
+    replicaCount: 1
+    maxUnavailable: 0
+    image:
+      repository: hypertrace/metric-anomaly-detector
+      pullPolicy: IfNotPresent
+      tagOverride: ""
+    imagePullSecrets: [ ]
+    nodeLabels: { }
+    containerAdminPort: 8099
+    javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
+    livenessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 5
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      failureThreshold: 5
+    deploymentLabels:
+      app: metric-anomaly-detector
+    podLabels:
+      app: metric-anomaly-detector
+    podAnnotations: { }
+    deploymentSelectorMatchLabels:
+      app: metric-anomaly-detector
+    serviceSelectorLabels:
+      app: metric-anomaly-detector
+    resources:
+      requests:
+        cpu: 0.1
+        memory: 1024Mi
+      limits:
+        cpu: 0.2
+        memory: 1024Mi
+    logConfig:
+      name: metric-anomaly-detector-log-appender-config
+      monitorInterval: 30
+      rootLogger:
+        level: INFO
+      appender:
+        rolling:
+          enabled: false
 
-  queryService:
-    host: query-service
-    port: 8090
-  attributeService:
-    host: attribute-service
-    port: 9012
-  queueConfig:
-    bootstrapServers: bootstrap
-    schemaRegistryUrl: localhost
-    consumer:
-      keyDeserializer: ""
-      valueDeserializer: ""
-    producer:
-      keySerializer: ""
-      valueSerializer: ""
+    queryService:
+      host: query-service
+      port: 8090
+    attributeService:
+      host: attribute-service
+      port: 9012
+    queueConfig:
+      bootstrapServers: "bootstrap:9092"
+      schemaRegistryUrl: "http://schema-registry-service:8081"
+      consumer:
+        keyDeserializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer"
+        valueDeserializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer"
+      producer:
+        keySerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
+        valueSerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
 
-metricAnomalyTaskManagerConfig:
-  name: metric-anomaly-task-manager-config
-  replicaCount: 1
-  maxUnavailable: 0
-  image:
-    repository: hypertrace/metric-anomaly-task-manager
-    pullPolicy: IfNotPresent
-    tagOverride: ""
-  imagePullSecrets: [ ]
-  nodeLabels: { }
-  containerAdminPort: 8099
-  javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
-  livenessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 5
-  readinessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 15
-    failureThreshold: 5
-  deploymentLabels:
-    app: metric-anomaly-task-manager
-  podLabels:
-    app: metric-anomaly-task-manager
-  podAnnotations: { }
-  deploymentSelectorMatchLabels:
-    app: metric-anomaly-task-manager
-  serviceSelectorLabels:
-    app: metric-anomaly-task-manager
-  resources:
-    requests:
-      cpu: 0.1
-      memory: 1024Mi
-    limits:
-      cpu: 0.2
-      memory: 1024Mi
-  logConfig:
-    name: metric-anomaly-task-manager-log-appender-config
-    monitorInterval: 30
-    rootLogger:
-      level: INFO
-    appender:
-      rolling:
-        enabled: false
+  metricAnomalyTaskManagerConfig:
+    name: metric-anomaly-task-manager-config
+    replicaCount: 1
+    maxUnavailable: 0
+    image:
+      repository: hypertrace/metric-anomaly-task-manager
+      pullPolicy: IfNotPresent
+      tagOverride: ""
+    imagePullSecrets: [ ]
+    nodeLabels: { }
+    containerAdminPort: 8099
+    javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
+    livenessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 5
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      failureThreshold: 5
+    deploymentLabels:
+      app: metric-anomaly-task-manager
+    podLabels:
+      app: metric-anomaly-task-manager
+    podAnnotations: { }
+    deploymentSelectorMatchLabels:
+      app: metric-anomaly-task-manager
+    serviceSelectorLabels:
+      app: metric-anomaly-task-manager
+    resources:
+      requests:
+        cpu: 0.1
+        memory: 1024Mi
+      limits:
+        cpu: 0.2
+        memory: 1024Mi
+    logConfig:
+      name: metric-anomaly-task-manager-log-appender-config
+      monitorInterval: 30
+      rootLogger:
+        level: INFO
+      appender:
+        rolling:
+          enabled: false
 
-  queueConfig:
-    bootstrapServers: bootstrap
-    schemaRegistryUrl: localhost
-    producer:
-      keySerializer: ""
-      valueSerializer: ""
-  alertRuleSource:
-    type: fs
-    fs:
-      path: "/app/resources/configs/metric-anomaly-task-manager/rules.json"
-  alertRulesConfig:
-    name: metric-anomaly-task-manager-alert-rules-config
-    rules:
+    queueConfig:
+      bootstrapServers: "bootstrap:9092"
+      schemaRegistryUrl: "http://schema-registry-service:8081"
+      producer:
+        keySerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
+        valueSerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
+    alertRuleSource:
+      type: fs
+      fs:
+        path: "/app/resources/configs/metric-anomaly-task-manager/rules.json"
+    alertRulesConfig:
+      name: metric-anomaly-task-manager-alert-rules-config
+      rules:
 
-notificationServiceConfig:
-  name: notification-service-config
-  replicaCount: 1
-  maxUnavailable: 0
-  image:
-    repository: hypertrace/notification-service
-    pullPolicy: IfNotPresent
-    tagOverride: ""
-  imagePullSecrets: [ ]
-  nodeLabels: { }
-  containerAdminPort: 8099
-  javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
-  livenessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 5
-  readinessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 15
-    failureThreshold: 5
-  deploymentLabels:
-    app: notification-service
-  podLabels:
-    app: notification-service
-  podAnnotations: { }
-  deploymentSelectorMatchLabels:
-    app: notification-service
-  serviceSelectorLabels:
-    app: notification-service
-  resources:
-    requests:
-      cpu: 0.1
-      memory: 1024Mi
-    limits:
-      cpu: 0.2
-      memory: 1024Mi
-  logConfig:
-    name: notification-service-log-appender-config
-    monitorInterval: 30
-    rootLogger:
-      level: INFO
-    appender:
-      rolling:
-        enabled: false
+  notificationServiceConfig:
+    name: notification-service-config
+    enabled: false
+    replicaCount: 1
+    maxUnavailable: 0
+    image:
+      repository: hypertrace/notification-service
+      pullPolicy: IfNotPresent
+      tagOverride: ""
+    imagePullSecrets: [ ]
+    nodeLabels: { }
+    containerAdminPort: 8099
+    javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
+    livenessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 5
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      failureThreshold: 5
+    deploymentLabels:
+      app: notification-service
+    podLabels:
+      app: notification-service
+    podAnnotations: { }
+    deploymentSelectorMatchLabels:
+      app: notification-service
+    serviceSelectorLabels:
+      app: notification-service
+    resources:
+      requests:
+        cpu: 0.1
+        memory: 1024Mi
+      limits:
+        cpu: 0.2
+        memory: 1024Mi
+    logConfig:
+      name: notification-service-log-appender-config
+      monitorInterval: 30
+      rootLogger:
+        level: INFO
+      appender:
+        rolling:
+          enabled: false
 
-  queueConfig:
-    bootstrapServers: bootstrap
-    schemaRegistryUrl: localhost
-    consumer:
-      keyDeserializer: ""
-      valueDeserializer: ""
-  notificationChannelsConfig:
-    name: hypertrace-alert-engine-notification-channels-config
-    channels:
+    queueConfig:
+      bootstrapServers: "bootstrap:9092"
+      schemaRegistryUrl: "http://schema-registry-service:8081"
+      consumer:
+        keyDeserializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer"
+        valueDeserializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer"
+    notificationChannelsConfig:
+      name: hypertrace-alert-engine-notification-channels-config
+      channels:
 
 kafka-topic-creator:
+  enabled: true
   jobName: alertable-events-kafka-topic-creator
   helmHook: pre-install,pre-upgrade
   kafka:

@@ -1,58 +1,59 @@
+{{- if (eq .Values.deploymentType "individual") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   labels:
     release: {{ .Release.Name }}
-  {{- with .Values.metricAnomalyDetectorConfig.deploymentLabels }}
+  {{- with .Values.individual.metricAnomalyDetectorConfig.deploymentLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.metricAnomalyDetectorConfig.replicaCount }}
+  replicas: {{ .Values.individual.metricAnomalyDetectorConfig.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: {{ .Values.metricAnomalyDetectorConfig.maxUnavailable }}
+      maxUnavailable: {{ .Values.individual.metricAnomalyDetectorConfig.maxUnavailable }}
   selector:
     matchLabels:
-      {{- toYaml .Values.metricAnomalyDetectorConfig.deploymentSelectorMatchLabels | nindent 6 }}
+      {{- toYaml .Values.individual.metricAnomalyDetectorConfig.deploymentSelectorMatchLabels | nindent 6 }}
   template:
     metadata:
       labels:
         release: {{ .Release.Name }}
-      {{- with .Values.metricAnomalyDetectorConfig.podLabels }}
+      {{- with .Values.individual.metricAnomalyDetectorConfig.podLabels }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/metric-anomaly-detector/application-config.yaml") . | sha256sum }}
         prometheus.io/scrape: "true"
-        prometheus.io/port: {{ .Values.metricAnomalyDetectorConfig.containerAdminPort | quote }}
-      {{- with .Values.metricAnomalyDetectorConfig.podAnnotations }}
+        prometheus.io/port: {{ .Values.individual.metricAnomalyDetectorConfig.containerAdminPort | quote }}
+      {{- with .Values.individual.metricAnomalyDetectorConfig.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-    {{- with .Values.metricAnomalyDetectorConfig.imagePullSecrets }}
+    {{- with .Values.individual.metricAnomalyDetectorConfig.imagePullSecrets }}
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
     {{- end }}
       volumes:
         - name: service-config
           configMap:
-            name: {{ .Values.metricAnomalyDetectorConfig.name }}
+            name: {{ .Values.individual.metricAnomalyDetectorConfig.name }}
         - name: log4j-config
           configMap:
-            name: {{ .Values.metricAnomalyDetectorConfig.logConfig.name }}
-    {{- with .Values.metricAnomalyDetectorConfig.nodeLabels }}
+            name: {{ .Values.individual.metricAnomalyDetectorConfig.logConfig.name }}
+    {{- with .Values.individual.metricAnomalyDetectorConfig.nodeLabels }}
       nodeSelector:
       {{- toYaml . | nindent 8}}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ include "service.image" (dict "name" .Values.metricAnomalyDetectorConfig "context" . ) }}"
-          imagePullPolicy: {{ .Values.metricAnomalyDetectorConfig.image.pullPolicy }}
+          image: "{{ include "service.image" (dict "name" .Values.individual.metricAnomalyDetectorConfig "context" . ) }}"
+          imagePullPolicy: {{ .Values.individual.metricAnomalyDetectorConfig.image.pullPolicy }}
           ports:
             - name: admin-port
-              containerPort: {{ .Values.metricAnomalyDetectorConfig.containerAdminPort }}
+              containerPort: {{ .Values.individual.metricAnomalyDetectorConfig.containerAdminPort }}
               protocol: TCP
           env:
             - name: SERVICE_NAME
@@ -62,7 +63,7 @@ spec:
             - name: LOG4J_CONFIGURATION_FILE
               value: "/var/{{ .Chart.Name }}/log/log4j2.properties"
             - name: JAVA_OPTS
-              value: {{ .Values.metricAnomalyDetectorConfig.javaOpts | quote }}
+              value: {{ .Values.individual.metricAnomalyDetectorConfig.javaOpts | quote }}
           volumeMounts:
             - name: service-config
               mountPath: /app/resources/configs/{{ .Chart.Name }}/application.conf
@@ -70,16 +71,17 @@ spec:
             - name: log4j-config
               mountPath: /var/{{ .Chart.Name }}/log
           livenessProbe:
-            initialDelaySeconds: {{ int .Values.metricAnomalyDetectorConfig.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.metricAnomalyDetectorConfig.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ int .Values.individual.metricAnomalyDetectorConfig.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.individual.metricAnomalyDetectorConfig.livenessProbe.periodSeconds }}
             tcpSocket:
               port: admin-port
           readinessProbe:
-            initialDelaySeconds: {{ int .Values.metricAnomalyDetectorConfig.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.metricAnomalyDetectorConfig.readinessProbe.periodSeconds }}
-            failureThreshold: {{ int .Values.metricAnomalyDetectorConfig.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ int .Values.individual.metricAnomalyDetectorConfig.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.individual.metricAnomalyDetectorConfig.readinessProbe.periodSeconds }}
+            failureThreshold: {{ int .Values.individual.metricAnomalyDetectorConfig.readinessProbe.failureThreshold }}
             httpGet:
               path: /health
-              port: {{ .Values.metricAnomalyDetectorConfig.containerAdminPort }}
+              port: {{ .Values.individual.metricAnomalyDetectorConfig.containerAdminPort }}
           resources:
-            {{- toYaml .Values.metricAnomalyDetectorConfig.resources | nindent 12 }}
+            {{- toYaml .Values.individual.metricAnomalyDetectorConfig.resources | nindent 12 }}
+{{- end }}

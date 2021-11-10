@@ -1,16 +1,16 @@
-{{- if .Values.notificationService.enabled}}
+{{- if and (eq .Values.deploymentType "individual") .Values.individual.notificationServiceConfig.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.notificationServiceConfig.logConfig.name }}
+  name: {{ .Values.individual.notificationServiceConfig.logConfig.name }}
   labels:
     release: {{ .Release.Name }}
 data:
   log4j2.properties: |-
     status = error
     name = PropertiesConfig
-    {{- if .Values.notificationServiceConfig.logConfig.monitorInterval}}
-    monitorInterval = {{ .Values.notificationServiceConfig.logConfig.monitorInterval }}
+    {{- if .Values.individual.notificationServiceConfig.logConfig.monitorInterval}}
+    monitorInterval = {{ .Values.individual.notificationServiceConfig.logConfig.monitorInterval }}
     {{- end }}
 
     appender.console.type = Console
@@ -18,7 +18,7 @@ data:
     appender.console.layout.type = PatternLayout
     appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %c{1.} - %msg%n
 
-    {{- if .Values.notificationServiceConfig.logConfig.appender.rolling.enabled }}
+    {{- if .Values.individual.notificationServiceConfig.logConfig.appender.rolling.enabled }}
     appender.rolling.type = RollingFile
     appender.rolling.name = ROLLING_FILE
     appender.rolling.fileName = ${env:SERVICE_NAME:-service}.log
@@ -35,9 +35,9 @@ data:
     appender.rolling.strategy.max = 5
     {{- end }}
 
-    rootLogger.level = {{ .Values.notificationServiceConfig.logConfig.rootLogger.level }}
+    rootLogger.level = {{ .Values.individual.notificationServiceConfig.logConfig.rootLogger.level }}
     rootLogger.appenderRef.stdout.ref = STDOUT
-    {{- if .Values.notificationServiceConfig.logConfig.appender.rolling.enabled }}
+    {{- if .Values.individual.notificationServiceConfig.logConfig.appender.rolling.enabled }}
     rootLogger.appenderRef.rolling.ref = ROLLING_FILE
     {{- end }}
 {{- end }}

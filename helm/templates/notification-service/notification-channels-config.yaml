@@ -1,11 +1,11 @@
-{{- if .Values.notificationService.enabled}}
+{{- if and (eq .Values.deploymentType "individual" ) .Values.individual.notificationServiceConfig.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.notificationServiceConfig.notificationChannelsConfig.name }}
+  name: {{ .Values.individual.notificationServiceConfig.notificationChannelsConfig.name }}
   labels:
     release: {{ .Release.Name }}
 data:
   notification-channels.json: |-
-    {{ .Values.notificationServiceConfig.notificationChannelsConfig.channels |  toJson  }}
+    {{ .Values.individual.notificationServiceConfig.notificationChannelsConfig.channels |  toJson  }}
 {{- end }}

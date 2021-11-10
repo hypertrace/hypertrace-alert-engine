@@ -1,65 +1,65 @@
-{{- if .Values.hypertraceAlertEngine.enabled}}
+{{- if (eq .Values.deploymentType "aggregated") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   labels:
     release: {{ .Release.Name }}
-  {{- with .Values.hypertraceAlertEngineConfig.deploymentLabels }}
+  {{- with .Values.aggregated.hypertraceAlertEngineConfig.deploymentLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.hypertraceAlertEngineConfig.replicaCount }}
+  replicas: {{ .Values.aggregated.hypertraceAlertEngineConfig.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: {{ .Values.hypertraceAlertEngineConfig.maxUnavailable }}
+      maxUnavailable: {{ .Values.aggregated.hypertraceAlertEngineConfig.maxUnavailable }}
   selector:
     matchLabels:
-      {{- toYaml .Values.hypertraceAlertEngineConfig.deploymentSelectorMatchLabels | nindent 6 }}
+      {{- toYaml .Values.aggregated.hypertraceAlertEngineConfig.deploymentSelectorMatchLabels | nindent 6 }}
   template:
     metadata:
       labels:
         release: {{ .Release.Name }}
-      {{- with .Values.hypertraceAlertEngineConfig.podLabels }}
+      {{- with .Values.aggregated.hypertraceAlertEngineConfig.podLabels }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/hypertrace-alert-engine/application-config.yaml") . | sha256sum }}
         prometheus.io/scrape: "true"
-        prometheus.io/port: {{ .Values.hypertraceAlertEngineConfig.containerAdminPort | quote }}
-      {{- with .Values.hypertraceAlertEngineConfig.podAnnotations }}
+        prometheus.io/port: {{ .Values.aggregated.hypertraceAlertEngineConfig.containerAdminPort | quote }}
+      {{- with .Values.aggregated.hypertraceAlertEngineConfig.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-    {{- with .Values.hypertraceAlertEngineConfig.imagePullSecrets }}
+    {{- with .Values.aggregated.hypertraceAlertEngineConfig.imagePullSecrets }}
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
     {{- end }}
       volumes:
         - name: service-config
           configMap:
-            name: {{ .Values.hypertraceAlertEngineConfig.name }}
+            name: {{ .Values.aggregated.hypertraceAlertEngineConfig.name }}
         - name: log4j-config
           configMap:
-            name: {{ .Values.hypertraceAlertEngineConfig.logConfig.name }}
+            name: {{ .Values.aggregated.hypertraceAlertEngineConfig.logConfig.name }}
         - name: alert-rules-config
           configMap:
-            name: {{ .Values.hypertraceAlertEngineConfig.alertRulesConfig.name }}
+            name: {{ .Values.aggregated.hypertraceAlertEngineConfig.alertRulesConfig.name }}
         - name: notification-channels-config
           configMap:
-            name: {{ .Values.hypertraceAlertEngineConfig.notificationChannelsConfig.name }}
-    {{- with .Values.hypertraceAlertEngineConfig.nodeLabels }}
+            name: {{ .Values.aggregated.hypertraceAlertEngineConfig.notificationChannelsConfig.name }}
+    {{- with .Values.aggregated.hypertraceAlertEngineConfig.nodeLabels }}
       nodeSelector:
       {{- toYaml . | nindent 8}}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ include "service.image" (dict "name" .Values.hypertraceAlertEngineConfig "context" . ) }}"
-          imagePullPolicy: {{ .Values.hypertraceAlertEngineConfig.image.pullPolicy }}
+          image: "{{ include "service.image" (dict "name" .Values.aggregated.hypertraceAlertEngineConfig "context" . ) }}"
+          imagePullPolicy: {{ .Values.aggregated.hypertraceAlertEngineConfig.image.pullPolicy }}
           ports:
             - name: admin-port
-              containerPort: {{ .Values.hypertraceAlertEngineConfig.containerAdminPort }}
+              containerPort: {{ .Values.aggregated.hypertraceAlertEngineConfig.containerAdminPort }}
               protocol: TCP
           env:
             - name: SERVICE_NAME
@@ -69,7 +69,7 @@ spec:
             - name: LOG4J_CONFIGURATION_FILE
               value: "/var/{{ .Chart.Name }}/log/log4j2.properties"
             - name: JAVA_OPTS
-              value: {{ .Values.hypertraceAlertEngineConfig.javaOpts | quote }}
+              value: {{ .Values.aggregated.hypertraceAlertEngineConfig.javaOpts | quote }}
             - name: ALERT_RULES_PATH
               value: "/var/{{ .Chart.Name }}/rules/alert-rules.json"
             - name: NOTIFICATION_CHANNELS_PATH
@@ -87,17 +87,17 @@ spec:
               mountPath: /var/{{ .Chart.Name }}/rules/notification-channels.json
               subPath: notification-channels.json
           livenessProbe:
-            initialDelaySeconds: {{ int .Values.hypertraceAlertEngineConfig.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.hypertraceAlertEngineConfig.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ int .Values.aggregated.hypertraceAlertEngineConfig.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.aggregated.hypertraceAlertEngineConfig.livenessProbe.periodSeconds }}
             tcpSocket:
               port: admin-port
           readinessProbe:
-            initialDelaySeconds: {{ int .Values.hypertraceAlertEngineConfig.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ int .Values.hypertraceAlertEngineConfig.readinessProbe.periodSeconds }}
-            failureThreshold: {{ int .Values.hypertraceAlertEngineConfig.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ int .Values.aggregated.hypertraceAlertEngineConfig.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ int .Values.aggregated.hypertraceAlertEngineConfig.readinessProbe.periodSeconds }}
+            failureThreshold: {{ int .Values.aggregated.hypertraceAlertEngineConfig.readinessProbe.failureThreshold }}
             httpGet:
               path: /health
-              port: {{ .Values.hypertraceAlertEngineConfig.containerAdminPort }}
+              port: {{ .Values.aggregated.hypertraceAlertEngineConfig.containerAdminPort }}
           resources:
-            {{- toYaml .Values.hypertraceAlertEngineConfig.resources | nindent 12 }}
+            {{- toYaml .Values.aggregated.hypertraceAlertEngineConfig.resources | nindent 12 }}
 {{- end }}
