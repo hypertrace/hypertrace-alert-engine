@@ -1,11 +1,11 @@
-{{- if .Values.hypertraceAlertEngine.enabled}}
+{{- if (eq .Values.deploymentType "aggregated") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.hypertraceAlertEngineConfig.notificationChannelsConfig.name }}
+  name: {{ .Values.aggregated.hypertraceAlertEngineConfig.notificationChannelsConfig.name }}
   labels:
     release: {{ .Release.Name }}
 data:
   notification-channels.json: |-
-    {{ .Values.hypertraceAlertEngineConfig.notificationChannelsConfig.channels |  toJson  }}
+    {{ .Values.aggregated.hypertraceAlertEngineConfig.notificationChannelsConfig.channels |  toJson  }}
 {{- end }}

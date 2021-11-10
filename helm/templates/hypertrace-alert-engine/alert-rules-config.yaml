@@ -1,11 +1,11 @@
-{{- if .Values.hypertraceAlertEngine.enabled}}
+{{- if (eq .Values.deploymentType "aggregated") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.hypertraceAlertEngineConfig.alertRulesConfig.name }}
+  name: {{ .Values.aggregated.hypertraceAlertEngineConfig.alertRulesConfig.name }}
   labels:
     release: {{ .Release.Name }}
 data:
   alert-rules.json: |-
-    {{ .Values.hypertraceAlertEngineConfig.alertRulesConfig.rules |  toJson  }}
+    {{ .Values.aggregated.hypertraceAlertEngineConfig.alertRulesConfig.rules |  toJson  }}
 {{- end }}

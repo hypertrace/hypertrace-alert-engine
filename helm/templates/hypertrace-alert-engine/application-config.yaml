@@ -1,19 +1,19 @@
-{{- if .Values.hypertraceAlertEngine.enabled}}
+{{- if (eq .Values.deploymentType "aggregated") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.hypertraceAlertEngineConfig.name }}
+  name: {{ .Values.aggregated.hypertraceAlertEngineConfig.name }}
   labels:
     release: {{ .Release.Name }}
 data:
   application.conf: |-
     query.service.config = {
-      host = {{ .Values.hypertraceAlertEngineConfig.queryService.host }}
-      port = {{ .Values.hypertraceAlertEngineConfig.queryService.port }}
+      host = {{ .Values.aggregated.hypertraceAlertEngineConfig.queryService.host }}
+      port = {{ .Values.aggregated.hypertraceAlertEngineConfig.queryService.port }}
     }
 
     attributes.service.config = {
-      host = {{ .Values.hypertraceAlertEngineConfig.attributeService.host }}
-      port = {{ .Values.hypertraceAlertEngineConfig.attributeService.port }}
+      host = {{ .Values.aggregated.hypertraceAlertEngineConfig.attributeService.host }}
+      port = {{ .Values.aggregated.hypertraceAlertEngineConfig.attributeService.port }}
     }
 {{- end }}
