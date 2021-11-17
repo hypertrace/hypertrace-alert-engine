@@ -8,18 +8,18 @@ metadata:
 data:
   application.conf: |-
     queue.config {
-      kafka = {
-        bootstrap.servers = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.bootstrapServers }}
+      kafka {
+        bootstrap.servers {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.bootstrapServers  | quote }}
         producer {
-          schema.registry.url = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.schemaRegistryUrl }}
-          key.serializer= {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.producer.keySerializer }}
-          value.serializer= {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.producer.valueSerializer }}
+          schema.registry.url = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.schemaRegistryUrl  | quote }}
+          key.serializer = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.producer.keySerializer  | quote }}
+          value.serializer = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.producer.valueSerializer  | quote }}
         }
       }
     }
 
     alertRuleSource {
-      type =  {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.type }}
+      type =  {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.type  | quote }}
       {{- if eq "fs" .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.type }}
       fs {
         path = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.fs.path | quote }}
@@ -29,8 +29,8 @@ data:
         resourceName = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceName | quote }}
         resourceNamespace = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceNamespace | quote }}
         config.service {
-          host={{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.host | quote }}
-          port={{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.port | quote }}
+          host = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.host | quote }}
+          port = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.port | quote }}
         }
         tenantIds = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.tenantIds }}
       }

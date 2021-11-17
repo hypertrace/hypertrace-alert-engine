@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Values.individual.metricAnomalyDetectorConfig.deploymentName }}
   labels:
     release: {{ .Release.Name }}
   {{- with .Values.individual.metricAnomalyDetectorConfig.deploymentLabels }}
@@ -48,7 +48,7 @@ spec:
       {{- toYaml . | nindent 8}}
     {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.individual.metricAnomalyDetectorConfig.deploymentName }}
           image: "{{ include "service.image" (dict "name" .Values.individual.metricAnomalyDetectorConfig "context" . ) }}"
           imagePullPolicy: {{ .Values.individual.metricAnomalyDetectorConfig.image.pullPolicy }}
           ports:
@@ -57,19 +57,19 @@ spec:
               protocol: TCP
           env:
             - name: SERVICE_NAME
-              value: "{{ .Chart.Name }}"
+              value: "{{ .Values.individual.metricAnomalyDetectorConfig.deploymentName }}"
             - name: BOOTSTRAP_CONFIG_URI
               value: "file:///app/resources/configs"
             - name: LOG4J_CONFIGURATION_FILE
-              value: "/var/{{ .Chart.Name }}/log/log4j2.properties"
+              value: "/var/{{ .Values.individual.metricAnomalyDetectorConfig.deploymentName }}/log/log4j2.properties"
             - name: JAVA_OPTS
               value: {{ .Values.individual.metricAnomalyDetectorConfig.javaOpts | quote }}
           volumeMounts:
             - name: service-config
-              mountPath: /app/resources/configs/{{ .Chart.Name }}/application.conf
+              mountPath: /app/resources/configs/{{ .Values.individual.metricAnomalyDetectorConfig.deploymentName }}/application.conf
               subPath: application.conf
             - name: log4j-config
-              mountPath: /var/{{ .Chart.Name }}/log
+              mountPath: /var/{{ .Values.individual.metricAnomalyDetectorConfig.deploymentName }}/log
           livenessProbe:
             initialDelaySeconds: {{ int .Values.individual.metricAnomalyDetectorConfig.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ int .Values.individual.metricAnomalyDetectorConfig.livenessProbe.periodSeconds }}

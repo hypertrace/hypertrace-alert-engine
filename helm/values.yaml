@@ -79,6 +79,7 @@ individual:
       initialDelaySeconds: 10
       periodSeconds: 15
       failureThreshold: 5
+    deploymentName: metric-anomaly-detector
     deploymentLabels:
       app: metric-anomaly-detector
     podLabels:
@@ -139,6 +140,7 @@ individual:
       initialDelaySeconds: 10
       periodSeconds: 15
       failureThreshold: 5
+    deploymentName: metric-anomaly-task-manager
     deploymentLabels:
       app: metric-anomaly-task-manager
     podLabels:
@@ -198,6 +200,7 @@ individual:
       initialDelaySeconds: 10
       periodSeconds: 15
       failureThreshold: 5
+    deploymentName: notification-service
     deploymentLabels:
       app: notification-service
     podLabels:
