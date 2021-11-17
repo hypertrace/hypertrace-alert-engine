@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Values.individual.metricAnomalyTaskManagerConfig.deploymentName }}
   labels:
     release: {{ .Release.Name }}
   {{- with .Values.individual.metricAnomalyTaskManagerConfig.deploymentLabels }}
@@ -51,7 +51,7 @@ spec:
       {{- toYaml . | nindent 8}}
     {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.individual.metricAnomalyTaskManagerConfig.deploymentName }}
           image: "{{ include "service.image" (dict "name" .Values.individual.metricAnomalyTaskManagerConfig "context" . ) }}"
           imagePullPolicy: {{ .Values.individual.metricAnomalyTaskManagerConfig.image.pullPolicy }}
           ports:
@@ -60,23 +60,23 @@ spec:
               protocol: TCP
           env:
             - name: SERVICE_NAME
-              value: "{{ .Chart.Name }}"
+              value: "{{ .Values.individual.metricAnomalyTaskManagerConfig.deploymentName }}"
             - name: BOOTSTRAP_CONFIG_URI
               value: "file:///app/resources/configs"
             - name: LOG4J_CONFIGURATION_FILE
-              value: "/var/{{ .Chart.Name }}/log/log4j2.properties"
+              value: "/var/{{ .Values.individual.metricAnomalyTaskManagerConfig.deploymentName }}/log/log4j2.properties"
             - name: JAVA_OPTS
               value: {{ .Values.individual.metricAnomalyTaskManagerConfig.javaOpts | quote }}
             - name: ALERT_RULES_PATH
-              value: "/var/{{ .Chart.Name }}/rules/alert-rules.json"
+              value: "/var/{{ .Values.individual.metricAnomalyTaskManagerConfig.deploymentName }}/rules/alert-rules.json"
           volumeMounts:
             - name: service-config
-              mountPath: /app/resources/configs/{{ .Chart.Name }}/application.conf
+              mountPath: /app/resources/configs/{{ .Values.individual.metricAnomalyTaskManagerConfig.deploymentName }}/application.conf
               subPath: application.conf
             - name: log4j-config
-              mountPath: /var/{{ .Chart.Name }}/log
+              mountPath: /var/{{ .Values.individual.metricAnomalyTaskManagerConfig.deploymentName }}/log
             - name: alert-rules-config
-              mountPath: /var/{{ .Chart.Name }}/rules/alert-rules.json
+              mountPath: /var/{{ .Values.individual.metricAnomalyTaskManagerConfig.deploymentName }}/rules/alert-rules.json
               subPath: alert-rules.json
           livenessProbe:
             initialDelaySeconds: {{ int .Values.individual.metricAnomalyTaskManagerConfig.livenessProbe.initialDelaySeconds }}

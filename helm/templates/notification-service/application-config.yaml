@@ -9,11 +9,11 @@ data:
   application.conf: |-
     queue.config {
       kafka {
-        bootstrap.servers = {{ .Values.individual.notificationServiceConfig.queueConfig.bootstrapServers }}
+        bootstrap.servers = {{ .Values.individual.notificationServiceConfig.queueConfig.bootstrapServers | quote }}
         consumer {
-          schema.registry.url = {{ .Values.individual.notificationServiceConfig.queueConfig.schemaRegistryUrl }}
-          key.deserializer= {{ .Values.individual.notificationServiceConfig.queueConfig.consumer.keyDeserializer }}
-          value.deserializer= {{ .Values.individual.notificationServiceConfig.queueConfig.consumer.valueDeserializer }}
+          schema.registry.url = {{ .Values.individual.notificationServiceConfig.queueConfig.schemaRegistryUrl | quote }}
+          key.deserializer = {{ .Values.individual.notificationServiceConfig.queueConfig.consumer.keyDeserializer | quote }}
+          value.deserializer = {{ .Values.individual.notificationServiceConfig.queueConfig.consumer.valueDeserializer | quote }}
         }
       }
     }

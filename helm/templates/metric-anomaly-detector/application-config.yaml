@@ -7,28 +7,28 @@ metadata:
     release: {{ .Release.Name }}
 data:
   application.conf: |-
-    query.service.config = {
-      host = {{ .Values.individual.metricAnomalyDetectorConfig.queryService.host }}
-      port = {{ .Values.individual.metricAnomalyDetectorConfig.queryService.port }}
+    query.service.config {
+      host = {{ .Values.individual.metricAnomalyDetectorConfig.queryService.host | quote }}
+      port = {{ .Values.individual.metricAnomalyDetectorConfig.queryService.port | quote }}
     }
 
-    attributes.service.config = {
-      host = {{ .Values.individual.metricAnomalyDetectorConfig.attributeService.host }}
-      port = {{ .Values.individual.metricAnomalyDetectorConfig.attributeService.port }}
+    attributes.service.config {
+      host = {{ .Values.individual.metricAnomalyDetectorConfig.attributeService.host | quote }}
+      port = {{ .Values.individual.metricAnomalyDetectorConfig.attributeService.port | quote }}
     }
 
     queue.config {
-      kafka = {
-        bootstrap.servers = {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.bootstrapServers }}
+      kafka {
+        bootstrap.servers = {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.bootstrapServers | quote }}
         consumer {
-          schema.registry.url = {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.schemaRegistryUrl }}
-          key.deserializer= {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.consumer.keyDeserializer }}
-          value.deserializer= {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.consumer.valueDeserializer }}
+          schema.registry.url = {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.schemaRegistryUrl | quote }}
+          key.deserializer= {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.consumer.keyDeserializer | quote }}
+          value.deserializer= {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.consumer.valueDeserializer | quote }}
         }
         producer {
-          schema.registry.url = {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.schemaRegistryUrl }}
-          key.serializer= {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.producer.keySerializer }}
-          value.serializer= {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.producer.valueSerializer }}
+          schema.registry.url = {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.schemaRegistryUrl | quote }}
+          key.serializer= {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.producer.keySerializer | quote }}
+          value.serializer= {{ .Values.individual.metricAnomalyDetectorConfig.queueConfig.producer.valueSerializer | quote }}
         }
       }
     }

@@ -7,12 +7,12 @@ metadata:
     release: {{ .Release.Name }}
 data:
   application.conf: |-
-    query.service.config = {
+    query.service.config {
       host = {{ .Values.aggregated.hypertraceAlertEngineConfig.queryService.host }}
       port = {{ .Values.aggregated.hypertraceAlertEngineConfig.queryService.port }}
     }
 
-    attributes.service.config = {
+    attributes.service.config {
       host = {{ .Values.aggregated.hypertraceAlertEngineConfig.attributeService.host }}
       port = {{ .Values.aggregated.hypertraceAlertEngineConfig.attributeService.port }}
     }
