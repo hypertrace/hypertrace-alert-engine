@@ -9,7 +9,7 @@ data:
   application.conf: |-
     queue.config {
       kafka {
-        bootstrap.servers {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.bootstrapServers  | quote }}
+        bootstrap.servers = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.bootstrapServers  | quote }}
         producer {
           schema.registry.url = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.schemaRegistryUrl  | quote }}
           key.serializer = {{ .Values.individual.metricAnomalyTaskManagerConfig.queueConfig.producer.keySerializer  | quote }}
@@ -24,15 +24,25 @@ data:
       fs {
         path = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.fs.path | quote }}
       }
-     {{- else }}
+      {{- else }}
       dataStore {
+      {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceName }}
         resourceName = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceName | quote }}
+      {{- end }}
+      {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceNamespace }}
         resourceNamespace = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceNamespace | quote }}
+      {{- end }}
         config.service {
+        {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.host }}
           host = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.host | quote }}
+        {{- end }}
+        {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.port }}
           port = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.port | quote }}
+        {{- end }}
         }
+        {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.tenantIds }}
         tenantIds = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.tenantIds }}
+        {{- end }}
       }
       {{- end }}
     }

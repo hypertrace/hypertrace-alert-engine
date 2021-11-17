@@ -73,12 +73,12 @@ individual:
     containerAdminPort: 8099
     javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
     livenessProbe:
-      initialDelaySeconds: 10
+      initialDelaySeconds: 20
       periodSeconds: 5
     readinessProbe:
-      initialDelaySeconds: 10
+      initialDelaySeconds: 20
       periodSeconds: 15
-      failureThreshold: 5
+      failureThreshold: 10
     deploymentName: metric-anomaly-detector
     deploymentLabels:
       app: metric-anomaly-detector
@@ -134,12 +134,12 @@ individual:
     containerAdminPort: 8099
     javaOpts: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:MaxDirectMemorySize=128M"
     livenessProbe:
-      initialDelaySeconds: 10
+      initialDelaySeconds: 20
       periodSeconds: 5
     readinessProbe:
-      initialDelaySeconds: 10
-      periodSeconds: 15
-      failureThreshold: 5
+      initialDelaySeconds: 20
+      periodSeconds: 20
+      failureThreshold: 10
     deploymentName: metric-anomaly-task-manager
     deploymentLabels:
       app: metric-anomaly-task-manager
@@ -173,9 +173,10 @@ individual:
         keySerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
         valueSerializer: "io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer"
     alertRuleSource:
-      type: fs
-      fs:
-        path: "/app/resources/configs/metric-anomaly-task-manager/rules.json"
+      type: dataStore
+      dataStore:
+        host: config-service
+        tenantIds: []
     alertRulesConfig:
       name: metric-anomaly-task-manager-alert-rules-config
       rules:
