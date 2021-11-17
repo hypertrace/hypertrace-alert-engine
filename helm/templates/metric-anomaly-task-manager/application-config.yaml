@@ -33,11 +33,11 @@ data:
         resourceNamespace = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.resourceNamespace | quote }}
       {{- end }}
         config.service {
-        {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.host }}
-          host = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.host | quote }}
+        {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.config.service.host }}
+          host = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.config.service.host | quote }}
         {{- end }}
-        {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.port }}
-          port = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.port | quote }}
+        {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.config.service.port }}
+          port = {{ .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.config.service.port | quote }}
         {{- end }}
         }
         {{- if .Values.individual.metricAnomalyTaskManagerConfig.alertRuleSource.dataStore.tenantIds }}

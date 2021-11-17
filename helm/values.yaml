@@ -175,7 +175,9 @@ individual:
     alertRuleSource:
       type: dataStore
       dataStore:
-        host: config-service
+        config:
+          service:
+            host: config-service
         tenantIds: []
     alertRulesConfig:
       name: metric-anomaly-task-manager-alert-rules-config
