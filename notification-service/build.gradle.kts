@@ -32,7 +32,7 @@ dependencies {
     implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.3.4")
     implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.23")
     implementation("com.typesafe:config:1.4.1")
-    implementation("org.apache.kafka:kafka-clients:2.6.0")
+    implementation("org.apache.kafka:kafka-clients:2.8.1")
     implementation("com.google.protobuf:protobuf-java-util:4.0.0-rc-2")
     implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.22")
     implementation("io.confluent:kafka-streams-avro-serde:6.0.1")
