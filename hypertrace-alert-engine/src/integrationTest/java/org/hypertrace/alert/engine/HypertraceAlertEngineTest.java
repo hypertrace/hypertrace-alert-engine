@@ -86,7 +86,7 @@ public class HypertraceAlertEngineTest {
     network = org.testcontainers.containers.Network.newNetwork();
 
     kafkaZk =
-        new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))
+        new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.0"))
             .withNetwork(network)
             .withNetworkAliases("kafka", "zookeeper")
             .withStartupAttempts(CONTAINER_STARTUP_ATTEMPTS)
