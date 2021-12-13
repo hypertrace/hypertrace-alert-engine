@@ -82,7 +82,7 @@ public class TaskManagerTest {
     network = Network.newNetwork();
 
     kafkaZk =
-        new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"))
+        new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.0"))
             .withNetwork(network)
             .withNetworkAliases("kafka", "zookeeper")
             .withExposedPorts(9093)
