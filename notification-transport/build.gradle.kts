@@ -41,7 +41,7 @@ dependencies {
   implementation("com.google.guava:guava:30.1-jre")
   // Logging
   implementation("org.slf4j:slf4j-api:1.7.30")
-  runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.15.0")
+  runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.16.0")
 
   testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
 }
