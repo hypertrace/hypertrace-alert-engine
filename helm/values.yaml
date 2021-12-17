@@ -259,5 +259,3 @@ kafka-topic-creator:
           retention.ms: 259200000
   zookeeper:
     address: zookeeper:2181
-  podAnnotations:
-    sidecar.istio.io/inject: "false"
