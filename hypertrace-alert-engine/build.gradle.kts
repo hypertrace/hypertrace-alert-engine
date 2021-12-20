@@ -29,7 +29,7 @@ dependencies {
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.16.0")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.0")
 
     // framework + libs
     implementation("com.google.protobuf:protobuf-java-util:3.17.3")
