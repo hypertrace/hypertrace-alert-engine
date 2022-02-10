@@ -19,7 +19,7 @@ tasks.test {
 dependencies {
   implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.32")
   implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.32")
-  implementation("org.hypertrace.core.documentstore:document-store:0.5.7")
+  implementation("org.hypertrace.core.documentstore:document-store:0.6.7")
   implementation("org.hypertrace.config.service:notification-channel-config-service-api:0.1.12")
   implementation("org.hypertrace.config.service:config-proto-converter:0.1.12")
   implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.6.2")
@@ -32,7 +32,7 @@ dependencies {
   implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.32")
   implementation("com.typesafe:config:1.4.1")
   implementation("org.apache.kafka:kafka-clients:2.6.0")
-  implementation("com.google.protobuf:protobuf-java-util:3.17.3")
+  implementation("com.google.protobuf:protobuf-java-util:3.19.4")
   implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.23")
   implementation("io.confluent:kafka-streams-avro-serde:6.0.1")
   constraints {
@@ -46,9 +46,9 @@ dependencies {
 
   // Logging
   implementation("org.slf4j:slf4j-api:1.7.30")
-  runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.0")
+  runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.1")
 
-  runtimeOnly("io.grpc:grpc-netty:1.42.0")
+  runtimeOnly("io.grpc:grpc-netty:1.42.2")
   constraints {
     runtimeOnly("io.netty:netty-codec-http2:4.1.71.Final")
     runtimeOnly("io.netty:netty-handler-proxy:4.1.71.Final")
@@ -58,7 +58,7 @@ dependencies {
   testImplementation("org.mockito:mockito-core:3.9.0")
   testImplementation("org.mockito:mockito-inline:3.9.0")
   testImplementation("org.junit-pioneer:junit-pioneer:1.3.8")
-  testImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
+  testImplementation("com.squareup.okhttp3:mockwebserver:4.9.3")
 }
 
 tasks.test {

@@ -25,14 +25,14 @@ dependencies {
     implementation(project(":metric-anomaly-detector"))
     implementation(project(":notification-service"))
 
-    implementation("org.hypertrace.core.documentstore:document-store:0.5.7")
+    implementation("org.hypertrace.core.documentstore:document-store:0.6.7")
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.0")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.1")
 
     // framework + libs
-    implementation("com.google.protobuf:protobuf-java-util:3.17.3")
+    implementation("com.google.protobuf:protobuf-java-util:3.19.4")
     implementation("org.quartz-scheduler:quartz:2.3.2")
 
     // integration test
@@ -53,7 +53,7 @@ dependencies {
     integrationTestImplementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.13")
     integrationTestImplementation("org.hypertrace.core.query.service:query-service-client:0.6.2")
     integrationTestImplementation("org.hypertrace.core.attribute.service:attribute-service-client:0.12.0")
-    integrationTestImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
+    integrationTestImplementation("com.squareup.okhttp3:mockwebserver:4.9.3")
 }
 
 tasks.run<JavaExec> {

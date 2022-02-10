@@ -31,7 +31,7 @@ dependencies {
   implementation("org.hypertrace.gateway.service:gateway-service-api:0.1.59")
   implementation("org.hypertrace.gateway.service:gateway-service-baseline-lib:0.1.167")
   implementation("org.apache.kafka:kafka-clients:2.6.0")
-  implementation("com.google.protobuf:protobuf-java-util:3.17.3")
+  implementation("com.google.protobuf:protobuf-java-util:3.19.4")
   implementation("com.google.guava:guava:30.1.1-jre")
   implementation("org.hypertrace.config.service:alerting-config-service-api:0.1.12")
   implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.23")
@@ -47,9 +47,9 @@ dependencies {
 
   // Logging
   implementation("org.slf4j:slf4j-api:1.7.30")
-  runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.0")
+  runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.1")
 
-  runtimeOnly("io.grpc:grpc-netty:1.42.0")
+  runtimeOnly("io.grpc:grpc-netty:1.42.2")
   constraints {
     runtimeOnly("io.netty:netty-codec-http2:4.1.71.Final")
     runtimeOnly("io.netty:netty-handler-proxy:4.1.71.Final")
