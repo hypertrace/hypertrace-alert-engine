@@ -5,6 +5,10 @@ ignore:
   SNYK-JAVA-IONETTY-1042268:
     - '*':
         reason: No replacement available
-        expires: 2022-01-31T00:00:00.000Z
+        expires: 2022-05-31T00:00:00.000Z
+  SNYK-JAVA-ORGJETBRAINSKOTLIN-2393744:
+    - '*':
+        reason: No replacement available
+        expires: 2022-05-31T00:00:00.000Z
 patch: {}
 

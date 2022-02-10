@@ -33,7 +33,7 @@ jobs:
           args: jacocoTestReport
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
         with:
           name: unit test reports
           fail_ci_if_error: true
@@ -45,7 +45,7 @@ jobs:
           args: jacocoIntegrationTestReport
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
         with:
           name: integration test reports
           fail_ci_if_error: true
