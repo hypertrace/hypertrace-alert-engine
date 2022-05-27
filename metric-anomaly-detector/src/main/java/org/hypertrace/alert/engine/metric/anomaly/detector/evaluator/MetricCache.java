@@ -43,7 +43,7 @@ class MetricCache {
     this.queryRequestHandler = queryRequestHandler;
     this.metricCache =
         CacheBuilder.newBuilder()
-            .expireAfterAccess(Duration.ofMinutes(CACHE_EXPIRY_MINUTES))
+            .expireAfterAccess(CACHE_EXPIRY_MINUTES, TimeUnit.MINUTES)
             .recordStats()
             .build();
   }

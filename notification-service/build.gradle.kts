@@ -17,19 +17,19 @@ tasks.test {
 }
 
 dependencies {
-  implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.32")
-  implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.32")
-  implementation("org.hypertrace.core.documentstore:document-store:0.6.7")
+  implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.33")
+  implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.33")
+  implementation("org.hypertrace.core.documentstore:document-store:0.6.16")
   implementation("org.hypertrace.config.service:notification-channel-config-service-api:0.1.12")
   implementation("org.hypertrace.config.service:config-proto-converter:0.1.12")
-  implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.6.2")
-  implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.6.2")
+  implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.7.3")
+  implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.7.3")
 
   implementation(project(":metric-anomaly-data-model"))
   implementation(project(":notification-transport"))
 
-  implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.6.2")
-  implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.32")
+  implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.7.3")
+  implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.33")
   implementation("com.typesafe:config:1.4.1")
   implementation("org.apache.kafka:kafka-clients:2.6.0")
   implementation("com.google.protobuf:protobuf-java-util:3.19.4")
@@ -48,10 +48,10 @@ dependencies {
   implementation("org.slf4j:slf4j-api:1.7.30")
   runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.1")
 
-  runtimeOnly("io.grpc:grpc-netty:1.42.2")
+  runtimeOnly("io.grpc:grpc-netty:1.45.1")
   constraints {
-    runtimeOnly("io.netty:netty-codec-http2:4.1.71.Final")
-    runtimeOnly("io.netty:netty-handler-proxy:4.1.71.Final")
+    runtimeOnly("io.netty:netty-codec-http2:4.1.77.Final")
+    runtimeOnly("io.netty:netty-handler-proxy:4.1.77.Final")
   }
 
   testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")

@@ -15,15 +15,15 @@ application {
 dependencies {
   // framework + libs (internal)
   implementation(project(":metric-anomaly-data-model"))
-  implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.32")
-  implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.32")
+  implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.33")
+  implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.33")
   implementation("org.apache.kafka:kafka-clients:2.6.0")
-  implementation("org.hypertrace.core.documentstore:document-store:0.6.7")
+  implementation("org.hypertrace.core.documentstore:document-store:0.6.16")
   implementation("org.hypertrace.config.service:config-service-api:0.1.12")
   implementation("org.hypertrace.config.service:alerting-config-service-api:0.1.12")
   implementation("org.hypertrace.config.service:notification-rule-config-service-api:0.1.12")
-  implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.6.2")
-  implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.6.2")
+  implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.7.3")
+  implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.7.3")
   implementation("org.apache.commons:commons-lang3:3.10")
   implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.23")
   implementation("io.confluent:kafka-streams-avro-serde:6.0.1")
@@ -37,10 +37,10 @@ dependencies {
   implementation("org.slf4j:slf4j-api:1.7.30")
   runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.1")
 
-  runtimeOnly("io.grpc:grpc-netty:1.42.2")
+  runtimeOnly("io.grpc:grpc-netty:1.45.1")
   constraints {
-    runtimeOnly("io.netty:netty-codec-http2:4.1.71.Final")
-    runtimeOnly("io.netty:netty-handler-proxy:4.1.71.Final")
+    runtimeOnly("io.netty:netty-codec-http2:4.1.77.Final")
+    runtimeOnly("io.netty:netty-handler-proxy:4.1.77.Final")
   }
 
   // framework + libs

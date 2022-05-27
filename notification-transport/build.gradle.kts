@@ -17,7 +17,7 @@ protobuf {
   }
   plugins {
     id("grpc") {
-      artifact = "io.grpc:protoc-gen-grpc-java:1.42.2"
+      artifact = "io.grpc:protoc-gen-grpc-java:1.45.1"
     }
   }
   generateProtoTasks {
@@ -36,8 +36,11 @@ dependencies {
     implementation("commons-codec:commons-codec:1.13") {
       because("https://snyk.io/vuln/SNYK-JAVA-COMMONSCODEC-561518")
     }
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1") {
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3") {
       because("https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-2326698")
+    }
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.0") {
+      because("https://snyk.io/vuln/SNYK-JAVA-ORGJETBRAINSKOTLIN-2628385")
     }
   }
   implementation("com.squareup.okhttp3:okhttp:4.9.3")

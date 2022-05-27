@@ -14,18 +14,18 @@ application {
 
 dependencies {
     constraints {
-        implementation("com.fasterxml.jackson.core:jackson-databind:2.12.1")
+        implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
         implementation("org.apache.httpcomponents:httpclient:4.5.13")
     }
-    implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.32")
-    implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.32")
+    implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.33")
+    implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.33")
 
     implementation(project(":metric-anomaly-data-model"))
     implementation(project(":metric-anomaly-task-manager"))
     implementation(project(":metric-anomaly-detector"))
     implementation(project(":notification-service"))
 
-    implementation("org.hypertrace.core.documentstore:document-store:0.6.7")
+    implementation("org.hypertrace.core.documentstore:document-store:0.6.16")
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")
@@ -42,7 +42,7 @@ dependencies {
     integrationTestImplementation("org.testcontainers:testcontainers:1.15.2")
     integrationTestImplementation("org.testcontainers:junit-jupiter:1.15.2")
     integrationTestImplementation("org.testcontainers:kafka:1.15.2")
-    integrationTestImplementation("org.hypertrace.core.serviceframework:integrationtest-service-framework:0.1.32")
+    integrationTestImplementation("org.hypertrace.core.serviceframework:integrationtest-service-framework:0.1.33")
     integrationTestImplementation("com.github.stefanbirkner:system-lambda:1.2.0")
 
     integrationTestImplementation("org.apache.kafka:kafka-clients:5.5.1-ccs")
