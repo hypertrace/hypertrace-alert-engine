@@ -6,13 +6,13 @@ plugins {
 
 dependencies {
   api("org.apache.avro:avro:1.10.2")
-  api("io.grpc:grpc-protobuf:1.42.2")
-  api("io.grpc:grpc-stub:1.42.2")
+  api("io.grpc:grpc-protobuf:1.45.1")
+  api("io.grpc:grpc-stub:1.45.1")
   api("javax.annotation:javax.annotation-api:1.3.2")
   api("org.apache.avro:avro:1.10.2")
   implementation("com.typesafe:config:1.4.1")
   implementation("org.apache.kafka:kafka-clients:2.6.0")
-  implementation("org.hypertrace.core.documentstore:document-store:0.6.7")
+  implementation("org.hypertrace.core.documentstore:document-store:0.6.16")
   implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-serdes:0.1.23")
   implementation("io.confluent:kafka-streams-avro-serde:6.0.1")
   constraints {
