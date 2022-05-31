@@ -44,7 +44,7 @@ dependencies {
     }
   }
   implementation("com.squareup.okhttp3:okhttp:4.9.3")
-  implementation("com.google.guava:guava:30.1-jre")
+  implementation("com.google.guava:guava:31.1-jre")
   // Logging
   implementation("org.slf4j:slf4j-api:1.7.30")
   runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.17.1")
